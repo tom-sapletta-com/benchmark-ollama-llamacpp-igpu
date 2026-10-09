@@ -1,0 +1,22 @@
+55/72 OllamaQ8 round=1 lru_cache pass=True wall=8.54s rate=29.11562133890301
+56/72 OllamaQ8 round=1 deep_merge pass=True wall=10.65s rate=29.108350579357246
+57/72 OllamaQ8 round=1 topological_sort pass=True wall=14.18s rate=28.866102745481275
+58/72 OllamaQ8 round=1 merge_intervals pass=True wall=12.10s rate=29.037947213071984
+59/72 OllamaQ8 round=1 csv_totals pass=True wall=11.06s rate=28.898365035946245
+60/72 OllamaQ8 round=1 unique_ordered pass=True wall=5.86s rate=29.273290561803236
+CONTEXT OllamaQ8 round=1 ttft=9.431107171985786 wall=10.13s pass=True
+61/72 OllamaQ8 round=2 csv_totals pass=True wall=10.96s rate=29.135640387198972
+62/72 OllamaQ8 round=2 merge_intervals pass=True wall=11.86s rate=28.9365154485836
+63/72 OllamaQ8 round=2 lru_cache pass=True wall=8.66s rate=29.03580496802623
+64/72 OllamaQ8 round=2 unique_ordered pass=True wall=6.64s rate=29.262313979216316
+65/72 OllamaQ8 round=2 deep_merge pass=True wall=10.60s rate=28.729033663296132
+66/72 OllamaQ8 round=2 topological_sort pass=True wall=13.18s rate=29.09370914000693
+CONTEXT OllamaQ8 round=2 ttft=9.397564218001207 wall=10.10s pass=True
+67/72 OllamaQ8 round=3 lru_cache pass=True wall=8.52s rate=29.171963455625974
+68/72 OllamaQ8 round=3 unique_ordered pass=True wall=6.66s rate=29.19880504312309
+69/72 OllamaQ8 round=3 merge_intervals pass=True wall=12.12s rate=28.66772801748063
+70/72 OllamaQ8 round=3 deep_merge pass=True wall=12.07s rate=29.100566072348784
+71/72 OllamaQ8 round=3 topological_sort pass=True wall=13.22s rate=28.643358803930578
+72/72 OllamaQ8 round=3 csv_totals pass=True wall=11.28s rate=29.111895948375665
+CONTEXT OllamaQ8 round=3 ttft=9.4537197840109 wall=10.15s pass=True
+Q8 PARITY COHORT COMPLETE; LLAMA.CPP RESTORED

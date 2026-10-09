@@ -1,0 +1,10 @@
+{
+  "ticket": "PLF-001",
+  "source_commit": "851524fc1aef54bcfc242b836db2ac96751629d4",
+  "runtime_files": {
+    "allama/benchmark.py": "d83bccb21fce0a1497e1a52a2f8d775687ae6bce4eb2ace16e827c1b7ea51be0",
+    "allama/benchmark_tasks.json": "5a846dea6d01ae13723efb1cb10c4fb070c0bbe94734f23a14562a07828482a7",
+    "allama/report_generator.py": "fe333e6972926257b64bf79eeba567857f1452917a78c69f8e7601aef0c05037",
+    "allama/templates/benchmark.html": "87a686f4aefc4003eebca9526f7282612a565889ced90aa70d96e2cdec8cb9e2"
+  }
+}

@@ -1,0 +1,2653 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Allama · benchmark minis</title>
+<style>
+:root{color-scheme:dark;--bg:#10151b;--panel:#1b232d;--line:#334152;--ink:#eaf1f8;--muted:#a9bacb;--good:#75e0af;--bad:#ff9a8e;--accent:#8ebaff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px system-ui,sans-serif}main{max-width:1400px;margin:auto;padding:42px 32px}header{display:flex;justify-content:space-between;gap:25px;align-items:start}h1{font-size:44px;margin:8px 0 14px;letter-spacing:-1.5px}h2{font-size:23px;margin-top:36px}p{overflow-wrap:anywhere;line-height:1.6;color:var(--muted)}a{color:var(--accent)}.eyebrow{color:var(--good);letter-spacing:3px;font-size:12px;font-weight:700}.badge{padding:9px 15px;border:1px solid var(--line);border-radius:30px;white-space:nowrap}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:26px 0}.card{background:var(--panel);padding:22px;border-radius:12px}.card strong{display:block;font-size:30px;margin-top:7px}.muted{color:var(--muted)}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse}th,td{padding:16px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{background:var(--panel);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}td:first-child{font-weight:600}td small{display:block;color:var(--muted);font-weight:400;margin-top:5px}.pass{color:var(--good)}.fail{color:var(--bad)}.bar{display:inline-block;height:6px;border-radius:9px;background:var(--accent);vertical-align:middle;margin-right:10px}details{background:var(--panel);padding:18px;border:1px solid var(--line);border-radius:9px;margin:10px 0}summary{cursor:pointer}pre{background:#0e1319;border-radius:8px;padding:18px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.5}code{font-size:13px}.notice{border-left:3px solid var(--accent);padding:2px 18px}.footer{font-size:12px;margin-top:36px}@media(max-width:850px){main{padding:24px 14px}header{display:block}h1{font-size:33px}.cards{grid-template-columns:repeat(2,1fr)}}
+</style></head><body><main>
+<header><div><div class="eyebrow">ALLAMA / LOKALNE MODELE</div><h1>Co działa najlepiej na minis?</h1><p>minis · Ryzen 9 7940HS · Radeon 780M · 46 GiB RAM<br>Ollama 0.35.1 · kontekst 8192 · limit 1024 tokenów</p></div><span class="badge">✓ Test zakończony</span></header>
+<div class="cards"><div class="card"><span class="muted">Modele</span><strong>5</strong></div><div class="card"><span class="muted">Wykonane próby</span><strong>60 / 60</strong></div><div class="card"><span class="muted">Zadania / powtórzenia</span><strong>6 × 2</strong></div><div class="card"><span class="muted">Ocena</span><strong>Testy kodu</strong></div></div>
+
+<div class="notice"><h2>W tym zestawie: gemma4:12b</h2><p>Najkrótsza mediana czasu spośród modeli z kompletem zaliczeń: <strong>11.84 s</strong> · 12/12 poprawnych rozwiązań. Wniosek dotyczy tego małego zestawu zadań i zmierzonych ustawień.</p></div>
+<h2>Poprawność i czas oczekiwania</h2>
+<div class="table-wrap"><table><thead><tr><th>Model / kwantyzacja</th><th>Poprawne rozwiązania</th><th>Odpowiedź · mediana</th><th>Pierwsza treść</th><th>Tokeny/s · mediana</th><th>GPU / całość</th><th>Błędy / ucięcia</th></tr></thead><tbody>
+<tr><td>gpt-oss:20b<small>MXFP4 · think=low</small></td><td class="pass">12 / 12</td><td>14.77 s</td><td>2.27 s</td><td><span class="bar" style="width:62.0px"></span>20.65</td><td>11.97 / 11.97 GiB</td><td>0 / 0</td></tr><tr><td>qwen3.5:9b<small>Q4_K_M · think=False</small></td><td class="fail">8 / 12</td><td>29.27 s</td><td>1.11 s</td><td><span class="bar" style="width:43.0px"></span>14.36</td><td>5.44 / 5.44 GiB</td><td>0 / 0</td></tr><tr><td>gemma4:12b<small>Q4_K_M · think=False · draft/MTP</small></td><td class="pass">12 / 12</td><td>11.84 s</td><td>1.36 s</td><td><span class="bar" style="width:78.0px"></span>25.87</td><td>≈ 9.9 GiB*<small>przyrost VRAM + GTT</small></td><td>0 / 0</td></tr><tr><td>qwen3.8:27b<small>Q4_K_M · think=False · draft/MTP</small></td><td class="pass">12 / 12</td><td>26.05 s</td><td>1.44 s</td><td><span class="bar" style="width:36.0px"></span>11.98</td><td>16.24 / 16.24 GiB</td><td>0 / 0</td></tr><tr><td>devstral-small-2:24b<small>Q4_K_M · think=None</small></td><td class="fail">9 / 12</td><td>32.44 s</td><td>0.70 s</td><td><span class="bar" style="width:17.0px"></span>5.74</td><td>14.76 / 14.76 GiB</td><td>0 / 0</td></tr>
+</tbody></table></div>
+<p class="notice">Czasy obejmują pełną odpowiedź po rozgrzaniu modelu, bez uruchamiania testów kodu. Tokeny/s pochodzą z licznika Ollamy i obejmują także rozumowanie; modele mają różne tokenizery. Pamięć to przydział modelu zgłoszony przez /api/ps, nie szczytowe zużycie całego komputera. iGPU współdzieli RAM. * Pomiar ze sterownika oznacza przyrost VRAM + GTT względem stanu bez modelu; jest przybliżeniem, z osobnym opisem metody w metadanych.</p>
+<h2>Jak czytać wyniki</h2><p>Każdy model rozwiązuje te same zadania, z temperaturą 0 i seed=42. Kolejność zadań jest tasowana w każdym powtórzeniu. Działa jeden model naraz; ładowanie i rozgrzewka są zapisane osobno. Używamy najtańszego trybu myślenia deklarowanego przez model: false lub low. Pozostałe parametry domyślne oraz skonfigurowane MTP są zachowane i zapisane w metadanych: porównujemy obecne instalacje. Puste odpowiedzi, błędy API i ucięcie na limicie nie zaliczają próby. Wyniki czasowe dotyczą odpowiedzi kompletnych, także błędnych funkcjonalnie.</p><p>To mały lokalny zestaw diagnostyczny z 6 zadaniami, a nie ogólny ranking inteligencji. Powtórzenia oceniają powtarzalność i czas, nie są niezależnymi zadaniami. Asercje obejmują przypadki brzegowe; złożoność O(1) w zadaniu LRU nie jest automatycznie dowodzona. Nie mierzymy długiego kontekstu, narzędzi, wizji ani energii.</p>
+<h2>Zadania i asercje</h2><details><summary>unique_ordered</summary><p>Napisz funkcję Python unique_ordered(items), która usuwa duplikaty z listy, zachowując kolejność pierwszych wystąpień. Elementy mogą być niehashowalne (listy, słowniki). Nie modyfikuj wejścia.</p><pre>assert unique_ordered([]) == []
+assert unique_ordered([3,1,3,2,1]) == [3,1,2]
+x = [[1], [2], [1], {&#39;a&#39;: 1}, {&#39;a&#39;: 1}]
+assert unique_ordered(x) == [[1], [2], {&#39;a&#39;: 1}]
+assert x == [[1], [2], [1], {&#39;a&#39;: 1}, {&#39;a&#39;: 1}]
+assert unique_ordered([None, None, 0, False]) == [None, 0]</pre></details><details><summary>merge_intervals</summary><p>Napisz funkcję Python merge_intervals(intervals). Zwróć posortowaną listę scalonych domkniętych przedziałów jako listy [start, end]; stykające się przedziały też scal. Wejście może być nieposortowane i nie wolno go modyfikować. Dla start &gt; end zgłoś ValueError. Puste wejście daje [].</p><pre>assert merge_intervals([]) == []
+x = [[5,7],[1,3],[3,5],[10,10]]
+assert merge_intervals(x) == [[1,7],[10,10]]
+assert x == [[5,7],[1,3],[3,5],[10,10]]
+assert merge_intervals([[-4,-1],[-3,0],[2,3]]) == [[-4,0],[2,3]]
+assert merge_intervals([[1,9],[2,3],[1,9]]) == [[1,9]]
+try:
+    merge_intervals([[5,2]])
+except ValueError:
+    pass
+else:
+    raise AssertionError(&#39;invalid interval accepted&#39;)</pre></details><details><summary>csv_totals</summary><p>Napisz funkcję Python csv_totals(text). Tekst CSV ma nagłówek category,amount i może zawierać cytowane przecinki w category. Zsumuj kwoty dla każdej kategorii dokładnie z użyciem Decimal; zwróć dict[str, Decimal]. Ignoruj puste wiersze. Błędna kwota ma zgłosić ValueError. Nie zaokrąglaj wyników.</p><pre>from decimal import Decimal
+assert csv_totals(&#39;category,amount\n&#39;) == {}
+assert csv_totals(&#39;category,amount\nA,0.1\nA,0.2\nB,-2.5\n\n&#39;) == {&#39;A&#39;: Decimal(&#39;0.3&#39;), &#39;B&#39;: Decimal(&#39;-2.5&#39;)}
+assert csv_totals(&#39;category,amount\n&#34;a,b&#34;,1.20\n&#34;a,b&#34;,2.30\n&#39;) == {&#39;a,b&#39;: Decimal(&#39;3.50&#39;)}
+try:
+    csv_totals(&#39;category,amount\nA,nope\n&#39;)
+except ValueError:
+    pass
+else:
+    raise AssertionError(&#39;invalid amount accepted&#39;)</pre></details><details><summary>topological_sort</summary><p>Napisz funkcję Python topo_sort(graph). graph to dict[str, list[str]], gdzie graph[u] wymienia wierzchołki v krawędzi u -&gt; v. Uwzględnij wierzchołki występujące tylko jako sąsiedzi. Zwróć porządek topologiczny, wybierając leksykograficznie najmniejszy spośród aktualnie dostępnych wierzchołków. Cykl ma zgłosić ValueError. Nie modyfikuj graph.</p><pre>assert topo_sort({}) == []
+g = {&#39;b&#39;:[&#39;c&#39;], &#39;a&#39;:[&#39;c&#39;], &#39;d&#39;:[]}
+assert topo_sort(g) == [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;]
+assert g == {&#39;b&#39;:[&#39;c&#39;], &#39;a&#39;:[&#39;c&#39;], &#39;d&#39;:[]}
+assert topo_sort({&#39;z&#39;:[&#39;a&#39;]}) == [&#39;z&#39;,&#39;a&#39;]
+assert topo_sort({&#39;a&#39;:[&#39;c&#39;,&#39;c&#39;], &#39;b&#39;:[&#39;c&#39;]}) == [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;]
+for g in ({&#39;a&#39;:[&#39;a&#39;]}, {&#39;a&#39;:[&#39;b&#39;],&#39;b&#39;:[&#39;a&#39;]}):
+    try:
+        topo_sort(g)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(&#39;cycle accepted&#39;)</pre></details><details><summary>deep_merge</summary><p>Napisz funkcję Python deep_merge(a, b) dla dwóch słowników. Łącz zagnieżdżone słowniki rekurencyjnie; w innych konfliktach wygrywa b (listy zastępuj w całości). Wynik ma być głęboką kopią: modyfikowanie zagnieżdżonych obiektów wyniku nie może zmieniać żadnego wejścia.</p><pre>a = {&#39;x&#39;:{&#39;a&#39;:1,&#39;items&#39;:[1]},&#39;left&#39;:[{&#39;v&#39;:2}]}
+b = {&#39;x&#39;:{&#39;b&#39;:2},&#39;right&#39;:[3]}
+r = deep_merge(a,b)
+assert r == {&#39;x&#39;:{&#39;a&#39;:1,&#39;items&#39;:[1],&#39;b&#39;:2},&#39;left&#39;:[{&#39;v&#39;:2}],&#39;right&#39;:[3]}
+r[&#39;x&#39;][&#39;items&#39;].append(9)
+r[&#39;left&#39;][0][&#39;v&#39;] = 8
+r[&#39;right&#39;].append(4)
+assert a == {&#39;x&#39;:{&#39;a&#39;:1,&#39;items&#39;:[1]},&#39;left&#39;:[{&#39;v&#39;:2}]}
+assert b == {&#39;x&#39;:{&#39;b&#39;:2},&#39;right&#39;:[3]}
+assert deep_merge({&#39;a&#39;:{&#39;b&#39;:1},&#39;c&#39;:[1]}, {&#39;a&#39;:None,&#39;c&#39;:[2]}) == {&#39;a&#39;:None,&#39;c&#39;:[2]}
+assert deep_merge({}, {}) == {}</pre></details><details><summary>lru_cache</summary><p>Napisz klasę Python LRUCache(capacity) z metodami get(key) i put(key, value). get zwraca -1 dla braku klucza. Odczyt i zapis istniejącego klucza odnawiają jego użycie. Po przekroczeniu pojemności usuń najdawniej używany klucz. Pojemność 0 jest poprawna (nic nie przechowuje), ujemna zgłasza ValueError. Operacje mają być O(1).</p><pre>c = LRUCache(2)
+c.put(&#39;a&#39;,1); c.put(&#39;b&#39;,2)
+assert c.get(&#39;a&#39;) == 1
+c.put(&#39;c&#39;,3)
+assert c.get(&#39;b&#39;) == -1
+c.put(&#39;a&#39;,4); c.put(&#39;d&#39;,5)
+assert c.get(&#39;c&#39;) == -1
+assert c.get(&#39;a&#39;) == 4 and c.get(&#39;d&#39;) == 5
+z = LRUCache(0); z.put(&#39;a&#39;,1); assert z.get(&#39;a&#39;) == -1
+c = LRUCache(1); c.put(&#39;x&#39;,None); assert c.get(&#39;x&#39;) is None
+try:
+    LRUCache(-1)
+except ValueError:
+    pass
+else:
+    raise AssertionError(&#39;negative capacity accepted&#39;)</pre></details>
+<h2>Wszystkie odpowiedzi</h2><details><summary><span class="pass">✓</span> gpt-oss:20b · topological_sort · próba 1 · 16.54 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import heapq
+from collections import defaultdict
+
+def topo_sort(graph: dict[str, list[str]]) -&gt; list[str]:
+    &#34;&#34;&#34;
+    Return a lexicographically smallest topological ordering of the directed graph.
+    Raises ValueError if the graph contains a cycle.
+    The input graph is not modified.
+    &#34;&#34;&#34;
+    # Build set of all vertices
+    vertices = set(graph.keys())
+    for neighs in graph.values():
+        vertices.update(neighs)
+
+    # Compute indegrees
+    indegree = defaultdict(int)
+    for u in vertices:
+        indegree[u] = 0
+    for u, neighs in graph.items():
+        for v in neighs:
+            indegree[v] += 1
+
+    # Min-heap of vertices with indegree 0
+    heap = [v for v in vertices if indegree[v] == 0]
+    heapq.heapify(heap)
+
+    order = []
+    processed = 0
+
+    while heap:
+        u = heapq.heappop(heap)
+        order.append(u)
+        processed += 1
+        for v in graph.get(u, []):
+            indegree[v] -= 1
+            if indegree[v] == 0:
+                heapq.heappush(heap, v)
+
+    if processed != len(vertices):
+        raise ValueError(&#34;Graph contains a cycle&#34;)
+
+    return order</pre><details><summary>Rozumowanie modelu</summary><pre>Implement Kahn with priority queue. Need to include nodes only as neighbors. Build indegree dict. Use heapq. Detect cycle. Return list.</pre></details><p>Koniec: stop · tokeny: 323 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · merge_intervals · próba 1 · 16.09 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def merge_intervals(intervals):
+    &#34;&#34;&#34;
+    Merge a list of closed intervals.
+
+    Parameters
+    ----------
+    intervals : Iterable[Iterable[int]]
+        Each element is an iterable of two integers [start, end].
+        The input may be unsorted and must not be modified.
+
+    Returns
+    -------
+    List[List[int]]
+        Sorted list of merged closed intervals. Adjacent intervals
+        (where end == next_start) are merged.
+
+    Raises
+    ------
+    ValueError
+        If any interval has start &gt; end.
+    &#34;&#34;&#34;
+    if not intervals:
+        return []
+
+    # Copy intervals to avoid modifying the input
+    intervals_copy = [list(interval) for interval in intervals]
+
+    # Validate and sort by start
+    for start, end in intervals_copy:
+        if start &gt; end:
+            raise ValueError(f&#34;Invalid interval with start &gt; end: [{start}, {end}]&#34;)
+
+    intervals_copy.sort(key=lambda x: x[0])
+
+    merged = []
+    current_start, current_end = intervals_copy[0]
+
+    for start, end in intervals_copy[1:]:
+        if start &lt;= current_end + 1:  # overlapping or touching
+            current_end = max(current_end, end)
+        else:
+            merged.append([current_start, current_end])
+            current_start, current_end = start, end
+
+    merged.append([current_start, current_end])
+    return merged</pre><details><summary>Rozumowanie modelu</summary><pre>Implement merge. Ensure not modify input. Return new list.</pre></details><p>Koniec: stop · tokeny: 315 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · csv_totals · próba 1 · 15.74 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import csv
+from decimal import Decimal, InvalidOperation
+from typing import Dict
+
+def csv_totals(text: str) -&gt; Dict[str, Decimal]:
+    &#34;&#34;&#34;
+    Sum amounts per category from a CSV string.
+
+    Parameters
+    ----------
+    text : str
+        CSV data with header &#39;category,amount&#39;. Category may contain quoted commas.
+        Empty lines are ignored. Amounts are parsed as Decimal; invalid amounts raise ValueError.
+
+    Returns
+    -------
+    Dict[str, Decimal]
+        Mapping from category to the total amount.
+    &#34;&#34;&#34;
+    totals: Dict[str, Decimal] = {}
+    reader = csv.DictReader(text.splitlines(), skipinitialspace=True)
+    if reader.fieldnames is None or set(reader.fieldnames) != {&#34;category&#34;, &#34;amount&#34;}:
+        raise ValueError(&#34;CSV must contain header &#39;category,amount&#39;&#34;)
+
+    for row in reader:
+        # Skip completely empty rows
+        if not any(row.values()):
+            continue
+
+        category = row[&#34;category&#34;]
+        amount_str = row[&#34;amount&#34;]
+
+        try:
+            amount = Decimal(amount_str)
+        except (InvalidOperation, TypeError):
+            raise ValueError(f&#34;Invalid amount: {amount_str!r}&#34;)
+
+        totals[category] = totals.get(category, Decimal(&#34;0&#34;)) + amount
+
+    return totals</pre><details><summary>Rozumowanie modelu</summary><pre>Implement csv_totals using csv module with quoting. Use Decimal. Skip empty lines. Raise ValueError if amount invalid. Return dict.</pre></details><p>Koniec: stop · tokeny: 304 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · deep_merge · próba 1 · 14.56 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import copy
+from collections.abc import Mapping
+
+def deep_merge(a: Mapping, b: Mapping) -&gt; dict:
+    &#34;&#34;&#34;
+    Return a deep copy of the merge of dictionaries `a` and `b`.
+    Nested dictionaries are merged recursively; in all other conflicts
+    the value from `b` wins. Lists and other non-dict values are
+    replaced entirely by the value from `b`. The result is a new
+    dictionary that shares no mutable objects with the inputs.
+    &#34;&#34;&#34;
+    result = {}
+
+    # Keys present only in a
+    for key in a:
+        if key not in b:
+            result[key] = copy.deepcopy(a[key])
+
+    # Keys present only in b
+    for key in b:
+        if key not in a:
+            result[key] = copy.deepcopy(b[key])
+
+    # Keys present in both
+    for key in a:
+        if key in b:
+            val_a = a[key]
+            val_b = b[key]
+            if isinstance(val_a, Mapping) and isinstance(val_b, Mapping):
+                result[key] = deep_merge(val_a, val_b)
+            else:
+                result[key] = copy.deepcopy(val_b)
+
+    return result</pre><details><summary>Rozumowanie modelu</summary><pre>Implement deep_merge. Use recursion, copy. Use copy.deepcopy for non-dict. Ensure new dict.</pre></details><p>Koniec: stop · tokeny: 281 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · unique_ordered · próba 1 · 9.28 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def unique_ordered(items):
+    &#34;&#34;&#34;
+    Return a new list containing the elements of `items` with duplicates removed,
+    preserving the order of the first occurrences. Elements may be unhashable
+    (e.g., lists, dictionaries). The input list is not modified.
+    &#34;&#34;&#34;
+    result = []
+    seen = []
+    for item in items:
+        # Check if an equal element has already been seen
+        if not any(item == s for s in seen):
+            seen.append(item)
+            result.append(item)
+    return result</pre><details><summary>Rozumowanie modelu</summary><pre>Need to return list preserving order, handling unhashable. Use list to track seen via equality. Can&#39;t use set. So iterate, for each item check if any seen equal via ==. Use list comprehension? We&#39;ll build result and seen list.</pre></details><p>Koniec: stop · tokeny: 173 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · lru_cache · próba 1 · 11.12 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import collections
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;Capacity must be non‑negative&#34;)
+        self.capacity = capacity
+        self.cache = collections.OrderedDict()
+
+    def get(self, key):
+        if key not in self.cache:
+            return -1
+        value = self.cache.pop(key)
+        self.cache[key] = value  # re‑insert to mark as most recently used
+        return value
+
+    def put(self, key, value):
+        if self.capacity == 0:
+            return
+        if key in self.cache:
+            self.cache.pop(key)
+        elif len(self.cache) &gt;= self.capacity:
+            self.cache.popitem(last=False)  # remove least recently used
+        self.cache[key] = value</pre><details><summary>Rozumowanie modelu</summary><pre>Implement LRU with OrderedDict or custom doubly linked list. Use collections.OrderedDict. Ensure capacity 0 works. Provide class.</pre></details><p>Koniec: stop · tokeny: 212 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · lru_cache · próba 2 · 10.56 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import collections
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;capacity must be non‑negative&#34;)
+        self.capacity = capacity
+        self.cache = collections.OrderedDict()
+
+    def get(self, key):
+        if key not in self.cache:
+            return -1
+        value = self.cache.pop(key)
+        self.cache[key] = value  # re‑insert to mark as most recently used
+        return value
+
+    def put(self, key, value):
+        if key in self.cache:
+            self.cache.pop(key)
+        elif len(self.cache) &gt;= self.capacity and self.capacity &gt; 0:
+            self.cache.popitem(last=False)  # remove least recently used
+        if self.capacity &gt; 0:
+            self.cache[key] = value</pre><details><summary>Rozumowanie modelu</summary><pre>Implement LRU with OrderedDict or custom doubly linked list. Use collections.OrderedDict. Ensure capacity 0 works. Provide class.</pre></details><p>Koniec: stop · tokeny: 215 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · deep_merge · próba 2 · 16.78 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import copy
+from collections.abc import Mapping
+
+def deep_merge(a: Mapping, b: Mapping) -&gt; dict:
+    &#34;&#34;&#34;
+    Return a deep copy of the merge of dictionaries `a` and `b`.
+    Nested dictionaries are merged recursively; in all other conflicts
+    the value from `b` wins. Lists and other non-dict values are
+    replaced entirely by the value from `b`. The result is a new
+    dictionary; modifying it will not affect the inputs.
+    &#34;&#34;&#34;
+    def _merge_dicts(d1: Mapping, d2: Mapping) -&gt; dict:
+        result = {}
+        # keys from d1
+        for key in d1:
+            if key in d2:
+                val1 = d1[key]
+                val2 = d2[key]
+                if isinstance(val1, Mapping) and isinstance(val2, Mapping):
+                    result[key] = _merge_dicts(val1, val2)
+                else:
+                    # b wins, deep copy to avoid aliasing
+                    result[key] = copy.deepcopy(val2)
+            else:
+                result[key] = copy.deepcopy(d1[key])
+        # keys only in d2
+        for key in d2:
+            if key not in d1:
+                result[key] = copy.deepcopy(d2[key])
+        return result
+
+    if not isinstance(a, Mapping) or not isinstance(b, Mapping):
+        raise TypeError(&#34;Both arguments must be mappings&#34;)
+    return _merge_dicts(a, b)</pre><details><summary>Rozumowanie modelu</summary><pre>Implement deep_merge. Use recursion, copy. Use copy.deepcopy for non-dict. Ensure result is new dict.</pre></details><p>Koniec: stop · tokeny: 342 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · topological_sort · próba 2 · 16.02 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import heapq
+from collections import defaultdict
+
+def topo_sort(graph: dict[str, list[str]]) -&gt; list[str]:
+    &#34;&#34;&#34;
+    Return a lexicographically smallest topological ordering of the directed graph.
+    Raises ValueError if the graph contains a cycle.
+    The input graph is not modified.
+    &#34;&#34;&#34;
+    # Build set of all vertices
+    vertices = set(graph.keys())
+    for neighs in graph.values():
+        vertices.update(neighs)
+
+    # Compute indegrees
+    indegree = defaultdict(int)
+    for u in vertices:
+        indegree[u] = 0
+    for u, neighs in graph.items():
+        for v in neighs:
+            indegree[v] += 1
+
+    # Min-heap of vertices with indegree 0
+    heap = [v for v in vertices if indegree[v] == 0]
+    heapq.heapify(heap)
+
+    order = []
+    processed = 0
+
+    while heap:
+        u = heapq.heappop(heap)
+        order.append(u)
+        processed += 1
+        for v in graph.get(u, []):
+            indegree[v] -= 1
+            if indegree[v] == 0:
+                heapq.heappush(heap, v)
+
+    if processed != len(vertices):
+        raise ValueError(&#34;Graph contains a cycle&#34;)
+
+    return order</pre><details><summary>Rozumowanie modelu</summary><pre>Implement Kahn with priority queue. Need to include nodes only as neighbors. Build indegree dict. Use heapq. Detect cycle. Return list.</pre></details><p>Koniec: stop · tokeny: 323 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · merge_intervals · próba 2 · 14.65 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def merge_intervals(intervals):
+    &#34;&#34;&#34;
+    Merge a list of closed intervals.
+
+    Parameters
+    ----------
+    intervals : Iterable[Iterable[int]]
+        Each element is an iterable of two integers [start, end].
+        The input may be unsorted and must not be modified.
+
+    Returns
+    -------
+    List[List[int]]
+        Sorted list of merged closed intervals. Adjacent intervals
+        (where end == next_start) are merged.
+
+    Raises
+    ------
+    ValueError
+        If any interval has start &gt; end.
+    &#34;&#34;&#34;
+    if not intervals:
+        return []
+
+    # Copy intervals to avoid modifying the input
+    intervals_copy = [list(interval) for interval in intervals]
+
+    # Validate and sort by start
+    for start, end in intervals_copy:
+        if start &gt; end:
+            raise ValueError(f&#34;Invalid interval with start &gt; end: [{start}, {end}]&#34;)
+
+    intervals_copy.sort(key=lambda x: x[0])
+
+    merged = [intervals_copy[0]]
+    for current in intervals_copy[1:]:
+        last = merged[-1]
+        if current[0] &lt;= last[1] + 1:  # overlapping or touching
+            last[1] = max(last[1], current[1])
+        else:
+            merged.append(current)
+
+    return merged</pre><details><summary>Rozumowanie modelu</summary><pre>Implement merge. Ensure not modify input. Return new list.</pre></details><p>Koniec: stop · tokeny: 298 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · csv_totals · próba 2 · 14.89 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import csv
+from decimal import Decimal, InvalidOperation
+from typing import Dict
+
+def csv_totals(text: str) -&gt; Dict[str, Decimal]:
+    &#34;&#34;&#34;
+    Sum amounts per category from a CSV string.
+
+    Parameters
+    ----------
+    text : str
+        CSV data with header &#39;category,amount&#39;. Category may contain quoted commas.
+        Empty lines are ignored.
+
+    Returns
+    -------
+    Dict[str, Decimal]
+        Mapping from category to the sum of amounts.
+
+    Raises
+    ------
+    ValueError
+        If an amount cannot be parsed as a Decimal.
+    &#34;&#34;&#34;
+    totals: Dict[str, Decimal] = {}
+    reader = csv.DictReader(text.splitlines(), skipinitialspace=True)
+    for row in reader:
+        # Skip completely empty rows
+        if not any(row.values()):
+            continue
+
+        category = row.get(&#34;category&#34;)
+        amount_str = row.get(&#34;amount&#34;)
+
+        if category is None or amount_str is None:
+            continue  # ignore malformed rows
+
+        try:
+            amount = Decimal(amount_str)
+        except (InvalidOperation, TypeError):
+            raise ValueError(f&#34;Invalid amount: {amount_str!r}&#34;)
+
+        totals[category] = totals.get(category, Decimal(&#34;0&#34;)) + amount
+
+    return totals</pre><details><summary>Rozumowanie modelu</summary><pre>Implement csv_totals using csv module with quoting. Use Decimal. Skip empty lines. Parse amount, if invalid raise ValueError. Return dict.</pre></details><p>Koniec: stop · tokeny: 300 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gpt-oss:20b · unique_ordered · próba 2 · 8.57 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def unique_ordered(items):
+    &#34;&#34;&#34;
+    Return a new list containing the elements of `items` with duplicates removed,
+    preserving the order of the first occurrences. Elements may be unhashable
+    (e.g., lists, dictionaries). The input list is not modified.
+    &#34;&#34;&#34;
+    result = []
+    seen = []
+    for item in items:
+        # Check if an equal element has already been seen
+        if not any(item == s for s in seen):
+            seen.append(item)
+            result.append(item)
+    return result</pre><details><summary>Rozumowanie modelu</summary><pre>Need to return list preserving order, handling unhashable. Use list to track seen via equality. Can&#39;t use set. So iterate, for each item check if any seen equal via ==. Use list comprehension? We&#39;ll build result and seen list.</pre></details><p>Koniec: stop · tokeny: 173 · pełna odpowiedź: True</p></details><details><summary><span class="fail">✗</span> qwen3.5:9b · topological_sort · próba 1 · 37.83 s</summary><p>Traceback (most recent call last):
+  File &#34;&lt;stdin&gt;&#34;, line 9, in &lt;module&gt;
+  File &#34;checks.py&#34;, line 3, in &lt;module&gt;
+    assert topo_sort(g) == [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError</p><pre>def topo_sort(graph: dict[str, list[str]]) -&gt; list[str]:
+    &#34;&#34;&#34;
+    Zwraca porządek topologiczny grafu, wybierając leksykograficznie najmniejszy
+    spośród aktualnie dostępnych wierzchołków. Jeśli wykryto cykl, zgłasza ValueError.
+    
+    Uwzględnia wszystkie wierzchołki występujące jako klucze lub wartości w graph.
+    Nie modyfikuje oryginalnego słownika graph.
+    &#34;&#34;&#34;
+    
+    # Zbieranie wszystkich unikalnych wierzchołków (klucze i wartości)
+    all_vertices = set()
+    for u in graph:
+        all_vertices.add(u)
+        for v in graph[u]:
+            all_vertices.add(v)
+    
+    if not all_vertices:
+        return []
+
+    # Budowanie odwrotnego grafu (do szybkiego sprawdzania, czy wierzchołek ma wejścia)
+    # Nie jest to konieczne do algorytmu DFS, ale pomocne w myśleniu.
+    # Zamiast tego użyjemy standardowego DFS z tablicą kolorów: 0 = biały, 1 = szary, 2 = czarny.
+    
+    colors = {v: 0 for v in all_vertices}
+    finish_order = []
+
+    def dfs(u):
+        colors[u] = 1  # Szary - w trakcie przetwarzania
+        
+        # Sortowanie sąsiadów leksykograficznie, aby spełnić warunek wyboru najmniejszego
+        neighbors = sorted(graph.get(u, []))
+        
+        for v in neighbors:
+            if colors[v] == 0:  # Biały - nieodwiedzony
+                dfs(v)
+            
+            # Jeśli sąsiad jest szary, wykryto cykl
+            if colors[v] == 1:
+                raise ValueError(&#34;Cykl wykryty&#34;)
+        
+        colors[u] = 2  # Czarny - zakończono przetwarzanie
+        finish_order.append(u)
+
+    # Uruchamiamy DFS od każdego wierzchołka, który nie został jeszcze odwiedzony
+    for v in sorted(all_vertices):
+        if colors[v] == 0:
+            dfs(v)
+    
+    # Porządek topologiczny jest odwrotnością kolejności zakończenia (finish time)
+    return finish_order[::-1]</pre><p>Koniec: stop · tokeny: 528 · pełna odpowiedź: True</p></details><details><summary><span class="fail">✗</span> qwen3.5:9b · merge_intervals · próba 1 · 28.49 s</summary><p>Traceback (most recent call last):
+  File &#34;&lt;stdin&gt;&#34;, line 9, in &lt;module&gt;
+  File &#34;checks.py&#34;, line 4, in &lt;module&gt;
+    assert x == [[5,7],[1,3],[3,5],[10,10]]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError</p><pre>def merge_intervals(intervals):
+    &#34;&#34;&#34;
+    Scalanie domkniętych przedziałów.
+    
+    Parametry:
+        intervals (list of list/tuple): Lista nieposortowanych przedziałów [start, end].
+        
+    Zwraca:
+        Posortowaną listę scalonych przedziałów [start, end].
+        
+    Wyjątki:
+        ValueError: Jeśli dla jakiegoś przedziału start &gt; end.
+    &#34;&#34;&#34;
+    
+    # Obsługa pustego wejścia
+    if not intervals:
+        return []
+    
+    # Walidacja danych wejściowych (sprawdzenie start &lt;= end)
+    for start, end in intervals:
+        if start &gt; end:
+            raise ValueError(&#34;Dla przedziału [start, end] musi zachodzić start &lt;= end.&#34;)
+    
+    # Sortowanie kopii listy wejściowej według początku przedziałów
+    # Nie modyfikujemy oryginalnej listy wejściowej (tworzymy nową)
+    sorted_intervals = sorted(intervals, key=lambda x: x[0])
+    
+    if not sorted_intervals:
+        return []
+        
+    merged = [sorted_intervals[0]]
+    
+    for current_start, current_end in sorted_intervals[1:]:
+        last_start, last_end = merged[-1]
+        
+        # Jeśli obecny przedział styka się lub pokrywa z ostatnim scalonym
+        if current_start &lt;= last_end:
+            # Aktualizujemy koniec ostatniego przedziału na maksymalny z obu końców
+            merged[-1][1] = max(last_end, current_end)
+        else:
+            # Dodajemy nowy przedział do listy scalonych
+            merged.append([current_start, current_end])
+            
+    return merged</pre><p>Koniec: stop · tokeny: 392 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.5:9b · csv_totals · próba 1 · 29.60 s</summary><p>Wszystkie asercje zaliczone.</p><pre>from decimal import Decimal, InvalidOperation
+import csv
+import io
+
+def csv_totals(text: str) -&gt; dict[str, Decimal]:
+    &#34;&#34;&#34;
+    Parses a CSV string with headers &#39;category&#39; and &#39;amount&#39;.
+    Returns a dictionary mapping category to the sum of amounts (as Decimal).
+    
+    Rules:
+    - Handles quoted fields containing commas.
+    - Ignores empty rows.
+    - Raises ValueError if an amount cannot be parsed as a number.
+    - Does not round results.
+    &#34;&#34;&#34;
+    totals = {}
+    
+    # Use StringIO to treat the text as a file-like object for csv.reader
+    reader = csv.DictReader(io.StringIO(text))
+    
+    # Validate headers exist (DictReader handles missing keys by returning None or empty string)
+    if reader.fieldnames is None:
+        raise ValueError(&#34;Empty CSV input&#34;)
+        
+    # Ensure required columns exist
+    if &#39;category&#39; not in reader.fieldnames or &#39;amount&#39; not in reader.fieldnames:
+        raise ValueError(&#34;CSV must contain &#39;category&#39; and &#39;amount&#39; headers&#34;)
+
+    for row in reader:
+        # Skip empty rows (where category is None or empty string)
+        category = row.get(&#39;category&#39;)
+        if category is None or category.strip() == &#39;&#39;:
+            continue
+            
+        amount_str = row.get(&#39;amount&#39;, &#39;&#39;)
+        
+        # Strip whitespace from amount string before parsing
+        amount_str = amount_str.strip()
+        
+        # Skip rows with empty amount (treated as no contribution)
+        if not amount_str:
+            continue
+            
+        try:
+            amount = Decimal(amount_str)
+        except InvalidOperation:
+            raise ValueError(f&#34;Invalid amount format for category &#39;{category}&#39;: {amount_str}&#34;)
+            
+        if category in totals:
+            totals[category] += amount
+        else:
+            totals[category] = amount
+            
+    return totals</pre><p>Koniec: stop · tokeny: 408 · pełna odpowiedź: True</p></details><details><summary><span class="fail">✗</span> qwen3.5:9b · deep_merge · próba 1 · 47.65 s</summary><p>Traceback (most recent call last):
+  File &#34;&lt;stdin&gt;&#34;, line 9, in &lt;module&gt;
+  File &#34;checks.py&#34;, line 10, in &lt;module&gt;
+    assert deep_merge({&#39;a&#39;:{&#39;b&#39;:1},&#39;c&#39;:[1]}, {&#39;a&#39;:None,&#39;c&#39;:[2]}) == {&#39;a&#39;:None,&#39;c&#39;:[2]}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError</p><pre>import copy
+
+def deep_merge(a, b):
+    &#34;&#34;&#34;
+    Głęboko łączy dwa słowniki &#39;a&#39; i &#39;b&#39;.
+    
+    Reguły:
+    - Dla zagnieżdżonych słowników: połączenie rekurencyjne.
+    - Dla list: zastąpienie całej listy z &#39;b&#39; na miejsce listy z &#39;a&#39;.
+    - W innych konfliktach (klucz istnieje tylko w &#39;b&#39; lub wartości są niezgodne): 
+      wartość z &#39;b&#39; wygrywa.
+    - Wynik jest głęboką kopią: modyfikacje wyniku nie wpływają na wejścia.
+    
+    Parametry:
+        a (dict | list | any): Pierwszy obiekt do scalenia.
+        b (dict | list | any): Drugi obiekt do scalenia (ma priorytet).
+        
+    Zwraca:
+        dict | list | any: Głęboka kopia scalonego obiektu.
+    &#34;&#34;&#34;
+    
+    # Jeśli &#39;a&#39; nie jest słownikiem, a &#39;b&#39; jest słownikiem, zwracamy głęboką kopię &#39;b&#39;.
+    if not isinstance(a, dict) and isinstance(b, dict):
+        return copy.deepcopy(b)
+    
+    # Jeśli &#39;a&#39; jest słownikiem, a &#39;b&#39; nie jest, zwracamy głęboką kopię &#39;a&#39;.
+    if isinstance(a, dict) and not isinstance(b, dict):
+        return copy.deepcopy(a)
+    
+    # Jeśli oba są słownikami, scalamy je rekurencyjnie.
+    if isinstance(a, dict) and isinstance(b, dict):
+        result = {}
+        # Dodajemy wszystkie klucze z &#39;a&#39; (głęboka kopia wartości)
+        for key in a:
+            if key in b:
+                # Konflikt klucza: rekurencyjne scalanie
+                result[key] = deep_merge(a[key], b[key])
+            else:
+                # Klucz tylko w &#39;a&#39;: głęboka kopia
+                result[key] = copy.deepcopy(a[key])
+        
+        # Dodajemy klucze z &#39;b&#39;, które nie są w &#39;a&#39; (głęboka kopia)
+        for key in b:
+            if key not in result:
+                result[key] = copy.deepcopy(b[key])
+        
+        return result
+    
+    # Jeśli oba są listami, zgodnie z instrukcją &#34;listy zastępują w całości&#34;, 
+    # zwracamy głęboką kopię &#39;b&#39;.
+    if isinstance(a, list) and isinstance(b, list):
+        return copy.deepcopy(b)
+    
+    # W przypadku innych typów danych (liczby, stringi, None itp.) lub gdy jeden jest listą, a drugi nie słownikiem/listą:
+    # Zgodnie z zasadą &#34;w innych konfliktach wygrywa b&#34;, zwracamy głęboką kopię &#39;b&#39;.
+    return copy.deepcopy(b)</pre><p>Koniec: stop · tokeny: 667 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.5:9b · unique_ordered · próba 1 · 16.53 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def unique_ordered(items):
+    &#34;&#34;&#34;
+    Usuwa duplikaty z listy, zachowując kolejność pierwszych wystąpień.
+    Obsługuje elementy niehashowalne (np. listy, słowniki).
+    Nie modyfikuje wejścia.
+
+    Args:
+        items (list): Lista elementów do przetworzenia.
+
+    Returns:
+        list: Nowa lista z unikalnymi elementami w oryginalnej kolejności.
+    &#34;&#34;&#34;
+    seen = []
+    result = []
+    
+    for item in items:
+        # Sprawdzamy, czy element nie występuje jeszcze w liście &#39;seen&#39;
+        # Ponieważ elementy mogą być niehashowalne, używamy pętli liniowej
+        is_duplicate = False
+        for seen_item in seen:
+            if item == seen_item:
+                is_duplicate = True
+                break
+        
+        if not is_duplicate:
+            seen.append(item)
+            result.append(item)
+            
+    return result</pre><p>Koniec: stop · tokeny: 225 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.5:9b · lru_cache · próba 1 · 24.35 s</summary><p>Wszystkie asercje zaliczone.</p><pre>from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;Capacity cannot be negative.&#34;)
+        self.capacity = capacity
+        # OrderedDict zachowuje kolejność wstawienia elementów.
+        # Najdawniej użyty element znajduje się na początku (left).
+        self.cache = OrderedDict()
+
+    def get(self, key: int) -&gt; int:
+        if key in self.cache:
+            # Przenosimy klucz na koniec, aby oznaczyć go jako najnowo użyty.
+            # move_to_end przesuwa element do końca listy, zachowując O(1).
+            self.cache.move_to_end(key)
+            return self.cache[key]
+        else:
+            return -1
+
+    def put(self, key: int, value: int) -&gt; None:
+        if key in self.cache:
+            # Aktualizujemy wartość i przenosimy klucz na koniec.
+            self.cache[key] = value
+            self.cache.move_to_end(key)
+        else:
+            # Dodajemy nowy element.
+            self.cache[key] = value
+            
+            # Jeśli pojemność została przekroczona, usuwamy najdawniej użyty element (pierwszy).
+            if len(self.cache) &gt; self.capacity:
+                # popitem(last=False) usuwa i zwraca pierwszy element (najstarszy), co jest O(1).
+                self.cache.popitem(last=False)</pre><p>Koniec: stop · tokeny: 331 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.5:9b · lru_cache · próba 2 · 23.28 s</summary><p>Wszystkie asercje zaliczone.</p><pre>from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;Capacity cannot be negative.&#34;)
+        self.capacity = capacity
+        # OrderedDict zachowuje kolejność wstawienia elementów.
+        # Najdawniej użyty element znajduje się na początku (lewym końcu).
+        self.cache = OrderedDict()
+
+    def get(self, key: int) -&gt; int:
+        if key in self.cache:
+            # Przenosimy klucz na koniec, aby oznaczyć go jako najnowo użyty.
+            # move_to_end przesuwa element do końca listy, zachowując jego wartość.
+            self.cache.move_to_end(key)
+            return self.cache[key]
+        else:
+            return -1
+
+    def put(self, key: int, value: int) -&gt; None:
+        if key in self.cache:
+            # Aktualizujemy wartość i przenosimy klucz na koniec.
+            self.cache[key] = value
+            self.cache.move_to_end(key)
+        else:
+            # Dodajemy nowy element.
+            self.cache[key] = value
+            
+            # Jeśli pojemność została przekroczona, usuwamy najdawniej użyty element (pierwszy).
+            if len(self.cache) &gt; self.capacity:
+                # popitem(last=False) usuwa i zwraca pierwszy element (najstarszy).
+                self.cache.popitem(last=False)</pre><p>Koniec: stop · tokeny: 326 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.5:9b · deep_merge · próba 2 · 35.57 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import copy
+
+def deep_merge(a, b):
+    &#34;&#34;&#34;
+    Głęboko łączy dwa słowniki &#39;a&#39; i &#39;b&#39;.
+    
+    Reguły:
+    - Dla zagnieżdżonych słowników: połączenie rekurencyjne.
+    - Dla list: zastąpienie całej listy z &#39;b&#39; na miejsce listy z &#39;a&#39;.
+    - W innych konfliktach (klucz istnieje tylko w &#39;b&#39; lub wartości są niezgodne): 
+      wartość z &#39;b&#39; wygrywa.
+    - Wynik jest głęboką kopią: modyfikacje wyniku nie wpływają na wejścia.
+    
+    Parametry:
+        a (dict | list | any): Pierwszy obiekt do scalenia.
+        b (dict | list | any): Drugi obiekt do scalenia (ma priorytet).
+        
+    Zwraca:
+        dict | list | any: Głęboka kopia scalonego obiektu.
+    &#34;&#34;&#34;
+    
+    # Jeśli &#39;a&#39; nie jest słownikiem, a &#39;b&#39; jest słownikiem, 
+    # lub typy są różne (poza listami), &#39;b&#39; wygrywa całkowicie.
+    if not isinstance(a, dict) or not isinstance(b, dict):
+        return copy.deepcopy(b)
+    
+    # Jeśli oba są słownikami, iterujemy po kluczach z &#39;b&#39; (bo one mają priorytet).
+    result = copy.deepcopy(a)
+    
+    for key in b:
+        if key in a:
+            val_a = a[key]
+            val_b = b[key]
+            
+            # Jeśli oba wartości są słownikami, łączymy rekurencyjnie.
+            if isinstance(val_a, dict) and isinstance(val_b, dict):
+                result[key] = deep_merge(val_a, val_b)
+            else:
+                # W przypadku list lub innych typów (lub konfliktu typów), 
+                # &#39;b&#39; zastępuje &#39;a&#39;.
+                result[key] = copy.deepcopy(val_b)
+        else:
+            # Klucz istnieje tylko w &#39;b&#39;, więc go kopiujemy.
+            result[key] = copy.deepcopy(b[key])
+            
+    return result</pre><p>Koniec: stop · tokeny: 493 · pełna odpowiedź: True</p></details><details><summary><span class="fail">✗</span> qwen3.5:9b · topological_sort · próba 2 · 38.13 s</summary><p>Traceback (most recent call last):
+  File &#34;&lt;stdin&gt;&#34;, line 9, in &lt;module&gt;
+  File &#34;checks.py&#34;, line 3, in &lt;module&gt;
+    assert topo_sort(g) == [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError</p><pre>def topo_sort(graph: dict[str, list[str]]) -&gt; list[str]:
+    &#34;&#34;&#34;
+    Zwraca porządek topologiczny grafu, wybierając leksykograficznie najmniejszy
+    spośród aktualnie dostępnych wierzchołków. Jeśli wykryto cykl, zgłasza ValueError.
+    
+    Uwzględnia wszystkie wierzchołki występujące jako klucze lub wartości w graph.
+    Nie modyfikuje oryginalnego słownika graph.
+    &#34;&#34;&#34;
+    
+    # Zbieranie wszystkich unikalnych wierzchołków (klucze i wartości)
+    all_vertices = set()
+    for u in graph:
+        all_vertices.add(u)
+        for v in graph[u]:
+            all_vertices.add(v)
+    
+    if not all_vertices:
+        return []
+
+    # Budowanie odwrotnego grafu (do szybkiego sprawdzania, czy wierzchołek ma wejścia)
+    # Nie jest to konieczne do algorytmu DFS, ale pomocne w myśleniu.
+    # Zamiast tego użyjemy standardowego DFS z tablicą kolorów: 0 = biały, 1 = szary, 2 = czarny.
+    
+    colors = {v: 0 for v in all_vertices}
+    finish_order = []
+
+    def dfs(u):
+        colors[u] = 1  # Szary - w trakcie przetwarzania
+        
+        # Sortowanie sąsiadów leksykograficznie, aby spełnić warunek wyboru najmniejszego
+        neighbors = sorted(graph.get(u, []))
+        
+        for v in neighbors:
+            if colors[v] == 0:  # Biały - nieodwiedzony
+                dfs(v)
+            
+            # Jeśli sąsiad jest szary, wykryto cykl
+            if colors[v] == 1:
+                raise ValueError(&#34;Cykl wykryty&#34;)
+        
+        colors[u] = 2  # Czarny - zakończono przetwarzanie
+        finish_order.append(u)
+
+    # Uruchamiamy DFS od każdego wierzchołka, który nie został jeszcze odwiedzony
+    for v in sorted(all_vertices):
+        if colors[v] == 0:
+            dfs(v)
+    
+    # Porządek topologiczny jest odwrotnością kolejności zakończenia (finish time)
+    return finish_order[::-1]</pre><p>Koniec: stop · tokeny: 528 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.5:9b · merge_intervals · próba 2 · 32.95 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def merge_intervals(intervals):
+    &#34;&#34;&#34;
+    Scalanie domkniętych przedziałów.
+    
+    Parametry:
+        intervals (list of list/tuple): Lista nieposortowanych przedziałów [start, end].
+        
+    Zwraca:
+        Posortowaną listę scalonych przedziałów [start, end].
+        
+    Wyjątki:
+        ValueError: Jeśli dla jakiegoś przedziału start &gt; end.
+    &#34;&#34;&#34;
+    
+    # Obsługa pustego wejścia
+    if not intervals:
+        return []
+    
+    # Walidacja danych wejściowych (sprawdzenie start &lt;= end)
+    for interval in intervals:
+        if len(interval) != 2:
+            raise ValueError(&#34;Każdy przedział musi być listą lub tuple o długości 2.&#34;)
+        start, end = interval
+        if not isinstance(start, (int, float)) or not isinstance(end, (int, float)):
+            raise TypeError(&#34;Start i end muszą być liczbami.&#34;)
+        if start &gt; end:
+            raise ValueError(f&#34;Dla przedziału {interval} start ({start}) jest większy niż end ({end}).&#34;)
+    
+    # Sortowanie wejścia bez modyfikacji oryginału (tworzymy nową listę)
+    sorted_intervals = sorted(intervals, key=lambda x: x[0])
+    
+    if not sorted_intervals:
+        return []
+        
+    merged = [sorted_intervals[0]]
+    
+    for current_start, current_end in sorted_intervals[1:]:
+        last_start, last_end = merged[-1]
+        
+        # Jeśli obecny przedział styka się lub pokrywa z ostatnim scalonym
+        if current_start &lt;= last_end:
+            # Aktualizujemy koniec ostatniego przedziału na maksimum końców obu przedziałów
+            new_end = max(last_end, current_end)
+            merged[-1] = [last_start, new_end]
+        else:
+            # Brak styku - dodajemy nowy przedział do listy scalonych
+            merged.append([current_start, current_end])
+            
+    return merged</pre><p>Koniec: stop · tokeny: 469 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.5:9b · csv_totals · próba 2 · 28.93 s</summary><p>Wszystkie asercje zaliczone.</p><pre>from decimal import Decimal, InvalidOperation
+import csv
+import io
+
+def csv_totals(text: str) -&gt; dict[str, Decimal]:
+    &#34;&#34;&#34;
+    Parses a CSV string with headers &#39;category&#39; and &#39;amount&#39;.
+    Returns a dictionary mapping category to the sum of amounts (as Decimal).
+    
+    Rules:
+    - Handles quoted fields containing commas.
+    - Ignores empty rows.
+    - Raises ValueError if an amount cannot be parsed as a number.
+    - Does not round results.
+    &#34;&#34;&#34;
+    totals = {}
+    
+    # Use StringIO to treat the text as a file-like object for csv.reader
+    reader = csv.DictReader(io.StringIO(text))
+    
+    # Validate headers exist (DictReader handles missing keys by returning None or empty string)
+    if reader.fieldnames is None:
+        raise ValueError(&#34;Empty CSV input&#34;)
+        
+    # Ensure required columns exist
+    if &#39;category&#39; not in reader.fieldnames or &#39;amount&#39; not in reader.fieldnames:
+        raise ValueError(&#34;CSV must contain &#39;category&#39; and &#39;amount&#39; headers&#34;)
+
+    for row in reader:
+        # Skip empty rows (where category is None or empty string)
+        category = row.get(&#39;category&#39;)
+        if category is None or category.strip() == &#39;&#39;:
+            continue
+            
+        amount_str = row.get(&#39;amount&#39;, &#39;&#39;)
+        
+        # Strip whitespace from amount string before parsing
+        amount_str = amount_str.strip()
+        
+        # Skip rows with empty amount (treated as no contribution)
+        if not amount_str:
+            continue
+            
+        try:
+            amount = Decimal(amount_str)
+        except InvalidOperation:
+            raise ValueError(f&#34;Invalid amount format for category &#39;{category}&#39;: {amount_str}&#34;)
+            
+        if category in totals:
+            totals[category] += amount
+        else:
+            totals[category] = amount
+            
+    return totals</pre><p>Koniec: stop · tokeny: 408 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.5:9b · unique_ordered · próba 2 · 16.24 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def unique_ordered(items):
+    &#34;&#34;&#34;
+    Usuwa duplikaty z listy, zachowując kolejność pierwszych wystąpień.
+    Obsługuje elementy niehashowalne (np. listy, słowniki).
+    Nie modyfikuje wejścia.
+
+    Args:
+        items (list): Lista elementów do przetworzenia.
+
+    Returns:
+        list: Nowa lista z unikalnymi elementami w oryginalnej kolejności.
+    &#34;&#34;&#34;
+    seen = []
+    result = []
+    
+    for item in items:
+        # Sprawdzamy, czy element nie występuje jeszcze w liście &#39;seen&#39;
+        # Ponieważ elementy mogą być niehashowalne, używamy pętli liniowej
+        is_duplicate = False
+        for seen_item in seen:
+            if item == seen_item:
+                is_duplicate = True
+                break
+        
+        if not is_duplicate:
+            seen.append(item)
+            result.append(item)
+            
+    return result</pre><p>Koniec: stop · tokeny: 225 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · topological_sort · próba 1 · 12.71 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import heapq
+
+def topo_sort(graph: dict[str, list[str]]) -&gt; list[str]:
+    in_degree = {}
+    # Inicjalizacja stopni wejściowych dla wszystkich wierzchołków
+    all_nodes = set(graph.keys())
+    for neighbors in graph.values():
+        for v in neighbors:
+            all_nodes.add(v)
+            
+    for node in all_nodes:
+        in_degree[node] = 0
+        
+    for u in graph:
+        for v in graph[u]:
+            in_degree[v] += 1
+            
+    # Kolejka priorytetowa dla leksykograficznego wyboru
+    queue = [node for node in all_nodes if in_degree[node] == 0]
+    heapq.heapify(queue)
+    
+    result = []
+    while queue:
+        u = heapq.heappop(queue)
+        result.append(u)
+        
+        if u in graph:
+            for v in graph[u]:
+                in_degree[v] -= 1
+                if in_degree[v] == 0:
+                    heapq.heappush(queue, v)
+                    
+    if len(result) != len(all_nodes):
+        raise ValueError(&#34;Cycle detected&#34;)
+        
+    return result</pre><p>Koniec: stop · tokeny: 313 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · merge_intervals · próba 1 · 14.10 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def merge_intervals(intervals):
+    if not intervals:
+        return []
+
+    # Walidacja i kopia danych (aby nie modyfikować wejścia)
+    processed_intervals = []
+    for interval in intervals:
+        if len(interval) != 2:
+            raise ValueError(&#34;Each interval must be a list of two elements.&#34;)
+        start, end = interval
+        if start &gt; end:
+            raise ValueError(&#34;Start of interval must be less than or equal to end.&#34;)
+        processed_intervals.append([start, end])
+
+    # Sortowanie po pierwszym elemencie (start)
+    processed_intervals.sort(key=lambda x: x[0])
+
+    merged = []
+    for current in processed_intervals:
+        if not merged:
+            merged.append(current)
+        else:
+            last_merged = merged[-1]
+            # Jeśli początek bieżącego przedziału jest &lt;= końcowi ostatniego scalonego
+            if current[0] &lt;= last_merged[1]:
+                # Scalamy przedziały, aktualizując koniec na większy z obu
+                last_merged[1] = max(last_merged[1], current[1])
+            else:
+                # Dodajemy jako nowy przedział
+                merged.append(current)
+
+    return merged</pre><p>Koniec: stop · tokeny: 296 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · csv_totals · próba 1 · 11.76 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import csv
+import io
+from decimal import Decimal
+from typing import Dict
+
+def csv_totals(text: str) -&gt; Dict[str, Decimal]:
+    f = io.StringIO(text.strip())
+    reader = csv.DictReader(f)
+    totals = {}
+    
+    for row in reader:
+        category = row.get(&#39;category&#39;)
+        amount_str = row.get(&#39;amount&#39;)
+        
+        if category is None or amount_str is None:
+            continue
+            
+        if category.strip() == &#34;&#34; and amount_str.strip() == &#34;&#34;:
+            continue
+            
+        try:
+            amount = Decimal(amount_str)
+        except (ValueError, TypeError, ArithmeticError):
+            # Note: ArithmeticError is not imported, but Decimal() 
+            # raises InvalidOperation which is a subclass of ArithmeticError.
+            # Standard ValueError is usually sufficient for bad strings.
+            raise ValueError(f&#34;Invalid amount: {amount_str}&#34;)
+
+        if category in totals:
+            totals[category] += amount
+        else:
+            totals[category] = amount
+            
+    return totals</pre><p>Koniec: stop · tokeny: 254 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · deep_merge · próba 1 · 9.48 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import copy
+
+def deep_merge(a, b):
+    &#34;&#34;&#34;
+    Łączy dwa słowniki rekurencyjnie. 
+    W przypadku konfliktów:
+    - Jeśli obie wartości są słownikami, są łączone rekurencyjnie.
+    - W pozostałych przypadkach (w tym dla list), wartość z b zastępuje wartość z a.
+    Wynik jest głęboką kopią.
+    &#34;&#34;&#34;
+    result = copy.deepcopy(a)
+    
+    for key, value in b.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = deep_merge(result[key], value)
+        else:
+            result[key] = copy.deepcopy(value)
+            
+    return result</pre><p>Koniec: stop · tokeny: 185 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · unique_ordered · próba 1 · 3.28 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def unique_ordered(items):
+    seen = []
+    result = []
+    for item in items:
+        if item not in seen:
+            seen.append(item)
+            result.append(item)
+    return result</pre><p>Koniec: stop · tokeny: 58 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · lru_cache · próba 1 · 11.91 s</summary><p>Wszystkie asercje zaliczone.</p><pre>from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;Capacity must be non-negative.&#34;)
+        self.capacity = capacity
+        self.cache = OrderedDict()
+
+    def get(self, key: int) -&gt; int:
+        if key not in self.cache:
+            return -1
+        # Przesuń klucz na koniec (najnowszy)
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key: int, value: int) -&gt; None:
+        if self.capacity == 0:
+            return
+        
+        if key in self.cache:
+            # Aktualizuj wartość i przesuń na koniec
+            self.cache[key] = value
+            self.cache.move_to_end(key)
+        else:
+            self.cache[key] = value
+            if len(self.cache) &gt; self.capacity:
+                # Usuń najstarszy element (z początku OrderedDict)
+                self.cache.popitem(last=False)</pre><p>Koniec: stop · tokeny: 265 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · lru_cache · próba 2 · 11.41 s</summary><p>Wszystkie asercje zaliczone.</p><pre>from collections import OrderedDict
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;Capacity must be non-negative&#34;)
+        self.capacity = capacity
+        self.cache = OrderedDict()
+
+    def get(self, key: int) -&gt; int:
+        if key not in self.cache:
+            return -1
+        # Przesuń klucz na koniec (najnowszy)
+        self.cache.move_to_end(key)
+        return self.cache[key]
+
+    def put(self, key: int, value: int) -&gt; None:
+        if self.capacity == 0:
+            return
+        
+        if key in self.cache:
+            # Aktualizuj wartość i przesuń na koniec
+            self.cache.move_to_end(key)
+            self.cache[key] = value
+        else:
+            self.cache[key] = value
+            if len(self.cache) &gt; self.capacity:
+                # Usuń najstarszy element (z początku OrderedDict)
+                self.cache.popitem(last=False)</pre><p>Koniec: stop · tokeny: 265 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · deep_merge · próba 2 · 8.70 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import copy
+
+def deep_merge(a, b):
+    &#34;&#34;&#34;
+    Łączy dwa słowniki rekurencyjnie. 
+    W przypadku konfliktów:
+    - Jeśli obie wartości są słownikami, są łączone rekurencyjnie.
+    - W innych przypadkach (np. listy, wartości skalarne), wartość z b zastępuje wartość z a.
+    Wynik jest głęboką kopią.
+    &#34;&#34;&#34;
+    result = copy.deepcopy(a)
+    
+    for key, value in b.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = deep_merge(result[key], value)
+        else:
+            result[key] = copy.deepcopy(value)
+            
+    return result</pre><p>Koniec: stop · tokeny: 188 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · topological_sort · próba 2 · 13.11 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import heapq
+
+def topo_sort(graph: dict[str, list[str]]) -&gt; list[str]:
+    in_degree = {}
+    # Inicjalizacja stopni wejściowych dla wszystkich wierzchołków
+    all_nodes = set(graph.keys())
+    for neighbors in graph.values():
+        for v in neighbors:
+            all_nodes.add(v)
+            
+    for node in all_nodes:
+        in_degree[node] = 0
+        
+    for u in graph:
+        for v in graph[u]:
+            in_degree[v] += 1
+            
+    # Kolejka priorytetowa dla leksykograficznego wyboru
+    queue = [node for node in all_nodes if in_degree[node] == 0]
+    heapq.heapify(queue)
+    
+    result = []
+    while queue:
+        u = heapq.heappop(queue)
+        result.append(u)
+        
+        if u in graph:
+            for v in graph[u]:
+                in_degree[v] -= 1
+                if in_degree[v] == 0:
+                    heapq.heappush(queue, v)
+                    
+    if len(result) != len(all_nodes):
+        raise ValueError(&#34;Cycle detected&#34;)
+        
+    return result</pre><p>Koniec: stop · tokeny: 313 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · merge_intervals · próba 2 · 13.90 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def merge_intervals(intervals):
+    if not intervals:
+        return []
+
+    # Walidacja i kopia danych (aby nie modyfikować wejścia)
+    processed_intervals = []
+    for interval in intervals:
+        if len(interval) != 2:
+            raise ValueError(&#34;Each interval must be a list of two elements.&#34;)
+        start, end = interval
+        if start &gt; end:
+            raise ValueError(&#34;Start of interval must be less than or equal to end.&#34;)
+        processed_intervals.append([start, end])
+
+    # Sortowanie po pierwszym elemencie (start)
+    processed_intervals.sort(key=lambda x: x[0])
+
+    merged = []
+    for current in processed_intervals:
+        if not merged:
+            merged.append(current)
+        else:
+            last_merged = merged[-1]
+            # Jeśli początek bieżącego przedziału jest &lt;= końcowi ostatniego scalonego
+            if current[0] &lt;= last_merged[1]:
+                # Scalamy przedziały, aktualizując koniec na większy z obu
+                last_merged[1] = max(last_merged[1], current[1])
+            else:
+                # Dodajemy jako nowy przedział
+                merged.append(current)
+
+    return merged</pre><p>Koniec: stop · tokeny: 296 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · csv_totals · próba 2 · 12.03 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import csv
+import io
+from decimal import Decimal
+from typing import Dict
+
+def csv_totals(text: str) -&gt; Dict[str, Decimal]:
+    totals: Dict[str, Decimal] = {}
+    
+    # Używamy io.StringIO, aby potraktować tekst jako plik dla modułu csv
+    f = io.StringIO(text.strip())
+    reader = csv.DictReader(f)
+    
+    for row in reader:
+        # Ignoruj wiersze, w których brakuje kluczowych danych
+        if not row.get(&#39;category&#39;) or row.get(&#39;amount&#39;) is None:
+            continue
+            
+        category = row[&#39;category&#39;]
+        amount_str = row[&#39;amount&#39;].strip()
+        
+        try:
+            amount = Decimal(amount_str)
+        except (ValueError, TypeError, ArithmeticError):
+            # Jeśli kwota nie jest poprawnym formatem Decimal
+            raise ValueError(f&#34;Invalid amount: {amount_str}&#34;)
+            
+        if category in totals:
+            totals[category] += amount
+        else:
+            totals[category] = amount
+            
+    return totals</pre><p>Koniec: stop · tokeny: 260 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> gemma4:12b · unique_ordered · próba 2 · 3.03 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def unique_ordered(items):
+    seen = []
+    result = []
+    for item in items:
+        if item not in seen:
+            seen.append(item)
+            result.append(item)
+    return result</pre><p>Koniec: stop · tokeny: 58 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · topological_sort · próba 1 · 30.34 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import heapq
+from collections import defaultdict
+
+
+def topo_sort(graph: dict[str, list[str]]) -&gt; list[str]:
+    # Zbierz wszystkie wierzchołki (klucze i wartości)
+    vertices: set[str] = set()
+    for u, neighbors in graph.items():
+        vertices.add(u)
+        for v in neighbors:
+            vertices.add(v)
+
+    # Zbuduj listę sąsiedztwa i stopnie wejściowe
+    adj: dict[str, list[str]] = {v: [] for v in vertices}
+    in_degree: dict[str, int] = {v: 0 for v in vertices}
+
+    for u, neighbors in graph.items():
+        for v in neighbors:
+            adj[u].append(v)
+            in_degree[v] += 1
+
+    # Inicjalizuj kopiec z wierzchołkami o stopniu wejściowym 0
+    heap: list[str] = []
+    for v in vertices:
+        if in_degree[v] == 0:
+            heapq.heappush(heap, v)
+
+    result: list[str] = []
+
+    while heap:
+        u = heapq.heappop(heap)
+        result.append(u)
+        for v in adj[u]:
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                heapq.heappush(heap, v)
+
+    if len(result) != len(vertices):
+        raise ValueError(&#34;Graph contains a cycle&#34;)
+
+    return result</pre><p>Koniec: stop · tokeny: 334 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · merge_intervals · próba 1 · 23.86 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def merge_intervals(intervals):
+    if not intervals:
+        return []
+    
+    # Validate and create a copy of valid intervals
+    valid = []
+    for interval in intervals:
+        if len(interval) != 2:
+            raise ValueError(&#34;Each interval must have exactly two elements&#34;)
+        start, end = interval
+        if start &gt; end:
+            raise ValueError(f&#34;Invalid interval: start ({start}) &gt; end ({end})&#34;)
+        valid.append([start, end])
+    
+    # Sort by start, then by end
+    valid.sort(key=lambda x: (x[0], x[1]))
+    
+    # Merge intervals
+    merged = []
+    for interval in valid:
+        start, end = interval
+        if not merged:
+            merged.append([start, end])
+        else:
+            last = merged[-1]
+            # Merge if overlapping or touching
+            if start &lt;= last[1]:
+                last[1] = max(last[1], end)
+            else:
+                merged.append([start, end])
+    
+    return merged</pre><p>Koniec: stop · tokeny: 240 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · csv_totals · próba 1 · 35.18 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import csv
+import io
+from decimal import Decimal, InvalidOperation
+
+
+def csv_totals(text: str) -&gt; dict[str, Decimal]:
+    reader = csv.DictReader(io.StringIO(text), fieldnames=None)
+    # Ensure header is exactly category,amount
+    header = reader.fieldnames
+    if header is None:
+        return {}
+    # Normalize header names (strip whitespace)
+    header = [h.strip() if h else h for h in header]
+    if header != [&#39;category&#39;, &#39;amount&#39;]:
+        # Try to find the right columns
+        if &#39;category&#39; not in header or &#39;amount&#39; not in header:
+            raise ValueError(&#34;CSV must have headers &#39;category&#39; and &#39;amount&#39;&#34;)
+    
+    totals: dict[str, Decimal] = {}
+    for row in reader:
+        # Skip empty rows (all values None or empty)
+        if row is None:
+            continue
+        # Check if row is empty
+        values = list(row.values())
+        if all(v is None or (isinstance(v, str) and v.strip() == &#39;&#39;) for v in values):
+            continue
+        
+        category = row.get(&#39;category&#39;)
+        amount_str = row.get(&#39;amount&#39;)
+        
+        if category is None or amount_str is None:
+            continue
+        
+        category = category.strip()
+        amount_str = amount_str.strip()
+        
+        if category == &#39;&#39; and amount_str == &#39;&#39;:
+            continue
+        
+        try:
+            amount = Decimal(amount_str)
+        except (InvalidOperation, ValueError) as e:
+            raise ValueError(f&#34;Invalid amount: {amount_str!r}&#34;) from e
+        
+        totals[category] = totals.get(category, Decimal(&#39;0&#39;)) + amount
+    
+    return totals</pre><p>Koniec: stop · tokeny: 374 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · deep_merge · próba 1 · 18.84 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import copy
+
+
+def deep_merge(a: dict, b: dict) -&gt; dict:
+    &#34;&#34;&#34;
+    Rekurencyjnie łączy dwa słowniki.
+    - Zagnieżdżone słowniki są łączone rekurencyjnie.
+    - W pozostałych konfliktach (w tym listy) wygrywa wartość z b.
+    - Zwracana jest głęboka kopia: modyfikacja wyniku nie wpływa na a ani b.
+    &#34;&#34;&#34;
+    result = copy.deepcopy(a)
+    for key, value_b in b.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value_b, dict):
+            result[key] = deep_merge(result[key], value_b)
+        else:
+            result[key] = copy.deepcopy(value_b)
+    return result</pre><p>Koniec: stop · tokeny: 186 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · unique_ordered · próba 1 · 14.49 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def unique_ordered(items):
+    &#34;&#34;&#34;
+    Usuwa duplikaty z listy, zachowując kolejność pierwszych wystąpień.
+    Obsługuje elementy niehashowalne (np. listy, słowniki).
+    Nie modyfikuje wejścia.
+    &#34;&#34;&#34;
+    seen = []
+    result = []
+    for item in items:
+        # Sprawdź, czy element już istnieje w &#39;seen&#39;
+        # Porównujemy przez równość (==), co działa dla niehashowalnych obiektów
+        if not any(item == s for s in seen):
+            seen.append(item)
+            result.append(item)
+    return result</pre><p>Koniec: stop · tokeny: 152 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · lru_cache · próba 1 · 37.63 s</summary><p>Wszystkie asercje zaliczone.</p><pre>class LRUCache:
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;capacity must be non-negative&#34;)
+        self.capacity = capacity
+        self._data = {}
+        self._head = None
+        self._tail = None
+
+    def _remove_node(self, node):
+        prev = node.prev
+        nxt = node.next
+        if prev:
+            prev.next = nxt
+        else:
+            self._head = nxt
+        if nxt:
+            nxt.prev = prev
+        else:
+            self._tail = prev
+
+    def _add_to_head(self, node):
+        node.prev = None
+        node.next = self._head
+        if self._head:
+            self._head.prev = node
+        self._head = node
+        if not self._tail:
+            self._tail = node
+
+    def _move_to_head(self, node):
+        self._remove_node(node)
+        self._add_to_head(node)
+
+    def get(self, key):
+        if self.capacity == 0 or key not in self._data:
+            return -1
+        node = self._data[key]
+        self._move_to_head(node)
+        return node.value
+
+    def put(self, key, value):
+        if self.capacity == 0:
+            return
+        if key in self._data:
+            node = self._data[key]
+            node.value = value
+            self._move_to_head(node)
+        else:
+            node = _Node(key, value)
+            self._data[key] = node
+            self._add_to_head(node)
+            if len(self._data) &gt; self.capacity:
+                oldest = self._tail
+                self._remove_node(oldest)
+                del self._data[oldest.key]
+
+
+class _Node:
+    __slots__ = (&#39;key&#39;, &#39;value&#39;, &#39;prev&#39;, &#39;next&#39;)
+
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.prev = None
+        self.next = None</pre><p>Koniec: stop · tokeny: 463 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · lru_cache · próba 2 · 35.22 s</summary><p>Wszystkie asercje zaliczone.</p><pre>class LRUCache:
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;capacity must be non-negative&#34;)
+        self.capacity = capacity
+        self._data = {}
+        self._head = None
+        self._tail = None
+
+    def _remove_node(self, node):
+        prev = node.prev
+        nxt = node.next
+        if prev:
+            prev.next = nxt
+        else:
+            self._head = nxt
+        if nxt:
+            nxt.prev = prev
+        else:
+            self._tail = prev
+
+    def _add_to_head(self, node):
+        node.prev = None
+        node.next = self._head
+        if self._head:
+            self._head.prev = node
+        self._head = node
+        if not self._tail:
+            self._tail = node
+
+    def _move_to_head(self, node):
+        self._remove_node(node)
+        self._add_to_head(node)
+
+    def get(self, key):
+        if self.capacity == 0 or key not in self._data:
+            return -1
+        node = self._data[key]
+        self._move_to_head(node)
+        return node.value
+
+    def put(self, key, value):
+        if self.capacity == 0:
+            return
+        if key in self._data:
+            node = self._data[key]
+            node.value = value
+            self._move_to_head(node)
+        else:
+            node = _Node(key, value)
+            self._data[key] = node
+            self._add_to_head(node)
+            if len(self._data) &gt; self.capacity:
+                oldest = self._tail
+                self._remove_node(oldest)
+                del self._data[oldest.key]
+
+
+class _Node:
+    __slots__ = (&#39;key&#39;, &#39;value&#39;, &#39;prev&#39;, &#39;next&#39;)
+
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.prev = None
+        self.next = None</pre><p>Koniec: stop · tokeny: 463 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · deep_merge · próba 2 · 16.12 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import copy
+
+
+def deep_merge(a: dict, b: dict) -&gt; dict:
+    &#34;&#34;&#34;
+    Rekurencyjnie łączy dwa słowniki.
+    - Zagnieżdżone słowniki są łączone rekurencyjnie.
+    - W pozostałych konfliktach (w tym listy) wygrywa wartość z b.
+    - Zwracana jest głęboka kopia: modyfikacja wyniku nie wpływa na a ani b.
+    &#34;&#34;&#34;
+    result = copy.deepcopy(a)
+    for key, value_b in b.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value_b, dict):
+            result[key] = deep_merge(result[key], value_b)
+        else:
+            result[key] = copy.deepcopy(value_b)
+    return result</pre><p>Koniec: stop · tokeny: 186 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · topological_sort · próba 2 · 28.24 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import heapq
+from collections import defaultdict
+
+
+def topo_sort(graph: dict[str, list[str]]) -&gt; list[str]:
+    # Zbierz wszystkie wierzchołki (klucze i wartości)
+    vertices: set[str] = set()
+    for u, neighbors in graph.items():
+        vertices.add(u)
+        for v in neighbors:
+            vertices.add(v)
+
+    # Zbuduj listę sąsiedztwa i stopnie wejściowe
+    adj: dict[str, list[str]] = {v: [] for v in vertices}
+    in_degree: dict[str, int] = {v: 0 for v in vertices}
+
+    for u, neighbors in graph.items():
+        for v in neighbors:
+            adj[u].append(v)
+            in_degree[v] += 1
+
+    # Inicjalizuj kopiec z wierzchołkami o stopniu wejściowym 0
+    heap: list[str] = []
+    for v in vertices:
+        if in_degree[v] == 0:
+            heapq.heappush(heap, v)
+
+    result: list[str] = []
+
+    while heap:
+        u = heapq.heappop(heap)
+        result.append(u)
+        for v in adj[u]:
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                heapq.heappush(heap, v)
+
+    if len(result) != len(vertices):
+        raise ValueError(&#34;Graph contains a cycle&#34;)
+
+    return result</pre><p>Koniec: stop · tokeny: 334 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · merge_intervals · próba 2 · 21.26 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def merge_intervals(intervals):
+    if not intervals:
+        return []
+    
+    # Validate and create a copy of valid intervals
+    valid = []
+    for interval in intervals:
+        if len(interval) != 2:
+            raise ValueError(&#34;Each interval must have exactly two elements&#34;)
+        start, end = interval
+        if start &gt; end:
+            raise ValueError(f&#34;Invalid interval: start ({start}) &gt; end ({end})&#34;)
+        valid.append([start, end])
+    
+    # Sort by start, then by end
+    valid.sort(key=lambda x: (x[0], x[1]))
+    
+    # Merge intervals
+    merged = []
+    for interval in valid:
+        start, end = interval
+        if not merged:
+            merged.append([start, end])
+        else:
+            last = merged[-1]
+            # Merge if overlapping or touching
+            if start &lt;= last[1]:
+                last[1] = max(last[1], end)
+            else:
+                merged.append([start, end])
+    
+    return merged</pre><p>Koniec: stop · tokeny: 240 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · csv_totals · próba 2 · 32.92 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import csv
+import io
+from decimal import Decimal, InvalidOperation
+
+
+def csv_totals(text: str) -&gt; dict[str, Decimal]:
+    reader = csv.DictReader(io.StringIO(text), fieldnames=None)
+    # Ensure header is exactly category,amount
+    header = reader.fieldnames
+    if header is None:
+        return {}
+    # Normalize header names (strip whitespace)
+    header = [h.strip() if h else h for h in header]
+    if header != [&#39;category&#39;, &#39;amount&#39;]:
+        # Try to find the right columns
+        if &#39;category&#39; not in header or &#39;amount&#39; not in header:
+            raise ValueError(&#34;CSV must have headers &#39;category&#39; and &#39;amount&#39;&#34;)
+    
+    totals: dict[str, Decimal] = {}
+    for row in reader:
+        # Skip empty rows (all values None or empty)
+        if row is None:
+            continue
+        # Check if row is empty
+        values = list(row.values())
+        if all(v is None or (isinstance(v, str) and v.strip() == &#39;&#39;) for v in values):
+            continue
+        
+        category = row.get(&#39;category&#39;)
+        amount_str = row.get(&#39;amount&#39;)
+        
+        if category is None or amount_str is None:
+            continue
+        
+        category = category.strip()
+        amount_str = amount_str.strip()
+        
+        if category == &#39;&#39; and amount_str == &#39;&#39;:
+            continue
+        
+        try:
+            amount = Decimal(amount_str)
+        except (InvalidOperation, ValueError) as e:
+            raise ValueError(f&#34;Invalid amount: {amount_str!r}&#34;) from e
+        
+        totals[category] = totals.get(category, Decimal(&#39;0&#39;)) + amount
+    
+    return totals</pre><p>Koniec: stop · tokeny: 374 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> qwen3.8:27b · unique_ordered · próba 2 · 12.89 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def unique_ordered(items):
+    &#34;&#34;&#34;
+    Usuwa duplikaty z listy, zachowując kolejność pierwszych wystąpień.
+    Obsługuje elementy niehashowalne (np. listy, słowniki).
+    Nie modyfikuje wejścia.
+    &#34;&#34;&#34;
+    seen = []
+    result = []
+    for item in items:
+        # Sprawdź, czy element już istnieje w &#39;seen&#39;
+        # Porównujemy przez równość (==), co działa dla niehashowalnych obiektów
+        if not any(item == s for s in seen):
+            seen.append(item)
+            result.append(item)
+    return result</pre><p>Koniec: stop · tokeny: 152 · pełna odpowiedź: True</p></details><details><summary><span class="fail">✗</span> devstral-small-2:24b · topological_sort · próba 1 · 70.72 s</summary><p>Traceback (most recent call last):
+  File &#34;&lt;stdin&gt;&#34;, line 9, in &lt;module&gt;
+  File &#34;checks.py&#34;, line 3, in &lt;module&gt;
+    assert topo_sort(g) == [&#39;a&#39;,&#39;b&#39;,&#39;c&#39;,&#39;d&#39;]
+           ^^^^^^^^^^^^
+  File &#34;candidate.py&#34;, line 33, in topo_sort
+    for v in graph_copy[u]:
+             ~~~~~~~~~~^^^
+KeyError: &#39;c&#39;</p><pre>def topo_sort(graph):
+    # Tworzymy kopię grafu, aby nie modyfikować oryginalnego
+    graph_copy = {u: list(v) for u, v in graph.items()}
+
+    # Znajdujemy wszystkie wierzchołki, które występują w grafie (jako klucze lub wartości)
+    all_nodes = set(graph_copy.keys())
+    for neighbors in graph_copy.values():
+        all_nodes.update(neighbors)
+
+    # Inicjalizujemy stopnie wejściowe
+    in_degree = {node: 0 for node in all_nodes}
+    for u in graph_copy:
+        for v in graph_copy[u]:
+            in_degree[v] += 1
+
+    # Inicjalizujemy kolejkę z wierzchołkami o stopniu wejściowym 0
+    queue = []
+    for node in all_nodes:
+        if in_degree[node] == 0:
+            queue.append(node)
+
+    # Sortujemy kolejkę leksykograficznie
+    queue.sort()
+
+    topo_order = []
+
+    while queue:
+        # Wybieramy leksykograficznie najmniejszy dostępny wierzchołek
+        u = queue.pop(0)
+        topo_order.append(u)
+
+        # Przeglądamy sąsiadów u
+        for v in graph_copy[u]:
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                queue.append(v)
+
+        # Sortujemy kolejkę, aby zachować leksykograficzny porządek
+        queue.sort()
+
+    # Sprawdzamy, czy wszystkie wierzchołki zostały uwzględnione
+    if len(topo_order) != len(all_nodes):
+        raise ValueError(&#34;Graph contains a cycle&#34;)
+
+    return topo_order</pre><p>Koniec: stop · tokeny: 397 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> devstral-small-2:24b · merge_intervals · próba 1 · 40.78 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def merge_intervals(intervals):
+    if not intervals:
+        return []
+
+    # Sprawdź poprawność przedziałów
+    for interval in intervals:
+        if len(interval) != 2:
+            raise ValueError(&#34;Each interval must have exactly two elements&#34;)
+        start, end = interval
+        if start &gt; end:
+            raise ValueError(&#34;Start must be less than or equal to end&#34;)
+
+    # Posortuj przedziały według początku
+    sorted_intervals = sorted(intervals, key=lambda x: x[0])
+    merged = []
+
+    for interval in sorted_intervals:
+        if not merged:
+            merged.append(list(interval))
+        else:
+            last_start, last_end = merged[-1]
+            current_start, current_end = interval
+
+            if current_start &lt;= last_end:
+                # Scal przedziały
+                new_start = last_start
+                new_end = max(last_end, current_end)
+                merged[-1] = [new_start, new_end]
+            else:
+                merged.append(list(interval))
+
+    return merged</pre><p>Koniec: stop · tokeny: 226 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> devstral-small-2:24b · csv_totals · próba 1 · 20.36 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import csv
+from decimal import Decimal, InvalidOperation
+
+def csv_totals(text):
+    totals = {}
+    reader = csv.DictReader(text.splitlines())
+    for row in reader:
+        if not row[&#39;amount&#39;].strip():
+            continue
+        try:
+            amount = Decimal(row[&#39;amount&#39;])
+        except InvalidOperation:
+            raise ValueError(&#34;Invalid amount value&#34;)
+        category = row[&#39;category&#39;]
+        totals[category] = totals.get(category, Decimal(0)) + amount
+    return totals</pre><p>Koniec: stop · tokeny: 109 · pełna odpowiedź: True</p></details><details><summary><span class="fail">✗</span> devstral-small-2:24b · deep_merge · próba 1 · 22.03 s</summary><p>Traceback (most recent call last):
+  File &#34;&lt;stdin&gt;&#34;, line 9, in &lt;module&gt;
+  File &#34;checks.py&#34;, line 8, in &lt;module&gt;
+    assert a == {&#39;x&#39;:{&#39;a&#39;:1,&#39;items&#39;:[1]},&#39;left&#39;:[{&#39;v&#39;:2}]}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError</p><pre>def deep_merge(a, b):
+    if not isinstance(a, dict) or not isinstance(b, dict):
+        return b
+
+    result = {}
+    all_keys = set(a.keys()) | set(b.keys())
+
+    for key in all_keys:
+        if key in b:
+            if key in a and isinstance(a[key], dict) and isinstance(b[key], dict):
+                result[key] = deep_merge(a[key], b[key])
+            else:
+                result[key] = b[key]
+        else:
+            result[key] = a[key]
+
+    return result</pre><p>Koniec: stop · tokeny: 119 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> devstral-small-2:24b · unique_ordered · próba 1 · 12.75 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def unique_ordered(items):
+    seen = []
+    result = []
+    for item in items:
+        found = False
+        for s in seen:
+            if s == item:
+                found = True
+                break
+        if not found:
+            seen.append(item)
+            result.append(item)
+    return result</pre><p>Koniec: stop · tokeny: 69 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> devstral-small-2:24b · lru_cache · próba 1 · 78.36 s</summary><p>Wszystkie asercje zaliczone.</p><pre>class LRUCache:
+    class Node:
+        def __init__(self, key=0, value=0):
+            self.key = key
+            self.value = value
+            self.prev = None
+            self.next = None
+
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;Capacity cannot be negative&#34;)
+        self.capacity = capacity
+        self.cache = {}
+        self.head = self.Node()  # dummy head
+        self.tail = self.Node()  # dummy tail
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def _add_node(self, node: Node) -&gt; None:
+        node.prev = self.head
+        node.next = self.head.next
+        self.head.next.prev = node
+        self.head.next = node
+
+    def _remove_node(self, node: Node) -&gt; None:
+        prev_node = node.prev
+        next_node = node.next
+        prev_node.next = next_node
+        next_node.prev = prev_node
+
+    def _move_to_head(self, node: Node) -&gt; None:
+        self._remove_node(node)
+        self._add_node(node)
+
+    def _pop_tail(self) -&gt; Node:
+        node = self.tail.prev
+        self._remove_node(node)
+        return node
+
+    def get(self, key: int) -&gt; int:
+        if key not in self.cache:
+            return -1
+        node = self.cache[key]
+        self._move_to_head(node)
+        return node.value
+
+    def put(self, key: int, value: int) -&gt; None:
+        if self.capacity == 0:
+            return
+        if key in self.cache:
+            node = self.cache[key]
+            node.value = value
+            self._move_to_head(node)
+        else:
+            node = self.Node(key, value)
+            self.cache[key] = node
+            self._add_node(node)
+            if len(self.cache) &gt; self.capacity:
+                tail = self._pop_tail()
+                del self.cache[tail.key]</pre><p>Koniec: stop · tokeny: 439 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> devstral-small-2:24b · lru_cache · próba 2 · 77.38 s</summary><p>Wszystkie asercje zaliczone.</p><pre>class LRUCache:
+    class Node:
+        def __init__(self, key=0, value=0):
+            self.key = key
+            self.value = value
+            self.prev = None
+            self.next = None
+
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;Capacity cannot be negative&#34;)
+        self.capacity = capacity
+        self.cache = {}
+        self.head = self.Node()  # dummy head
+        self.tail = self.Node()  # dummy tail
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def _add_node(self, node: Node) -&gt; None:
+        node.prev = self.head
+        node.next = self.head.next
+        self.head.next.prev = node
+        self.head.next = node
+
+    def _remove_node(self, node: Node) -&gt; None:
+        prev_node = node.prev
+        next_node = node.next
+        prev_node.next = next_node
+        next_node.prev = prev_node
+
+    def _move_to_head(self, node: Node) -&gt; None:
+        self._remove_node(node)
+        self._add_node(node)
+
+    def _pop_tail(self) -&gt; Node:
+        node = self.tail.prev
+        self._remove_node(node)
+        return node
+
+    def get(self, key: int) -&gt; int:
+        if key not in self.cache:
+            return -1
+        node = self.cache[key]
+        self._move_to_head(node)
+        return node.value
+
+    def put(self, key: int, value: int) -&gt; None:
+        if self.capacity == 0:
+            return
+        if key in self.cache:
+            node = self.cache[key]
+            node.value = value
+            self._move_to_head(node)
+        else:
+            node = self.Node(key, value)
+            self.cache[key] = node
+            self._add_node(node)
+            if len(self.cache) &gt; self.capacity:
+                tail = self._pop_tail()
+                del self.cache[tail.key]</pre><p>Koniec: stop · tokeny: 439 · pełna odpowiedź: True</p></details><details><summary><span class="fail">✗</span> devstral-small-2:24b · deep_merge · próba 2 · 25.00 s</summary><p>Traceback (most recent call last):
+  File &#34;&lt;stdin&gt;&#34;, line 9, in &lt;module&gt;
+  File &#34;checks.py&#34;, line 8, in &lt;module&gt;
+    assert a == {&#39;x&#39;:{&#39;a&#39;:1,&#39;items&#39;:[1]},&#39;left&#39;:[{&#39;v&#39;:2}]}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError</p><pre>def deep_merge(a, b):
+    if not isinstance(a, dict) or not isinstance(b, dict):
+        return b.copy() if isinstance(b, dict) else b
+
+    result = {}
+    all_keys = set(a.keys()) | set(b.keys())
+
+    for key in all_keys:
+        if key in a and key in b:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                result[key] = deep_merge(a[key], b[key])
+            else:
+                result[key] = b[key]
+        elif key in a:
+            result[key] = a[key]
+        else:
+            result[key] = b[key]
+
+    return result</pre><p>Koniec: stop · tokeny: 143 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> devstral-small-2:24b · topological_sort · próba 2 · 80.86 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def topo_sort(graph):
+    # Tworzymy kopię grafu, aby nie modyfikować oryginalnego
+    graph_copy = {u: list(v) for u, v in graph.items()}
+
+    # Znajdujemy wszystkie wierzchołki, które występują w grafie (jako klucze lub w listach sąsiadów)
+    all_nodes = set(graph_copy.keys())
+    for neighbors in graph_copy.values():
+        all_nodes.update(neighbors)
+
+    # Inicjalizujemy stopnie wejściowe dla wszystkich wierzchołków
+    in_degree = {node: 0 for node in all_nodes}
+    for u in graph_copy:
+        for v in graph_copy[u]:
+            in_degree[v] += 1
+
+    # Kolejka priorytetowa (używamy listy i sortujemy, ponieważ nie mamy heapq z priorytetem leksykograficznym)
+    available = []
+    for node in all_nodes:
+        if in_degree[node] == 0:
+            available.append(node)
+    available.sort()
+
+    topo_order = []
+
+    while available:
+        # Wybieramy leksykograficznie najmniejszy dostępny wierzchołek
+        u = available.pop(0)
+        topo_order.append(u)
+
+        # Przeglądamy sąsiadów u
+        for v in graph_copy.get(u, []):
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                # Wstawiamy v w odpowiednie miejsce, aby zachować kolejność leksykograficzną
+                inserted = False
+                for i in range(len(available)):
+                    if v &lt; available[i]:
+                        available.insert(i, v)
+                        inserted = True
+                        break
+                if not inserted:
+                    available.append(v)
+
+    # Sprawdzamy, czy wszystkie wierzchołki zostały uwzględnione (czy nie ma cyklu)
+    if len(topo_order) != len(all_nodes):
+        raise ValueError(&#34;Graph contains a cycle&#34;)
+
+    return topo_order</pre><p>Koniec: stop · tokeny: 459 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> devstral-small-2:24b · merge_intervals · próba 2 · 39.88 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def merge_intervals(intervals):
+    if not intervals:
+        return []
+
+    # Sprawdź poprawność przedziałów
+    for interval in intervals:
+        if len(interval) != 2:
+            raise ValueError(&#34;Each interval must have exactly two elements&#34;)
+        start, end = interval
+        if start &gt; end:
+            raise ValueError(&#34;Start must be less than or equal to end&#34;)
+
+    # Posortuj przedziały według początku
+    sorted_intervals = sorted(intervals, key=lambda x: x[0])
+    merged = []
+
+    for interval in sorted_intervals:
+        if not merged:
+            merged.append(list(interval))
+        else:
+            last_start, last_end = merged[-1]
+            current_start, current_end = interval
+
+            if current_start &lt;= last_end:
+                # Scal przedziały
+                new_start = last_start
+                new_end = max(last_end, current_end)
+                merged[-1] = [new_start, new_end]
+            else:
+                merged.append(list(interval))
+
+    return merged</pre><p>Koniec: stop · tokeny: 226 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> devstral-small-2:24b · csv_totals · próba 2 · 19.38 s</summary><p>Wszystkie asercje zaliczone.</p><pre>import csv
+from decimal import Decimal, InvalidOperation
+
+def csv_totals(text):
+    totals = {}
+    reader = csv.DictReader(text.splitlines())
+    for row in reader:
+        if not row[&#39;amount&#39;].strip():
+            continue
+        try:
+            amount = Decimal(row[&#39;amount&#39;])
+        except InvalidOperation:
+            raise ValueError(&#34;Invalid amount value&#34;)
+        category = row[&#39;category&#39;]
+        totals[category] = totals.get(category, Decimal(0)) + amount
+    return totals</pre><p>Koniec: stop · tokeny: 109 · pełna odpowiedź: True</p></details><details><summary><span class="pass">✓</span> devstral-small-2:24b · unique_ordered · próba 2 · 12.29 s</summary><p>Wszystkie asercje zaliczone.</p><pre>def unique_ordered(items):
+    seen = []
+    result = []
+    for item in items:
+        found = False
+        for s in seen:
+            if s == item:
+                found = True
+                break
+        if not found:
+            seen.append(item)
+            result.append(item)
+    return result</pre><p>Koniec: stop · tokeny: 69 · pełna odpowiedź: True</p></details>
+<h2>Pochodzenie i odtwarzalność</h2><p>Próby wyłączone z porównania i powtórzone z powodu równoległego użycia modeli: 4. Zachowano je w JSON.</p><p>Powtórzone błędy połączenia: 11. Pierwotne próby zachowano w JSON, poza tabelą końcowych ocen.</p><p><a href="results.json">Pobierz pełne wyniki JSON</a> · profil <code>allama benchmark</code> · zadania SHA256: <code>5a846dea6d01ae13723efb1cb10c4fb070c0bbe94734f23a14562a07828482a7</code></p><details><summary>gpt-oss:20b · metadane</summary><pre>{
+  "capabilities": [
+    "completion",
+    "tools",
+    "thinking"
+  ],
+  "details": {
+    "families": [
+      "gptoss"
+    ],
+    "family": "gptoss",
+    "format": "gguf",
+    "parameter_size": "20.9B",
+    "parent_model": "",
+    "quantization_level": "MXFP4"
+  },
+  "digest": "17052f91a42e97930aa6e28a6c6c06a983e6a58dbb00434885a0cf5313e376f7",
+  "loaded": {
+    "context_length": 8192,
+    "details": {
+      "families": [
+        "gptoss"
+      ],
+      "family": "gptoss",
+      "format": "gguf",
+      "parameter_size": "20.9B",
+      "parent_model": "",
+      "quantization_level": "MXFP4"
+    },
+    "digest": "17052f91a42e97930aa6e28a6c6c06a983e6a58dbb00434885a0cf5313e376f7",
+    "expires_at": "2026-10-08T22:37:36.117874637+02:00",
+    "model": "gpt-oss:20b",
+    "name": "gpt-oss:20b",
+    "size": 12854189096,
+    "size_vram": 12854189096
+  },
+  "parameters": "temperature                    1",
+  "speculative_decoding": false,
+  "think": "low",
+  "thinking_metadata": {
+    "default": "medium",
+    "values": [
+      "low",
+      "medium",
+      "high"
+    ]
+  },
+  "warmup": {
+    "completed": true,
+    "content": "",
+    "done_reason": "length",
+    "error": null,
+    "eval_count": 32,
+    "eval_duration": 1501766000,
+    "first_answer_s": null,
+    "first_token_s": 4.252361557009863,
+    "load_duration": 3400724635,
+    "prompt_eval_count": 128,
+    "prompt_eval_duration": 695842000,
+    "thinking": "User says \"Odpowiedz: OK\". Probably they want just \"OK\". But instruction says return only complete Python code block. But user",
+    "tokens_per_second": 21.308246424542837,
+    "total_duration": 5606375139,
+    "truncated": true,
+    "valid_answer": false,
+    "wall_s": 5.60774213600962
+  }
+}</pre></details><details><summary>qwen3.5:9b · metadane</summary><pre>{
+  "capabilities": [
+    "completion",
+    "vision",
+    "tools",
+    "thinking"
+  ],
+  "details": {
+    "families": [
+      "qwen35"
+    ],
+    "family": "qwen35",
+    "format": "gguf",
+    "parameter_size": "9.0B",
+    "parent_model": "model.gguf",
+    "quantization_level": "Q4_K_M"
+  },
+  "digest": "56671c2ab9385f9cfcb404638e32cd62d88e3501d44822208363c010179a3c90",
+  "loaded": {
+    "context_length": 8192,
+    "details": {
+      "families": [
+        "qwen35"
+      ],
+      "family": "qwen35",
+      "format": "gguf",
+      "parameter_size": "9.0B",
+      "parent_model": "",
+      "quantization_level": "Q4_K_M"
+    },
+    "digest": "56671c2ab9385f9cfcb404638e32cd62d88e3501d44822208363c010179a3c90",
+    "expires_at": "2026-10-08T22:40:43.466326856+02:00",
+    "model": "qwen3.5:9b",
+    "name": "qwen3.5:9b",
+    "size": 5845423226,
+    "size_vram": 5845423226
+  },
+  "parameters": "top_p                          0.95\npresence_penalty               1.5\ntemperature                    1\ntop_k                          20",
+  "speculative_decoding": false,
+  "think": false,
+  "thinking_metadata": {
+    "default": true,
+    "values": [
+      false,
+      true
+    ]
+  },
+  "warmup": {
+    "completed": true,
+    "content": "OK",
+    "done_reason": "stop",
+    "error": null,
+    "eval_count": 2,
+    "eval_duration": 71834000,
+    "first_answer_s": 5.137400944993715,
+    "first_token_s": 5.137400944993715,
+    "load_duration": 4585346438,
+    "prompt_eval_count": 68,
+    "prompt_eval_duration": 548944000,
+    "thinking": "",
+    "tokens_per_second": 27.841968984046552,
+    "total_duration": 5207570023,
+    "truncated": false,
+    "valid_answer": true,
+    "wall_s": 5.209004090997041
+  }
+}</pre></details><details><summary>gemma4:12b · metadane</summary><pre>{
+  "capabilities": [
+    "completion",
+    "vision",
+    "audio",
+    "tools",
+    "thinking"
+  ],
+  "details": {
+    "families": [
+      "gemma4"
+    ],
+    "family": "gemma4",
+    "format": "gguf",
+    "parameter_size": "11.9B",
+    "parent_model": "imatrix-20260927-12b/model-q4_K_M.gguf",
+    "quantization_level": "Q4_K_M"
+  },
+  "digest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+  "driver_memory": {
+    "after": [
+      {
+        "mem_info_gtt_total": 25145704448,
+        "mem_info_gtt_used": 1286193152,
+        "mem_info_vram_total": 17179869184,
+        "mem_info_vram_used": 9572577280,
+        "time": 1791492213.7047906
+      },
+      {
+        "mem_info_gtt_total": 25145704448,
+        "mem_info_gtt_used": 1286193152,
+        "mem_info_vram_total": 17179869184,
+        "mem_info_vram_used": 9572577280,
+        "time": 1791492214.4011104
+      },
+      {
+        "mem_info_gtt_total": 25145704448,
+        "mem_info_gtt_used": 1286193152,
+        "mem_info_vram_total": 17179869184,
+        "mem_info_vram_used": 9572577280,
+        "time": 1791492215.0919216
+      }
+    ],
+    "at": "2026-10-08T20:43:35.600584+00:00",
+    "before": [
+      {
+        "mem_info_gtt_total": 25145704448,
+        "mem_info_gtt_used": 24670208,
+        "mem_info_vram_total": 17179869184,
+        "mem_info_vram_used": 159428608,
+        "time": 1791492200.727612
+      },
+      {
+        "mem_info_gtt_total": 25145704448,
+        "mem_info_gtt_used": 24670208,
+        "mem_info_vram_total": 17179869184,
+        "mem_info_vram_used": 159428608,
+        "time": 1791492201.417798
+      },
+      {
+        "mem_info_gtt_total": 25145704448,
+        "mem_info_gtt_used": 24670208,
+        "mem_info_vram_total": 17179869184,
+        "mem_info_vram_used": 159428608,
+        "time": 1791492202.1079407
+      }
+    ],
+    "context": 8192,
+    "delta_gib": 9.94156265258789,
+    "device": "/sys/class/drm/card1/device",
+    "method": "AMD sysfs incremental VRAM+GTT allocation: median of 3 readings after load minus median of 3 idle readings; not process peak or total host RAM",
+    "model": "gemma4:12b",
+    "ollama_loaded": {
+      "context_length": 8192,
+      "details": {
+        "families": [
+          "gemma4"
+        ],
+        "family": "gemma4",
+        "format": "gguf",
+        "parameter_size": "11.9B",
+        "parent_model": "",
+        "quantization_level": "Q4_K_M"
+      },
+      "digest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "expires_at": "2026-10-08T23:13:33.512283142+02:00",
+      "model": "gemma4:12b",
+      "name": "gemma4:12b",
+      "size": 1334963076,
+      "size_vram": 1334963076
+    },
+    "sample_delta_range_gib": [
+      9.94156265258789,
+      9.94156265258789
+    ]
+  },
+  "gpu_weights_lower_bound_gib": 7.278193359375,
+  "loaded": {
+    "context_length": 8192,
+    "details": {
+      "families": [
+        "gemma4"
+      ],
+      "family": "gemma4",
+      "format": "gguf",
+      "parameter_size": "11.9B",
+      "parent_model": "",
+      "quantization_level": "Q4_K_M"
+    },
+    "digest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+    "expires_at": "2026-10-08T22:51:27.830911451+02:00",
+    "model": "gemma4:12b",
+    "name": "gemma4:12b",
+    "size": 1334963076,
+    "size_vram": 1334963076
+  },
+  "memory_warning": "API under-reports memory with MTP draft. Server logs show 7024.34 MiB main GPU weights plus 428.53 MiB draft GPU weights (7.278 GiB minimum, excluding KV and compute). Do not use API value as total footprint.",
+  "parameters": "top_p                          0.95\ndraft_num_predict              3\ntemperature                    1\ntop_k                          64",
+  "previous_loads": [
+    {
+      "capabilities": [
+        "completion",
+        "vision",
+        "audio",
+        "tools",
+        "thinking"
+      ],
+      "details": {
+        "families": [
+          "gemma4"
+        ],
+        "family": "gemma4",
+        "format": "gguf",
+        "parameter_size": "11.9B",
+        "parent_model": "imatrix-20260927-12b/model-q4_K_M.gguf",
+        "quantization_level": "Q4_K_M"
+      },
+      "digest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "loaded": {
+        "context_length": 8192,
+        "details": {
+          "families": [
+            "gemma4"
+          ],
+          "family": "gemma4",
+          "format": "gguf",
+          "parameter_size": "11.9B",
+          "parent_model": "",
+          "quantization_level": "Q4_K_M"
+        },
+        "digest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+        "expires_at": "2026-10-08T22:48:00.921345299+02:00",
+        "model": "gemma4:12b",
+        "name": "gemma4:12b",
+        "size": 1334963076,
+        "size_vram": 1334963076
+      },
+      "think": false,
+      "thinking_metadata": {
+        "default": true,
+        "values": [
+          false,
+          true
+        ]
+      },
+      "warmup": {
+        "completed": true,
+        "content": "```python\nprint(\"OK\")\n```",
+        "done_reason": "stop",
+        "error": null,
+        "eval_count": 10,
+        "eval_duration": 389746000,
+        "first_answer_s": 11.487378637000802,
+        "first_token_s": 11.487378637000802,
+        "load_duration": 10831576942,
+        "prompt_eval_count": 64,
+        "prompt_eval_duration": 649628000,
+        "thinking": "",
+        "tokens_per_second": 25.657736064000655,
+        "total_duration": 11875227123,
+        "truncated": false,
+        "valid_answer": true,
+        "wall_s": 11.877057709003566
+      }
+    }
+  ],
+  "speculative_decoding": true,
+  "think": false,
+  "thinking_metadata": {
+    "default": true,
+    "values": [
+      false,
+      true
+    ]
+  },
+  "warmup": {
+    "completed": true,
+    "content": "```python\nprint(\"OK\")\n```",
+    "done_reason": "stop",
+    "error": null,
+    "eval_count": 10,
+    "eval_duration": 408896000,
+    "first_answer_s": 4.611589756998001,
+    "first_token_s": 4.611589756998001,
+    "load_duration": 3922752013,
+    "prompt_eval_count": 64,
+    "prompt_eval_duration": 685844000,
+    "thinking": "",
+    "tokens_per_second": 24.45609641571451,
+    "total_duration": 5019113703,
+    "truncated": false,
+    "valid_answer": true,
+    "wall_s": 5.020528723995085
+  }
+}</pre></details><details><summary>qwen3.8:27b · metadane</summary><pre>{
+  "capabilities": [
+    "completion",
+    "vision",
+    "tools",
+    "thinking"
+  ],
+  "details": {
+    "families": [
+      "qwen35"
+    ],
+    "family": "qwen35",
+    "format": "gguf",
+    "parameter_size": "27.3B",
+    "parent_model": "qwen3.8:27b-q4_K_M",
+    "quantization_level": "Q4_K_M"
+  },
+  "digest": "aaee06c39dcf2437cde036998d960e1fc1494b8191be7cc9657d01e509097813",
+  "loaded": {
+    "context_length": 8192,
+    "details": {
+      "families": [
+        "qwen35"
+      ],
+      "family": "qwen35",
+      "format": "gguf",
+      "parameter_size": "27.3B",
+      "parent_model": "",
+      "quantization_level": "Q4_K_M"
+    },
+    "digest": "aaee06c39dcf2437cde036998d960e1fc1494b8191be7cc9657d01e509097813",
+    "expires_at": "2026-10-08T22:57:33.415346078+02:00",
+    "model": "qwen3.8:27b",
+    "name": "qwen3.8:27b",
+    "size": 17435386182,
+    "size_vram": 17435386182
+  },
+  "parameters": "presence_penalty               0\nrepeat_penalty                 1\ntemperature                    1\ntop_k                          20\ntop_p                          0.95\ndraft_num_predict              4\nmin_p                          0",
+  "previous_loads": [
+    {
+      "capabilities": [
+        "completion",
+        "vision",
+        "tools",
+        "thinking"
+      ],
+      "details": {
+        "families": [
+          "qwen35"
+        ],
+        "family": "qwen35",
+        "format": "gguf",
+        "parameter_size": "27.3B",
+        "parent_model": "qwen3.8:27b-q4_K_M",
+        "quantization_level": "Q4_K_M"
+      },
+      "digest": "aaee06c39dcf2437cde036998d960e1fc1494b8191be7cc9657d01e509097813",
+      "loaded": {
+        "context_length": 8192,
+        "details": {
+          "families": [
+            "qwen35"
+          ],
+          "family": "qwen35",
+          "format": "gguf",
+          "parameter_size": "27.3B",
+          "parent_model": "",
+          "quantization_level": "Q4_K_M"
+        },
+        "digest": "aaee06c39dcf2437cde036998d960e1fc1494b8191be7cc9657d01e509097813",
+        "expires_at": "2026-10-08T22:53:55.252359801+02:00",
+        "model": "qwen3.8:27b",
+        "name": "qwen3.8:27b",
+        "size": 17435386182,
+        "size_vram": 17435386182
+      },
+      "think": false,
+      "thinking_metadata": {
+        "default": "medium",
+        "values": [
+          false,
+          "low",
+          "medium",
+          "xhigh"
+        ]
+      },
+      "warmup": {
+        "completed": true,
+        "content": "```python\nprint(\"OK\")\n```",
+        "done_reason": "stop",
+        "error": null,
+        "eval_count": 10,
+        "eval_duration": 999595000,
+        "first_answer_s": 17.591686763000325,
+        "first_token_s": 17.591686763000325,
+        "load_duration": 16331390030,
+        "prompt_eval_count": 68,
+        "prompt_eval_duration": 1256732000,
+        "thinking": "",
+        "tokens_per_second": 10.00405164091457,
+        "total_duration": 18589932841,
+        "truncated": false,
+        "valid_answer": true,
+        "wall_s": 18.591351434006356
+      }
+    }
+  ],
+  "speculative_decoding": true,
+  "think": false,
+  "thinking_metadata": {
+    "default": "medium",
+    "values": [
+      false,
+      "low",
+      "medium",
+      "xhigh"
+    ]
+  },
+  "warmup": {
+    "completed": true,
+    "content": "```python\nprint(\"OK\")\n```",
+    "done_reason": "stop",
+    "error": null,
+    "eval_count": 10,
+    "eval_duration": 1052665999,
+    "first_answer_s": 18.03643701200781,
+    "first_token_s": 18.03643701200781,
+    "load_duration": 16734251802,
+    "prompt_eval_count": 68,
+    "prompt_eval_duration": 1298453000,
+    "thinking": "",
+    "tokens_per_second": 9.499689369182333,
+    "total_duration": 19087172607,
+    "truncated": false,
+    "valid_answer": true,
+    "wall_s": 19.089121351003996
+  }
+}</pre></details><details><summary>devstral-small-2:24b · metadane</summary><pre>{
+  "capabilities": [
+    "completion",
+    "vision",
+    "tools"
+  ],
+  "details": {
+    "families": [
+      "mistral3"
+    ],
+    "family": "mistral3",
+    "format": "gguf",
+    "parameter_size": "24.0B",
+    "parent_model": "",
+    "quantization_level": "Q4_K_M"
+  },
+  "digest": "24277f07f62db8f9cb68e9dfc679ea1818a7fbac47a50eff0a701d3f645b63c8",
+  "loaded": {
+    "context_length": 8192,
+    "details": {
+      "families": [
+        "mistral3"
+      ],
+      "family": "mistral3",
+      "format": "gguf",
+      "parameter_size": "24.0B",
+      "parent_model": "",
+      "quantization_level": "Q4_K_M"
+    },
+    "digest": "24277f07f62db8f9cb68e9dfc679ea1818a7fbac47a50eff0a701d3f645b63c8",
+    "expires_at": "2026-10-08T23:03:11.27378601+02:00",
+    "model": "devstral-small-2:24b",
+    "name": "devstral-small-2:24b",
+    "size": 15844434247,
+    "size_vram": 15844434247
+  },
+  "parameters": "temperature                    0.15",
+  "speculative_decoding": false,
+  "think": null,
+  "thinking_metadata": null,
+  "warmup": {
+    "completed": true,
+    "content": "```python\nprint(\"OK\")\n```",
+    "done_reason": "stop",
+    "error": null,
+    "eval_count": 9,
+    "eval_duration": 1415232000,
+    "first_answer_s": 14.413747608996346,
+    "first_token_s": 14.413747608996346,
+    "load_duration": 13651580339,
+    "prompt_eval_count": 56,
+    "prompt_eval_duration": 757243000,
+    "thinking": "",
+    "tokens_per_second": 6.359381359381359,
+    "total_duration": 15827516584,
+    "truncated": false,
+    "valid_answer": true,
+    "wall_s": 15.829184115005773
+  }
+}</pre></details><p class="footer">Start: 2026-10-08T20:07:30.489872+00:00 · Aktualizacja: 2026-10-08T20:43:35.834332+00:00 · Allama / PLF-001<br>Metryki API: <a href="https://docs.ollama.com/api/chat">Ollama chat</a> · <a href="https://docs.ollama.com/capabilities/thinking">Tryby myślenia</a></p>
+</main></body></html>

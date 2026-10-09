@@ -1,0 +1,64 @@
+{
+  "production_active": "active",
+  "production_enabled": "enabled",
+  "ollama_active": "inactive",
+  "ollama_enabled": "disabled",
+  "benchmark_active": "inactive",
+  "production_unit_sha256": "d04547adeb3ff97f356b867426faf5c169259fb92b40d785f1974febcd5f5452",
+  "temporary_dropin_exists": false,
+  "temporary_unit_exists": false,
+  "ollama_processes": "",
+  "smoke_prompt": {
+    "model": "gpt-oss-minis-code:20b",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Oblicz 2+2. Odpowiedz tylko cyfr\u0105."
+      }
+    ],
+    "temperature": 0,
+    "max_tokens": 128,
+    "reasoning_effort": "low",
+    "stream": false
+  },
+  "smoke_response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "4",
+          "reasoning_content": "Need to answer with digit only. 2+2=4."
+        }
+      }
+    ],
+    "created": 1791541439,
+    "model": "gpt-oss-minis-code:20b",
+    "system_fingerprint": "b11429-d81235049",
+    "object": "chat.completion",
+    "usage": {
+      "completion_tokens": 25,
+      "prompt_tokens": 83,
+      "total_tokens": 108,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "id": "chatcmpl-ATGrQ8mW2IJoyu0GtBgN5zQVRRaGiIbW",
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 83,
+      "prompt_ms": 687.784,
+      "prompt_per_token_ms": 8.28655421686747,
+      "prompt_per_second": 120.67742198131971,
+      "predicted_n": 25,
+      "predicted_ms": 838.289,
+      "predicted_per_token_ms": 34.92870833333333,
+      "predicted_per_second": 28.629744634606922
+    }
+  },
+  "production_tunnel_verified": true,
+  "web_interfaces_http200": true,
+  "verified_at": "2026-10-09T10:23:59.199434+00:00"
+}

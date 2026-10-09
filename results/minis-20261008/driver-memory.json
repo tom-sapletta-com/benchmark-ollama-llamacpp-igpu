@@ -1,0 +1,77 @@
+{
+  "model": "gemma4:12b",
+  "at": "2026-10-08T20:43:35.600584+00:00",
+  "method": "AMD sysfs incremental VRAM+GTT allocation: median of 3 readings after load minus median of 3 idle readings; not process peak or total host RAM",
+  "device": "/sys/class/drm/card1/device",
+  "context": 8192,
+  "before": [
+    {
+      "time": 1791492200.727612,
+      "mem_info_vram_used": 159428608,
+      "mem_info_vram_total": 17179869184,
+      "mem_info_gtt_used": 24670208,
+      "mem_info_gtt_total": 25145704448
+    },
+    {
+      "time": 1791492201.417798,
+      "mem_info_vram_used": 159428608,
+      "mem_info_vram_total": 17179869184,
+      "mem_info_gtt_used": 24670208,
+      "mem_info_gtt_total": 25145704448
+    },
+    {
+      "time": 1791492202.1079407,
+      "mem_info_vram_used": 159428608,
+      "mem_info_vram_total": 17179869184,
+      "mem_info_gtt_used": 24670208,
+      "mem_info_gtt_total": 25145704448
+    }
+  ],
+  "after": [
+    {
+      "time": 1791492213.7047906,
+      "mem_info_vram_used": 9572577280,
+      "mem_info_vram_total": 17179869184,
+      "mem_info_gtt_used": 1286193152,
+      "mem_info_gtt_total": 25145704448
+    },
+    {
+      "time": 1791492214.4011104,
+      "mem_info_vram_used": 9572577280,
+      "mem_info_vram_total": 17179869184,
+      "mem_info_gtt_used": 1286193152,
+      "mem_info_gtt_total": 25145704448
+    },
+    {
+      "time": 1791492215.0919216,
+      "mem_info_vram_used": 9572577280,
+      "mem_info_vram_total": 17179869184,
+      "mem_info_gtt_used": 1286193152,
+      "mem_info_gtt_total": 25145704448
+    }
+  ],
+  "delta_gib": 9.94156265258789,
+  "sample_delta_range_gib": [
+    9.94156265258789,
+    9.94156265258789
+  ],
+  "ollama_loaded": {
+    "name": "gemma4:12b",
+    "model": "gemma4:12b",
+    "size": 1334963076,
+    "digest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+    "details": {
+      "parent_model": "",
+      "format": "gguf",
+      "family": "gemma4",
+      "families": [
+        "gemma4"
+      ],
+      "parameter_size": "11.9B",
+      "quantization_level": "Q4_K_M"
+    },
+    "expires_at": "2026-10-08T23:13:33.512283142+02:00",
+    "size_vram": 1334963076,
+    "context_length": 8192
+  }
+}

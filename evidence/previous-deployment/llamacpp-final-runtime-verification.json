@@ -1,0 +1,18 @@
+{
+  "ticket": "PLF-17294",
+  "observed_at": "2026-10-09T09:14:49.373628+00:00",
+  "llamacpp_active": "active",
+  "llamacpp_enabled": "enabled",
+  "ollama_active": "inactive",
+  "ollama_enabled": "disabled",
+  "ollama_processes": "",
+  "health": {
+    "status": "ok"
+  },
+  "model_path": "/home/tom/.local/share/llama.cpp/models/gpt-oss-20b-official-MXFP4.gguf",
+  "slots": 1,
+  "model_sha256": "27cd6c432c7672cb812a92f611cf3ba7bbc35928262bb1e1253ff4ee6ae35901",
+  "vram_total_bytes": 17179869184,
+  "vram_used_bytes": 12083240960,
+  "unit": "# /etc/systemd/system/llamacpp-gpt-oss.service\n[Unit]\nDescription=GPT-OSS 20B on Radeon 780M through llama.cpp Vulkan\nAfter=network-online.target\nWants=network-online.target\nConflicts=ollama.service\n\n[Service]\nType=simple\nUser=tom\nSupplementaryGroups=render video\nWorkingDirectory=/home/tom/.local/lib/llama.cpp/releases/b11429/llama-b11429\nExecStart=/home/tom/.local/lib/llama.cpp/releases/b11429/llama-b11429/llama-server --model /home/tom/.local/share/llama.cpp/models/gpt-oss-20b-official-MXFP4.gguf --host 0.0.0.0 --port 11434 --alias gpt-oss-minis-code:20b --parallel 1 --ctx-size 16384 --n-predict 2048 --batch-size 512 --ubatch-size 128 --n-gpu-layers all --fit off --flash-attn on --jinja --reasoning-format auto --reasoning-effort medium --threads 8 --threads-batch 8 --offline\nRestart=on-failure\nRestartSec=10\nTimeoutStopSec=60\nNoNewPrivileges=true\nUMask=0077\n\n[Install]\nWantedBy=multi-user.target"
+}

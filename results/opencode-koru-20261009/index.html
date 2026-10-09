@@ -1,0 +1,1475 @@
+<!doctype html><html lang="pl"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>OpenCode · Gemma 12B vs GPT-OSS 20B · zadanie Koru</title>
+<style>body{font:16px system-ui;max-width:1200px;margin:32px auto;padding:20px;background:#10151b;color:#eaf1f8}h1{font-size:34px}a{color:#8ebaff}article{padding:20px;background:#1b232d;border-radius:12px;margin:20px 0}p{line-height:1.6}table{border-collapse:collapse;width:100%}td,th{padding:12px;text-align:left;border-bottom:1px solid #394553}.pass{color:#7beba7}.fail{color:#ff9393}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#10151b;padding:16px;border-radius:8px}summary{cursor:pointer;padding:10px}</style>
+<h1>OpenCode: Gemma 12B i GPT-OSS 20B</h1>
+<p>minis · Ollama · rzeczywiste zadanie Koru Planfile <strong>STARTER-614</strong> · status: complete</p>
+<article><h2>Refaktoryzacja strumienia logów SSE</h2><p>Historyczne zadanie z Planfile: zmniejszyć złożoność sse_log_stream, zachowując działanie. Odtwarzamy jeden moduł Koru z commitu f248f4e5331e75c242ef33f170447acf2a7f550d, sprzed istniejącej refaktoryzacji. Kod w bieżącym main Koru już zawiera tę zmianę; ten eksperyment nie zamyka zadania w kolejce.</p><p>Planfile podawał code2llm CC=25. Użyty Ruff mierzy w tym kodzie CC=19; próg akceptacji to ≤15 dla każdej funkcji. Dodatkowo: 16 niezmienionych testów modułu Koru i 8 osobnych testów zachowania, kontrola składni/lintu oraz zmiana dokładnie jednego pliku.</p></article>
+<table><thead><tr><th>Model / dokładny tag</th><th>Pełne zaliczenia</th><th>Czas próby</th><th>VRAM, szczyt sterownika</th><th>GTT, szczyt</th></tr></thead><tbody><tr><td>gemma4:12b</td><td>0/1</td><td>396.3 s</td><td>9.09 GiB</td><td>1.26 GiB</td></tr><tr><td>gpt-oss:20b</td><td>0/1</td><td>150.2 s</td><td>12.53 GiB</td><td>1.19 GiB</td></tr></tbody></table>
+<p>Dokładny tag gpt-oss:20b to wcześniejsze wagi MXFP4 + BF16, odrębne od produkcyjnego aliasu Q8. Gemma to lokalny tag gemma4:12b Q4_K_M; metadane i digest zapisano z serwera. To porównanie modeli i ich formatów wag, nie izolowany test kwantyzacji.</p>
+<table><thead><tr><th>Próba</th><th>Wynik</th><th>Testy</th><th>CC≤15</th><th>Pliki</th><th>Czas</th><th>API / narzędzia / błędy</th><th>Tokeny wyjścia API</th></tr></thead><tbody><tr><td>gemma4:12b #1</td><td class="fail">FAIL</td><td>24/24</td><td>FAIL</td><td>FAIL</td><td>396.3 s</td><td>4 / 3 / 0</td><td>8160</td></tr><tr><td>gpt-oss:20b #1</td><td class="fail">FAIL</td><td>18/24</td><td>OK</td><td>OK</td><td>150.2 s</td><td>8 / 7 / 1</td><td>2410</td></tr></tbody></table>
+<article><h2>gemma4:12b — próba 1</h2><details><summary>Przebieg pracy: narzędzia i końcowa odpowiedź</summary><pre>glob: {
+  "input": {
+    "pattern": "src/koruapi/dashboard_logs.py"
+  },
+  "metadata": {
+    "count": 1,
+    "truncated": false
+  },
+  "output": "/workspace/src/koruapi/dashboard_logs.py",
+  "status": "completed",
+  "time": {
+    "end": 1791560809499,
+    "start": 1791560808732
+  },
+  "title": "workspace"
+}</pre><pre>read: {
+  "input": {
+    "filePath": "/workspace/src/koruapi/dashboard_logs.py"
+  },
+  "metadata": {
+    "display": {
+      "lineEnd": 241,
+      "lineStart": 1,
+      "path": "/workspace/src/koruapi/dashboard_logs.py",
+      "text": "\"\"\"Log streaming endpoint for the koru dashboard.\n\nProvides a Server-Sent Events (SSE) endpoint that tails the structured\n``nfo-events.jsonl`` log and the autonomous cycle log, streaming entries\nwith severity levels (ERROR, WARNING, INFO, DEBUG) to the browser.\n\nSSE is used instead of WebSocket because it works with stdlib\u0027s\n``http.server`` without protocol upgrade, and log streaming is\nunidirectional (server \u2192 client).\n\"\"\"\n\nfrom __future__ import annotations\n\nimport ast\nimport json\nimport time\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _nfo_log_path(project: Path) -\u003e Path:\n    return project / \".planfile\" / \".koru\" / \"nfo-events.jsonl\"\n\n\ndef _autonomous_log_path(project: Path) -\u003e Path:\n    return project / \".planfile\" / \".koru\" / \"autonomous.log\"\n\n\ndef _parse_nfo_line(line: str) -\u003e dict[str, Any] | None:\n    \"\"\"Parse a single nfo-events.jsonl line into a structured log entry.\"\"\"\n    try:\n        record = json.loads(line)\n    except (json.JSONDecodeError, ValueError):\n        return None\n    if not isinstance(record, dict):\n        return None\n    level = str(record.get(\"level\", \"INFO\")).upper()\n    timestamp = record.get(\"timestamp\", \"\")\n    kwargs_raw = record.get(\"kwargs\", \"\")\n    message = \"\"\n    category = \"\"\n    if isinstance(kwargs_raw, str):\n        try:\n            kwargs = ast.literal_eval(kwargs_raw)\n        except Exception:  # noqa: BLE001\n            kwargs = {}\n    elif isinstance(kwargs_raw, dict):\n        kwargs = kwargs_raw\n    else:\n        kwargs = {}\n    if not isinstance(kwargs, dict):\n        kwargs = {}\n    message = str(kwargs.get(\"activity_message\", \"\") or \"\")\n    category = str(kwargs.get(\"category\", \"\") or \"\")\n    event = str(kwargs.get(\"event\", \"\") or \"\")\n    if not message:\n        message = f\"{event} {category}\".strip() or str(record.get(\"function_name\", \"\"))\n    return {\n        \"timestamp\": timestamp,\n        \"level\": level,\n        \"message\": message,\n        \"category\": category,\n        \"event\": event,\n        \"source\": \"nfo\",\n    }\n\n\ndef _parse_autonomous_log_line(line: str) -\u003e dict[str, Any] | None:\n    \"\"\"Parse a line from the autonomous log (plain text with optional level prefix).\"\"\"\n    line = line.strip()\n    if not line:\n        return None\n    level = \"INFO\"\n    upper = line.upper()\n    if upper.startswith(\"[ERROR]\") or \" ERROR \" in upper or \"\u2717\" in line:\n        level = \"ERROR\"\n    elif upper.startswith(\"[WARN\") or \" WARNING \" in upper or \"\u26a0\" in line:\n        level = \"WARNING\"\n    elif upper.startswith(\"[DEBUG]\") or \" DEBUG \" in upper:\n        level = \"DEBUG\"\n    return {\n        \"timestamp\": \"\",\n        \"level\": level,\n        \"message\": line,\n        \"category\": \"AUTONOMOUS\",\n        \"event\": \"\",\n        \"source\": \"autonomous\",\n    }\n\n\ndef read_recent_logs(project: Path, *, limit: int = 100) -\u003e list[dict[str, Any]]:\n    \"\"\"Return the most recent log entries from nfo-events.jsonl and autonomous log.\"\"\"\n    entries: list[dict[str, Any]] = []\n    nfo_path = _nfo_log_path(project)\n    if nfo_path.exists():\n        try:\n            lines = nfo_path.read_text(encoding=\"utf-8\", errors=\"ignore\").splitlines()\n            for line in lines[-limit:]:\n                entry = _parse_nfo_line(line)\n                if entry:\n                    entries.append(entry)\n        except OSError:\n            pass\n    auto_path = _autonomous_log_path(project)\n    if auto_path.exists():\n        try:\n            lines = auto_path.read_text(encoding=\"utf-8\", errors=\"ignore\").splitlines()\n            for line in lines[-limit:]:\n                entry = _parse_autonomous_log_line(line)\n                if entry:\n                    entries.append(entry)\n        except OSError:\n            pass\n    entries.sort(key=lambda e: e.get(\"timestamp\", \"\"))\n    return entries[-limit:]\n\n\ndef sse_log_stream(\n    project: Path,\n    *,\n    levels: set[str] | None = None,\n    poll_interval: float = 0.5,\n    max_events: int = 0,\n    stop_event: Any = None,\n) -\u003e str:\n    \"\"\"Yield SSE-formatted log events by tailing log files.\n\n    This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n    The caller should write them to the HTTP response.\n    \"\"\"\n    if levels is None:\n        levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n\n    nfo_path = _nfo_log_path(project)\n    auto_path = _autonomous_log_path(project)\n    nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n    auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n    events_sent = 0\n\n    # Send recent history first\n    for entry in read_recent_logs(project, limit=50):\n        if entry[\"level\"] in levels:\n            yield f\"data: {json.dumps(entry)}\\n\\n\"\n            events_sent += 1\n\n    while True:\n        if max_events and events_sent \u003e= max_events:\n            break\n        if stop_event is not None and stop_event.is_set():\n            break\n        # Check nfo log for new lines\n        if nfo_path.exists():\n            try:\n                current_size = nfo_path.stat().st_size\n                if current_size \u003c nfo_offset:\n                    nfo_offset = 0  # file was truncated/rotated\n                if current_size \u003e nfo_offset:\n                    with nfo_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                        f.seek(nfo_offset)\n                        for line in f:\n                            entry = _parse_nfo_line(line)\n                            if entry and entry[\"level\"] in levels:\n                                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                                events_sent += 1\n                        nfo_offset = f.tell()\n            except OSError:\n                pass\n        # Check autonomous log for new lines\n        if auto_path.exists():\n            try:\n                current_size = auto_path.stat().st_size\n                if current_size \u003c auto_offset:\n                    auto_offset = 0\n                if current_size \u003e auto_offset:\n                    with auto_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                        f.seek(auto_offset)\n                        for line in f:\n                            entry = _parse_autonomous_log_line(line)\n                            if entry and entry[\"level\"] in levels:\n                                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                                events_sent += 1\n                        auto_offset = f.tell()\n            except OSError:\n                pass\n        yield \": keepalive\\n\\n\"\n        time.sleep(poll_interval)\n\n\ndef handle_sse_logs_request(handler: Any, config: Any) -\u003e None:\n    \"\"\"Handle GET /api/logs/stream \u2014 SSE log streaming endpoint.\"\"\"\n    import urllib.parse\n\n    parsed = urllib.parse.urlparse(handler.path)\n    qs = urllib.parse.parse_qs(parsed.query)\n    level_param = qs.get(\"level\", [\"\"])[0].upper()\n    limit_param = qs.get(\"limit\", [\"100\"])[0]\n    try:\n        limit = int(limit_param)\n    except ValueError:\n        limit = 100\n\n    if level_param and level_param != \"ALL\":\n        levels = {level.strip() for level in level_param.split(\",\") if level.strip()}\n    else:\n        levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n\n    project = handler._selected_project()\n\n    handler.send_response(200)\n    handler.send_header(\"Content-Type\", \"text/event-stream\")\n    handler.send_header(\"Cache-Control\", \"no-cache\")\n    handler.send_header(\"Connection\", \"keep-alive\")\n    handler.send_header(\"Access-Control-Allow-Origin\", \"*\")\n    handler.end_headers()\n\n    try:\n        stop_event = getattr(handler.server, \"shutdown_event\", None)\n        for chunk in sse_log_stream(\n            project, levels=levels, max_events=limit, stop_event=stop_event\n        ):\n            handler.wfile.write(chunk.encode(\"utf-8\"))\n            handler.wfile.flush()\n    except (BrokenPipeError, ConnectionResetError):\n        pass\n\n\ndef handle_logs_json_request(handler: Any, config: Any) -\u003e None:\n    \"\"\"Handle GET /api/logs \u2014 return recent log entries as JSON.\"\"\"\n    import urllib.parse\n\n    parsed = urllib.parse.urlparse(handler.path)\n    qs = urllib.parse.parse_qs(parsed.query)\n    limit_param = qs.get(\"limit\", [\"100\"])[0]\n    try:\n        limit = int(limit_param)\n    except ValueError:\n        limit = 100\n\n    project = handler._selected_project()\n    entries = read_recent_logs(project, limit=limit)\n    handler._send_json({\"logs\": entries, \"ok\": True})",
+      "totalLines": 241,
+      "truncated": false,
+      "type": "file"
+    },
+    "loaded": [],
+    "preview": "\"\"\"Log streaming endpoint for the koru dashboard.\n\nProvides a Server-Sent Events (SSE) endpoint that tails the structured\n``nfo-events.jsonl`` log and the autonomous cycle log, streaming entries\nwith severity levels (ERROR, WARNING, INFO, DEBUG) to the browser.\n\nSSE is used instead of WebSocket because it works with stdlib\u0027s\n``http.server`` without protocol upgrade, and log streaming is\nunidirectional (server \u2192 client).\n\"\"\"\n\nfrom __future__ import annotations\n\nimport ast\nimport json\nimport time\nfrom pathlib import Path\nfrom typing import Any\n\n",
+    "truncated": false
+  },
+  "output": "\u003cpath\u003e/workspace/src/koruapi/dashboard_logs.py\u003c/path\u003e\n\u003ctype\u003efile\u003c/type\u003e\n\u003ccontent\u003e\n1: \"\"\"Log streaming endpoint for the koru dashboard.\n2: \n3: Provides a Server-Sent Events (SSE) endpoint that tails the structured\n4: ``nfo-events.jsonl`` log and the autonomous cycle log, streaming entries\n5: with severity levels (ERROR, WARNING, INFO, DEBUG) to the browser.\n6: \n7: SSE is used instead of WebSocket because it works with stdlib\u0027s\n8: ``http.server`` without protocol upgrade, and log streaming is\n9: unidirectional (server \u2192 client).\n10: \"\"\"\n11: \n12: from __future__ import annotations\n13: \n14: import ast\n15: import json\n16: import time\n17: from pathlib import Path\n18: from typing import Any\n19: \n20: \n21: def _nfo_log_path(project: Path) -\u003e Path:\n22:     return project / \".planfile\" / \".koru\" / \"nfo-events.jsonl\"\n23: \n24: \n25: def _autonomous_log_path(project: Path) -\u003e Path:\n26:     return project / \".planfile\" / \".koru\" / \"autonomous.log\"\n27: \n28: \n29: def _parse_nfo_line(line: str) -\u003e dict[str, Any] | None:\n30:     \"\"\"Parse a single nfo-events.jsonl line into a structured log entry.\"\"\"\n31:     try:\n32:         record = json.loads(line)\n33:     except (json.JSONDecodeError, ValueError):\n34:         return None\n35:     if not isinstance(record, dict):\n36:         return None\n37:     level = str(record.get(\"level\", \"INFO\")).upper()\n38:     timestamp = record.get(\"timestamp\", \"\")\n39:     kwargs_raw = record.get(\"kwargs\", \"\")\n40:     message = \"\"\n41:     category = \"\"\n42:     if isinstance(kwargs_raw, str):\n43:         try:\n44:             kwargs = ast.literal_eval(kwargs_raw)\n45:         except Exception:  # noqa: BLE001\n46:             kwargs = {}\n47:     elif isinstance(kwargs_raw, dict):\n48:         kwargs = kwargs_raw\n49:     else:\n50:         kwargs = {}\n51:     if not isinstance(kwargs, dict):\n52:         kwargs = {}\n53:     message = str(kwargs.get(\"activity_message\", \"\") or \"\")\n54:     category = str(kwargs.get(\"category\", \"\") or \"\")\n55:     event = str(kwargs.get(\"event\", \"\") or \"\")\n56:     if not message:\n57:         message = f\"{event} {category}\".strip() or str(record.get(\"function_name\", \"\"))\n58:     return {\n59:         \"timestamp\": timestamp,\n60:         \"level\": level,\n61:         \"message\": message,\n62:         \"category\": category,\n63:         \"event\": event,\n64:         \"source\": \"nfo\",\n65:     }\n66: \n67: \n68: def _parse_autonomous_log_line(line: str) -\u003e dict[str, Any] | None:\n69:     \"\"\"Parse a line from the autonomous log (plain text with optional level prefix).\"\"\"\n70:     line = line.strip()\n71:     if not line:\n72:         return None\n73:     level = \"INFO\"\n74:     upper = line.upper()\n75:     if upper.startswith(\"[ERROR]\") or \" ERROR \" in upper or \"\u2717\" in line:\n76:         level = \"ERROR\"\n77:     elif upper.startswith(\"[WARN\") or \" WARNING \" in upper or \"\u26a0\" in line:\n78:         level = \"WARNING\"\n79:     elif upper.startswith(\"[DEBUG]\") or \" DEBUG \" in upper:\n80:         level = \"DEBUG\"\n81:     return {\n82:         \"timestamp\": \"\",\n83:         \"level\": level,\n84:         \"message\": line,\n85:         \"category\": \"AUTONOMOUS\",\n86:         \"event\": \"\",\n87:         \"source\": \"autonomous\",\n88:     }\n89: \n90: \n91: def read_recent_logs(project: Path, *, limit: int = 100) -\u003e list[dict[str, Any]]:\n92:     \"\"\"Return the most recent log entries from nfo-events.jsonl and autonomous log.\"\"\"\n93:     entries: list[dict[str, Any]] = []\n94:     nfo_path = _nfo_log_path(project)\n95:     if nfo_path.exists():\n96:         try:\n97:             lines = nfo_path.read_text(encoding=\"utf-8\", errors=\"ignore\").splitlines()\n98:             for line in lines[-limit:]:\n99:                 entry = _parse_nfo_line(line)\n100:                 if entry:\n101:                     entries.append(entry)\n102:         except OSError:\n103:             pass\n104:     auto_path = _autonomous_log_path(project)\n105:     if auto_path.exists():\n106:         try:\n107:             lines = auto_path.read_text(encoding=\"utf-8\", errors=\"ignore\").splitlines()\n108:             for line in lines[-limit:]:\n109:                 entry = _parse_autonomous_log_line(line)\n110:                 if entry:\n111:                     entries.append(entry)\n112:         except OSError:\n113:             pass\n114:     entries.sort(key=lambda e: e.get(\"timestamp\", \"\"))\n115:     return entries[-limit:]\n116: \n117: \n118: def sse_log_stream(\n119:     project: Path,\n120:     *,\n121:     levels: set[str] | None = None,\n122:     poll_interval: float = 0.5,\n123:     max_events: int = 0,\n124:     stop_event: Any = None,\n125: ) -\u003e str:\n126:     \"\"\"Yield SSE-formatted log events by tailing log files.\n127: \n128:     This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n129:     The caller should write them to the HTTP response.\n130:     \"\"\"\n131:     if levels is None:\n132:         levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n133: \n134:     nfo_path = _nfo_log_path(project)\n135:     auto_path = _autonomous_log_path(project)\n136:     nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n137:     auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n138:     events_sent = 0\n139: \n140:     # Send recent history first\n141:     for entry in read_recent_logs(project, limit=50):\n142:         if entry[\"level\"] in levels:\n143:             yield f\"data: {json.dumps(entry)}\\n\\n\"\n144:             events_sent += 1\n145: \n146:     while True:\n147:         if max_events and events_sent \u003e= max_events:\n148:             break\n149:         if stop_event is not None and stop_event.is_set():\n150:             break\n151:         # Check nfo log for new lines\n152:         if nfo_path.exists():\n153:             try:\n154:                 current_size = nfo_path.stat().st_size\n155:                 if current_size \u003c nfo_offset:\n156:                     nfo_offset = 0  # file was truncated/rotated\n157:                 if current_size \u003e nfo_offset:\n158:                     with nfo_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n159:                         f.seek(nfo_offset)\n160:                         for line in f:\n161:                             entry = _parse_nfo_line(line)\n162:                             if entry and entry[\"level\"] in levels:\n163:                                 yield f\"data: {json.dumps(entry)}\\n\\n\"\n164:                                 events_sent += 1\n165:                         nfo_offset = f.tell()\n166:             except OSError:\n167:                 pass\n168:         # Check autonomous log for new lines\n169:         if auto_path.exists():\n170:             try:\n171:                 current_size = auto_path.stat().st_size\n172:                 if current_size \u003c auto_offset:\n173:                     auto_offset = 0\n174:                 if current_size \u003e auto_offset:\n175:                     with auto_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n176:                         f.seek(auto_offset)\n177:                         for line in f:\n178:                             entry = _parse_autonomous_log_line(line)\n179:                             if entry and entry[\"level\"] in levels:\n180:                                 yield f\"data: {json.dumps(entry)}\\n\\n\"\n181:                                 events_sent += 1\n182:                         auto_offset = f.tell()\n183:             except OSError:\n184:                 pass\n185:         yield \": keepalive\\n\\n\"\n186:         time.sleep(poll_interval)\n187: \n188: \n189: def handle_sse_logs_request(handler: Any, config: Any) -\u003e None:\n190:     \"\"\"Handle GET /api/logs/stream \u2014 SSE log streaming endpoint.\"\"\"\n191:     import urllib.parse\n192: \n193:     parsed = urllib.parse.urlparse(handler.path)\n194:     qs = urllib.parse.parse_qs(parsed.query)\n195:     level_param = qs.get(\"level\", [\"\"])[0].upper()\n196:     limit_param = qs.get(\"limit\", [\"100\"])[0]\n197:     try:\n198:         limit = int(limit_param)\n199:     except ValueError:\n200:         limit = 100\n201: \n202:     if level_param and level_param != \"ALL\":\n203:         levels = {level.strip() for level in level_param.split(\",\") if level.strip()}\n204:     else:\n205:         levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n206: \n207:     project = handler._selected_project()\n208: \n209:     handler.send_response(200)\n210:     handler.send_header(\"Content-Type\", \"text/event-stream\")\n211:     handler.send_header(\"Cache-Control\", \"no-cache\")\n212:     handler.send_header(\"Connection\", \"keep-alive\")\n213:     handler.send_header(\"Access-Control-Allow-Origin\", \"*\")\n214:     handler.end_headers()\n215: \n216:     try:\n217:         stop_event = getattr(handler.server, \"shutdown_event\", None)\n218:         for chunk in sse_log_stream(\n219:             project, levels=levels, max_events=limit, stop_event=stop_event\n220:         ):\n221:             handler.wfile.write(chunk.encode(\"utf-8\"))\n222:             handler.wfile.flush()\n223:     except (BrokenPipeError, ConnectionResetError):\n224:         pass\n225: \n226: \n227: def handle_logs_json_request(handler: Any, config: Any) -\u003e None:\n228:     \"\"\"Handle GET /api/logs \u2014 return recent log entries as JSON.\"\"\"\n229:     import urllib.parse\n230: \n231:     parsed = urllib.parse.urlparse(handler.path)\n232:     qs = urllib.parse.parse_qs(parsed.query)\n233:     limit_param = qs.get(\"limit\", [\"100\"])[0]\n234:     try:\n235:         limit = int(limit_param)\n236:     except ValueError:\n237:         limit = 100\n238: \n239:     project = handler._selected_project()\n240:     entries = read_recent_logs(project, limit=limit)\n241:     handler._send_json({\"logs\": entries, \"ok\": True})\n\n(End of file - total 241 lines)\n\u003c/content\u003e",
+  "status": "completed",
+  "time": {
+    "end": 1791560815253,
+    "start": 1791560815245
+  },
+  "title": "workspace/src/koruapi/dashboard_logs.py"
+}</pre><pre>bash: {
+  "input": {
+    "command": "ruff check src/koruapi/dashboard_logs.py --select C901 --config lint.mccabe.max-complexity=15 --no-cache",
+    "description": "Check current cyclomatic complexity of dashboard_logs.py"
+  },
+  "metadata": {
+    "description": "Check current cyclomatic complexity of dashboard_logs.py",
+    "exit": 1,
+    "output": "C901 `sse_log_stream` is too complex (19 \u003e 15)\n   --\u003e src/koruapi/dashboard_logs.py:118:5\n    |\n118 | def sse_log_stream(\n    |     ^^^^^^^^^^^^^^\n119 |     project: Path,\n120 |     *,\n    |\n\nFound 1 error.\n",
+    "truncated": false
+  },
+  "output": "C901 `sse_log_stream` is too complex (19 \u003e 15)\n   --\u003e src/koruapi/dashboard_logs.py:118:5\n    |\n118 | def sse_log_stream(\n    |     ^^^^^^^^^^^^^^\n119 |     project: Path,\n120 |     *,\n    |\n\nFound 1 error.\n",
+  "status": "completed",
+  "time": {
+    "end": 1791560997056,
+    "start": 1791560997049
+  },
+  "title": "Check current cyclomatic complexity of dashboard_logs.py"
+}</pre></details><details><summary>Diff i pełny kod</summary><p>Agent nie zmienił kodu. Zachowanie 24/24 testów bazowych nie oznacza wykonania refaktoryzacji.</p><pre></pre><pre>&#34;&#34;&#34;Log streaming endpoint for the koru dashboard.
+
+Provides a Server-Sent Events (SSE) endpoint that tails the structured
+``nfo-events.jsonl`` log and the autonomous cycle log, streaming entries
+with severity levels (ERROR, WARNING, INFO, DEBUG) to the browser.
+
+SSE is used instead of WebSocket because it works with stdlib&#39;s
+``http.server`` without protocol upgrade, and log streaming is
+unidirectional (server → client).
+&#34;&#34;&#34;
+
+from __future__ import annotations
+
+import ast
+import json
+import time
+from pathlib import Path
+from typing import Any
+
+
+def _nfo_log_path(project: Path) -&gt; Path:
+    return project / &#34;.planfile&#34; / &#34;.koru&#34; / &#34;nfo-events.jsonl&#34;
+
+
+def _autonomous_log_path(project: Path) -&gt; Path:
+    return project / &#34;.planfile&#34; / &#34;.koru&#34; / &#34;autonomous.log&#34;
+
+
+def _parse_nfo_line(line: str) -&gt; dict[str, Any] | None:
+    &#34;&#34;&#34;Parse a single nfo-events.jsonl line into a structured log entry.&#34;&#34;&#34;
+    try:
+        record = json.loads(line)
+    except (json.JSONDecodeError, ValueError):
+        return None
+    if not isinstance(record, dict):
+        return None
+    level = str(record.get(&#34;level&#34;, &#34;INFO&#34;)).upper()
+    timestamp = record.get(&#34;timestamp&#34;, &#34;&#34;)
+    kwargs_raw = record.get(&#34;kwargs&#34;, &#34;&#34;)
+    message = &#34;&#34;
+    category = &#34;&#34;
+    if isinstance(kwargs_raw, str):
+        try:
+            kwargs = ast.literal_eval(kwargs_raw)
+        except Exception:  # noqa: BLE001
+            kwargs = {}
+    elif isinstance(kwargs_raw, dict):
+        kwargs = kwargs_raw
+    else:
+        kwargs = {}
+    if not isinstance(kwargs, dict):
+        kwargs = {}
+    message = str(kwargs.get(&#34;activity_message&#34;, &#34;&#34;) or &#34;&#34;)
+    category = str(kwargs.get(&#34;category&#34;, &#34;&#34;) or &#34;&#34;)
+    event = str(kwargs.get(&#34;event&#34;, &#34;&#34;) or &#34;&#34;)
+    if not message:
+        message = f&#34;{event} {category}&#34;.strip() or str(record.get(&#34;function_name&#34;, &#34;&#34;))
+    return {
+        &#34;timestamp&#34;: timestamp,
+        &#34;level&#34;: level,
+        &#34;message&#34;: message,
+        &#34;category&#34;: category,
+        &#34;event&#34;: event,
+        &#34;source&#34;: &#34;nfo&#34;,
+    }
+
+
+def _parse_autonomous_log_line(line: str) -&gt; dict[str, Any] | None:
+    &#34;&#34;&#34;Parse a line from the autonomous log (plain text with optional level prefix).&#34;&#34;&#34;
+    line = line.strip()
+    if not line:
+        return None
+    level = &#34;INFO&#34;
+    upper = line.upper()
+    if upper.startswith(&#34;[ERROR]&#34;) or &#34; ERROR &#34; in upper or &#34;✗&#34; in line:
+        level = &#34;ERROR&#34;
+    elif upper.startswith(&#34;[WARN&#34;) or &#34; WARNING &#34; in upper or &#34;⚠&#34; in line:
+        level = &#34;WARNING&#34;
+    elif upper.startswith(&#34;[DEBUG]&#34;) or &#34; DEBUG &#34; in upper:
+        level = &#34;DEBUG&#34;
+    return {
+        &#34;timestamp&#34;: &#34;&#34;,
+        &#34;level&#34;: level,
+        &#34;message&#34;: line,
+        &#34;category&#34;: &#34;AUTONOMOUS&#34;,
+        &#34;event&#34;: &#34;&#34;,
+        &#34;source&#34;: &#34;autonomous&#34;,
+    }
+
+
+def read_recent_logs(project: Path, *, limit: int = 100) -&gt; list[dict[str, Any]]:
+    &#34;&#34;&#34;Return the most recent log entries from nfo-events.jsonl and autonomous log.&#34;&#34;&#34;
+    entries: list[dict[str, Any]] = []
+    nfo_path = _nfo_log_path(project)
+    if nfo_path.exists():
+        try:
+            lines = nfo_path.read_text(encoding=&#34;utf-8&#34;, errors=&#34;ignore&#34;).splitlines()
+            for line in lines[-limit:]:
+                entry = _parse_nfo_line(line)
+                if entry:
+                    entries.append(entry)
+        except OSError:
+            pass
+    auto_path = _autonomous_log_path(project)
+    if auto_path.exists():
+        try:
+            lines = auto_path.read_text(encoding=&#34;utf-8&#34;, errors=&#34;ignore&#34;).splitlines()
+            for line in lines[-limit:]:
+                entry = _parse_autonomous_log_line(line)
+                if entry:
+                    entries.append(entry)
+        except OSError:
+            pass
+    entries.sort(key=lambda e: e.get(&#34;timestamp&#34;, &#34;&#34;))
+    return entries[-limit:]
+
+
+def sse_log_stream(
+    project: Path,
+    *,
+    levels: set[str] | None = None,
+    poll_interval: float = 0.5,
+    max_events: int = 0,
+    stop_event: Any = None,
+) -&gt; str:
+    &#34;&#34;&#34;Yield SSE-formatted log events by tailing log files.
+
+    This is a generator that yields ``data: &lt;json&gt;\\n\\n`` strings.
+    The caller should write them to the HTTP response.
+    &#34;&#34;&#34;
+    if levels is None:
+        levels = {&#34;ERROR&#34;, &#34;WARNING&#34;, &#34;INFO&#34;, &#34;DEBUG&#34;}
+
+    nfo_path = _nfo_log_path(project)
+    auto_path = _autonomous_log_path(project)
+    nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0
+    auto_offset = auto_path.stat().st_size if auto_path.exists() else 0
+    events_sent = 0
+
+    # Send recent history first
+    for entry in read_recent_logs(project, limit=50):
+        if entry[&#34;level&#34;] in levels:
+            yield f&#34;data: {json.dumps(entry)}\n\n&#34;
+            events_sent += 1
+
+    while True:
+        if max_events and events_sent &gt;= max_events:
+            break
+        if stop_event is not None and stop_event.is_set():
+            break
+        # Check nfo log for new lines
+        if nfo_path.exists():
+            try:
+                current_size = nfo_path.stat().st_size
+                if current_size &lt; nfo_offset:
+                    nfo_offset = 0  # file was truncated/rotated
+                if current_size &gt; nfo_offset:
+                    with nfo_path.open(&#34;r&#34;, encoding=&#34;utf-8&#34;, errors=&#34;ignore&#34;) as f:
+                        f.seek(nfo_offset)
+                        for line in f:
+                            entry = _parse_nfo_line(line)
+                            if entry and entry[&#34;level&#34;] in levels:
+                                yield f&#34;data: {json.dumps(entry)}\n\n&#34;
+                                events_sent += 1
+                        nfo_offset = f.tell()
+            except OSError:
+                pass
+        # Check autonomous log for new lines
+        if auto_path.exists():
+            try:
+                current_size = auto_path.stat().st_size
+                if current_size &lt; auto_offset:
+                    auto_offset = 0
+                if current_size &gt; auto_offset:
+                    with auto_path.open(&#34;r&#34;, encoding=&#34;utf-8&#34;, errors=&#34;ignore&#34;) as f:
+                        f.seek(auto_offset)
+                        for line in f:
+                            entry = _parse_autonomous_log_line(line)
+                            if entry and entry[&#34;level&#34;] in levels:
+                                yield f&#34;data: {json.dumps(entry)}\n\n&#34;
+                                events_sent += 1
+                        auto_offset = f.tell()
+            except OSError:
+                pass
+        yield &#34;: keepalive\n\n&#34;
+        time.sleep(poll_interval)
+
+
+def handle_sse_logs_request(handler: Any, config: Any) -&gt; None:
+    &#34;&#34;&#34;Handle GET /api/logs/stream — SSE log streaming endpoint.&#34;&#34;&#34;
+    import urllib.parse
+
+    parsed = urllib.parse.urlparse(handler.path)
+    qs = urllib.parse.parse_qs(parsed.query)
+    level_param = qs.get(&#34;level&#34;, [&#34;&#34;])[0].upper()
+    limit_param = qs.get(&#34;limit&#34;, [&#34;100&#34;])[0]
+    try:
+        limit = int(limit_param)
+    except ValueError:
+        limit = 100
+
+    if level_param and level_param != &#34;ALL&#34;:
+        levels = {level.strip() for level in level_param.split(&#34;,&#34;) if level.strip()}
+    else:
+        levels = {&#34;ERROR&#34;, &#34;WARNING&#34;, &#34;INFO&#34;, &#34;DEBUG&#34;}
+
+    project = handler._selected_project()
+
+    handler.send_response(200)
+    handler.send_header(&#34;Content-Type&#34;, &#34;text/event-stream&#34;)
+    handler.send_header(&#34;Cache-Control&#34;, &#34;no-cache&#34;)
+    handler.send_header(&#34;Connection&#34;, &#34;keep-alive&#34;)
+    handler.send_header(&#34;Access-Control-Allow-Origin&#34;, &#34;*&#34;)
+    handler.end_headers()
+
+    try:
+        stop_event = getattr(handler.server, &#34;shutdown_event&#34;, None)
+        for chunk in sse_log_stream(
+            project, levels=levels, max_events=limit, stop_event=stop_event
+        ):
+            handler.wfile.write(chunk.encode(&#34;utf-8&#34;))
+            handler.wfile.flush()
+    except (BrokenPipeError, ConnectionResetError):
+        pass
+
+
+def handle_logs_json_request(handler: Any, config: Any) -&gt; None:
+    &#34;&#34;&#34;Handle GET /api/logs — return recent log entries as JSON.&#34;&#34;&#34;
+    import urllib.parse
+
+    parsed = urllib.parse.urlparse(handler.path)
+    qs = urllib.parse.parse_qs(parsed.query)
+    limit_param = qs.get(&#34;limit&#34;, [&#34;100&#34;])[0]
+    try:
+        limit = int(limit_param)
+    except ValueError:
+        limit = 100
+
+    project = handler._selected_project()
+    entries = read_recent_logs(project, limit=limit)
+    handler._send_json({&#34;logs&#34;: entries, &#34;ok&#34;: True})
+</pre></details><details><summary>Weryfikacja niezależna od odpowiedzi modelu</summary><pre>{
+  "complexity_findings": [
+    {
+      "cell": null,
+      "code": "C901",
+      "end_location": {
+        "column": 19,
+        "row": 118
+      },
+      "filename": "/workspace/src/koruapi/dashboard_logs.py",
+      "fix": null,
+      "location": {
+        "column": 5,
+        "row": 118
+      },
+      "message": "`sse_log_stream` is too complex (19 \u003e 15)",
+      "noqa_row": 118,
+      "url": "https://docs.astral.sh/ruff/rules/complex-structure"
+    }
+  ],
+  "complexity_passed": false,
+  "lint_findings": [],
+  "lint_passed": true,
+  "static_metrics": {
+    "documented_functions": 6,
+    "functions": 8,
+    "max_function_lines": 69
+  },
+  "syntax_passed": true,
+  "test_exit": 0,
+  "test_output": "........................                                                 [100%]\n24 passed in 0.04s\n",
+  "test_summary": {
+    "collected": 24,
+    "passed": 24,
+    "total": 24
+  },
+  "tests": [
+    {
+      "call": {
+        "duration": 0.00012567598605528474,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_valid_nfo_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 6.829795893281698e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_invalid_json",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 5.5684009566903114e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_empty_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 7.745600305497646e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_error_level",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 7.118296343833208e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_missing_message_falls_back_to_function_name",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 5.106598837301135e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_error_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 4.9592985305935144e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_warning_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 4.892196739092469e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_info_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 4.849099786952138e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_empty_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 4.9342052079737186e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_cross_mark_error",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 9.747198782861233e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_no_log_files",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00020514399511739612,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_nfo_log",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00016661197878420353,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_autonomous_log",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00047570199239999056,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_limit",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00029297900618985295,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_yields_sse_format",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.0002435359638184309,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_level_filter",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.0002087010070681572,
+        "outcome": "passed"
+      },
+      "nodeid": "checks/test_stream_regression.py::test_empty_levels_is_not_default",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00022027204977348447,
+        "outcome": "passed"
+      },
+      "nodeid": "checks/test_stream_regression.py::test_existing_history_order_and_limit_semantics",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00010217196540907025,
+        "outcome": "passed"
+      },
+      "nodeid": "checks/test_stream_regression.py::test_already_set_stop_event",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00012193899601697922,
+        "outcome": "passed"
+      },
+      "nodeid": "checks/test_stream_regression.py::test_stop_after_keepalive",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00028039602329954505,
+        "outcome": "passed"
+      },
+      "nodeid": "checks/test_stream_regression.py::test_tail_both_sources_and_unicode",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.0002703869831748307,
+        "outcome": "passed"
+      },
+      "nodeid": "checks/test_stream_regression.py::test_rotation_resets_offset",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00021866901079192758,
+        "outcome": "passed"
+      },
+      "nodeid": "checks/test_stream_regression.py::test_new_file_and_level_filter",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00018217199249193072,
+        "outcome": "passed"
+      },
+      "nodeid": "checks/test_stream_regression.py::test_unreadable_logs_are_ignored",
+      "outcome": "passed"
+    }
+  ]
+}</pre></details><details><summary>Tokeny i zasoby</summary><pre>{
+  "api_calls": 4,
+  "completion_tokens": 8160,
+  "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "length"
+  ],
+  "gpu_busy_mean_percent": 94.46085858585859,
+  "output_limit_hits": 1,
+  "peak_gtt_gib": 1.2649383544921875,
+  "peak_vram_gib": 9.089893341064453,
+  "prompt_tokens": 19804,
+  "tool_calls": 3,
+  "tool_errors": 0,
+  "tools": {
+    "bash": 1,
+    "glob": 1,
+    "read": 1
+  },
+  "usage_complete": true,
+  "usage_records": 4
+}</pre><pre>{
+  "models": [
+    {
+      "context_length": 16384,
+      "details": {
+        "families": [
+          "gemma4"
+        ],
+        "family": "gemma4",
+        "format": "gguf",
+        "parameter_size": "11.9B",
+        "parent_model": "",
+        "quantization_level": "Q4_K_M"
+      },
+      "digest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+      "expires_at": "2319-01-19T16:40:10.821390528+01:00",
+      "model": "gemma4:12b",
+      "name": "gemma4:12b",
+      "size": 1351740292,
+      "size_vram": 1351740292
+    }
+  ]
+}</pre></details></article><article><h2>gpt-oss:20b — próba 1</h2><details><summary>Przebieg pracy: narzędzia i końcowa odpowiedź</summary><pre>read: {
+  "input": {
+    "filePath": "/workspace/src/koruapi/dashboard_logs.py",
+    "limit": 2000,
+    "offset": 1
+  },
+  "metadata": {
+    "display": {
+      "lineEnd": 241,
+      "lineStart": 1,
+      "path": "/workspace/src/koruapi/dashboard_logs.py",
+      "text": "\"\"\"Log streaming endpoint for the koru dashboard.\n\nProvides a Server-Sent Events (SSE) endpoint that tails the structured\n``nfo-events.jsonl`` log and the autonomous cycle log, streaming entries\nwith severity levels (ERROR, WARNING, INFO, DEBUG) to the browser.\n\nSSE is used instead of WebSocket because it works with stdlib\u0027s\n``http.server`` without protocol upgrade, and log streaming is\nunidirectional (server \u2192 client).\n\"\"\"\n\nfrom __future__ import annotations\n\nimport ast\nimport json\nimport time\nfrom pathlib import Path\nfrom typing import Any\n\n\ndef _nfo_log_path(project: Path) -\u003e Path:\n    return project / \".planfile\" / \".koru\" / \"nfo-events.jsonl\"\n\n\ndef _autonomous_log_path(project: Path) -\u003e Path:\n    return project / \".planfile\" / \".koru\" / \"autonomous.log\"\n\n\ndef _parse_nfo_line(line: str) -\u003e dict[str, Any] | None:\n    \"\"\"Parse a single nfo-events.jsonl line into a structured log entry.\"\"\"\n    try:\n        record = json.loads(line)\n    except (json.JSONDecodeError, ValueError):\n        return None\n    if not isinstance(record, dict):\n        return None\n    level = str(record.get(\"level\", \"INFO\")).upper()\n    timestamp = record.get(\"timestamp\", \"\")\n    kwargs_raw = record.get(\"kwargs\", \"\")\n    message = \"\"\n    category = \"\"\n    if isinstance(kwargs_raw, str):\n        try:\n            kwargs = ast.literal_eval(kwargs_raw)\n        except Exception:  # noqa: BLE001\n            kwargs = {}\n    elif isinstance(kwargs_raw, dict):\n        kwargs = kwargs_raw\n    else:\n        kwargs = {}\n    if not isinstance(kwargs, dict):\n        kwargs = {}\n    message = str(kwargs.get(\"activity_message\", \"\") or \"\")\n    category = str(kwargs.get(\"category\", \"\") or \"\")\n    event = str(kwargs.get(\"event\", \"\") or \"\")\n    if not message:\n        message = f\"{event} {category}\".strip() or str(record.get(\"function_name\", \"\"))\n    return {\n        \"timestamp\": timestamp,\n        \"level\": level,\n        \"message\": message,\n        \"category\": category,\n        \"event\": event,\n        \"source\": \"nfo\",\n    }\n\n\ndef _parse_autonomous_log_line(line: str) -\u003e dict[str, Any] | None:\n    \"\"\"Parse a line from the autonomous log (plain text with optional level prefix).\"\"\"\n    line = line.strip()\n    if not line:\n        return None\n    level = \"INFO\"\n    upper = line.upper()\n    if upper.startswith(\"[ERROR]\") or \" ERROR \" in upper or \"\u2717\" in line:\n        level = \"ERROR\"\n    elif upper.startswith(\"[WARN\") or \" WARNING \" in upper or \"\u26a0\" in line:\n        level = \"WARNING\"\n    elif upper.startswith(\"[DEBUG]\") or \" DEBUG \" in upper:\n        level = \"DEBUG\"\n    return {\n        \"timestamp\": \"\",\n        \"level\": level,\n        \"message\": line,\n        \"category\": \"AUTONOMOUS\",\n        \"event\": \"\",\n        \"source\": \"autonomous\",\n    }\n\n\ndef read_recent_logs(project: Path, *, limit: int = 100) -\u003e list[dict[str, Any]]:\n    \"\"\"Return the most recent log entries from nfo-events.jsonl and autonomous log.\"\"\"\n    entries: list[dict[str, Any]] = []\n    nfo_path = _nfo_log_path(project)\n    if nfo_path.exists():\n        try:\n            lines = nfo_path.read_text(encoding=\"utf-8\", errors=\"ignore\").splitlines()\n            for line in lines[-limit:]:\n                entry = _parse_nfo_line(line)\n                if entry:\n                    entries.append(entry)\n        except OSError:\n            pass\n    auto_path = _autonomous_log_path(project)\n    if auto_path.exists():\n        try:\n            lines = auto_path.read_text(encoding=\"utf-8\", errors=\"ignore\").splitlines()\n            for line in lines[-limit:]:\n                entry = _parse_autonomous_log_line(line)\n                if entry:\n                    entries.append(entry)\n        except OSError:\n            pass\n    entries.sort(key=lambda e: e.get(\"timestamp\", \"\"))\n    return entries[-limit:]\n\n\ndef sse_log_stream(\n    project: Path,\n    *,\n    levels: set[str] | None = None,\n    poll_interval: float = 0.5,\n    max_events: int = 0,\n    stop_event: Any = None,\n) -\u003e str:\n    \"\"\"Yield SSE-formatted log events by tailing log files.\n\n    This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n    The caller should write them to the HTTP response.\n    \"\"\"\n    if levels is None:\n        levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n\n    nfo_path = _nfo_log_path(project)\n    auto_path = _autonomous_log_path(project)\n    nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n    auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n    events_sent = 0\n\n    # Send recent history first\n    for entry in read_recent_logs(project, limit=50):\n        if entry[\"level\"] in levels:\n            yield f\"data: {json.dumps(entry)}\\n\\n\"\n            events_sent += 1\n\n    while True:\n        if max_events and events_sent \u003e= max_events:\n            break\n        if stop_event is not None and stop_event.is_set():\n            break\n        # Check nfo log for new lines\n        if nfo_path.exists():\n            try:\n                current_size = nfo_path.stat().st_size\n                if current_size \u003c nfo_offset:\n                    nfo_offset = 0  # file was truncated/rotated\n                if current_size \u003e nfo_offset:\n                    with nfo_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                        f.seek(nfo_offset)\n                        for line in f:\n                            entry = _parse_nfo_line(line)\n                            if entry and entry[\"level\"] in levels:\n                                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                                events_sent += 1\n                        nfo_offset = f.tell()\n            except OSError:\n                pass\n        # Check autonomous log for new lines\n        if auto_path.exists():\n            try:\n                current_size = auto_path.stat().st_size\n                if current_size \u003c auto_offset:\n                    auto_offset = 0\n                if current_size \u003e auto_offset:\n                    with auto_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                        f.seek(auto_offset)\n                        for line in f:\n                            entry = _parse_autonomous_log_line(line)\n                            if entry and entry[\"level\"] in levels:\n                                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                                events_sent += 1\n                        auto_offset = f.tell()\n            except OSError:\n                pass\n        yield \": keepalive\\n\\n\"\n        time.sleep(poll_interval)\n\n\ndef handle_sse_logs_request(handler: Any, config: Any) -\u003e None:\n    \"\"\"Handle GET /api/logs/stream \u2014 SSE log streaming endpoint.\"\"\"\n    import urllib.parse\n\n    parsed = urllib.parse.urlparse(handler.path)\n    qs = urllib.parse.parse_qs(parsed.query)\n    level_param = qs.get(\"level\", [\"\"])[0].upper()\n    limit_param = qs.get(\"limit\", [\"100\"])[0]\n    try:\n        limit = int(limit_param)\n    except ValueError:\n        limit = 100\n\n    if level_param and level_param != \"ALL\":\n        levels = {level.strip() for level in level_param.split(\",\") if level.strip()}\n    else:\n        levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n\n    project = handler._selected_project()\n\n    handler.send_response(200)\n    handler.send_header(\"Content-Type\", \"text/event-stream\")\n    handler.send_header(\"Cache-Control\", \"no-cache\")\n    handler.send_header(\"Connection\", \"keep-alive\")\n    handler.send_header(\"Access-Control-Allow-Origin\", \"*\")\n    handler.end_headers()\n\n    try:\n        stop_event = getattr(handler.server, \"shutdown_event\", None)\n        for chunk in sse_log_stream(\n            project, levels=levels, max_events=limit, stop_event=stop_event\n        ):\n            handler.wfile.write(chunk.encode(\"utf-8\"))\n            handler.wfile.flush()\n    except (BrokenPipeError, ConnectionResetError):\n        pass\n\n\ndef handle_logs_json_request(handler: Any, config: Any) -\u003e None:\n    \"\"\"Handle GET /api/logs \u2014 return recent log entries as JSON.\"\"\"\n    import urllib.parse\n\n    parsed = urllib.parse.urlparse(handler.path)\n    qs = urllib.parse.parse_qs(parsed.query)\n    limit_param = qs.get(\"limit\", [\"100\"])[0]\n    try:\n        limit = int(limit_param)\n    except ValueError:\n        limit = 100\n\n    project = handler._selected_project()\n    entries = read_recent_logs(project, limit=limit)\n    handler._send_json({\"logs\": entries, \"ok\": True})",
+      "totalLines": 241,
+      "truncated": false,
+      "type": "file"
+    },
+    "loaded": [],
+    "preview": "\"\"\"Log streaming endpoint for the koru dashboard.\n\nProvides a Server-Sent Events (SSE) endpoint that tails the structured\n``nfo-events.jsonl`` log and the autonomous cycle log, streaming entries\nwith severity levels (ERROR, WARNING, INFO, DEBUG) to the browser.\n\nSSE is used instead of WebSocket because it works with stdlib\u0027s\n``http.server`` without protocol upgrade, and log streaming is\nunidirectional (server \u2192 client).\n\"\"\"\n\nfrom __future__ import annotations\n\nimport ast\nimport json\nimport time\nfrom pathlib import Path\nfrom typing import Any\n\n",
+    "truncated": false
+  },
+  "output": "\u003cpath\u003e/workspace/src/koruapi/dashboard_logs.py\u003c/path\u003e\n\u003ctype\u003efile\u003c/type\u003e\n\u003ccontent\u003e\n1: \"\"\"Log streaming endpoint for the koru dashboard.\n2: \n3: Provides a Server-Sent Events (SSE) endpoint that tails the structured\n4: ``nfo-events.jsonl`` log and the autonomous cycle log, streaming entries\n5: with severity levels (ERROR, WARNING, INFO, DEBUG) to the browser.\n6: \n7: SSE is used instead of WebSocket because it works with stdlib\u0027s\n8: ``http.server`` without protocol upgrade, and log streaming is\n9: unidirectional (server \u2192 client).\n10: \"\"\"\n11: \n12: from __future__ import annotations\n13: \n14: import ast\n15: import json\n16: import time\n17: from pathlib import Path\n18: from typing import Any\n19: \n20: \n21: def _nfo_log_path(project: Path) -\u003e Path:\n22:     return project / \".planfile\" / \".koru\" / \"nfo-events.jsonl\"\n23: \n24: \n25: def _autonomous_log_path(project: Path) -\u003e Path:\n26:     return project / \".planfile\" / \".koru\" / \"autonomous.log\"\n27: \n28: \n29: def _parse_nfo_line(line: str) -\u003e dict[str, Any] | None:\n30:     \"\"\"Parse a single nfo-events.jsonl line into a structured log entry.\"\"\"\n31:     try:\n32:         record = json.loads(line)\n33:     except (json.JSONDecodeError, ValueError):\n34:         return None\n35:     if not isinstance(record, dict):\n36:         return None\n37:     level = str(record.get(\"level\", \"INFO\")).upper()\n38:     timestamp = record.get(\"timestamp\", \"\")\n39:     kwargs_raw = record.get(\"kwargs\", \"\")\n40:     message = \"\"\n41:     category = \"\"\n42:     if isinstance(kwargs_raw, str):\n43:         try:\n44:             kwargs = ast.literal_eval(kwargs_raw)\n45:         except Exception:  # noqa: BLE001\n46:             kwargs = {}\n47:     elif isinstance(kwargs_raw, dict):\n48:         kwargs = kwargs_raw\n49:     else:\n50:         kwargs = {}\n51:     if not isinstance(kwargs, dict):\n52:         kwargs = {}\n53:     message = str(kwargs.get(\"activity_message\", \"\") or \"\")\n54:     category = str(kwargs.get(\"category\", \"\") or \"\")\n55:     event = str(kwargs.get(\"event\", \"\") or \"\")\n56:     if not message:\n57:         message = f\"{event} {category}\".strip() or str(record.get(\"function_name\", \"\"))\n58:     return {\n59:         \"timestamp\": timestamp,\n60:         \"level\": level,\n61:         \"message\": message,\n62:         \"category\": category,\n63:         \"event\": event,\n64:         \"source\": \"nfo\",\n65:     }\n66: \n67: \n68: def _parse_autonomous_log_line(line: str) -\u003e dict[str, Any] | None:\n69:     \"\"\"Parse a line from the autonomous log (plain text with optional level prefix).\"\"\"\n70:     line = line.strip()\n71:     if not line:\n72:         return None\n73:     level = \"INFO\"\n74:     upper = line.upper()\n75:     if upper.startswith(\"[ERROR]\") or \" ERROR \" in upper or \"\u2717\" in line:\n76:         level = \"ERROR\"\n77:     elif upper.startswith(\"[WARN\") or \" WARNING \" in upper or \"\u26a0\" in line:\n78:         level = \"WARNING\"\n79:     elif upper.startswith(\"[DEBUG]\") or \" DEBUG \" in upper:\n80:         level = \"DEBUG\"\n81:     return {\n82:         \"timestamp\": \"\",\n83:         \"level\": level,\n84:         \"message\": line,\n85:         \"category\": \"AUTONOMOUS\",\n86:         \"event\": \"\",\n87:         \"source\": \"autonomous\",\n88:     }\n89: \n90: \n91: def read_recent_logs(project: Path, *, limit: int = 100) -\u003e list[dict[str, Any]]:\n92:     \"\"\"Return the most recent log entries from nfo-events.jsonl and autonomous log.\"\"\"\n93:     entries: list[dict[str, Any]] = []\n94:     nfo_path = _nfo_log_path(project)\n95:     if nfo_path.exists():\n96:         try:\n97:             lines = nfo_path.read_text(encoding=\"utf-8\", errors=\"ignore\").splitlines()\n98:             for line in lines[-limit:]:\n99:                 entry = _parse_nfo_line(line)\n100:                 if entry:\n101:                     entries.append(entry)\n102:         except OSError:\n103:             pass\n104:     auto_path = _autonomous_log_path(project)\n105:     if auto_path.exists():\n106:         try:\n107:             lines = auto_path.read_text(encoding=\"utf-8\", errors=\"ignore\").splitlines()\n108:             for line in lines[-limit:]:\n109:                 entry = _parse_autonomous_log_line(line)\n110:                 if entry:\n111:                     entries.append(entry)\n112:         except OSError:\n113:             pass\n114:     entries.sort(key=lambda e: e.get(\"timestamp\", \"\"))\n115:     return entries[-limit:]\n116: \n117: \n118: def sse_log_stream(\n119:     project: Path,\n120:     *,\n121:     levels: set[str] | None = None,\n122:     poll_interval: float = 0.5,\n123:     max_events: int = 0,\n124:     stop_event: Any = None,\n125: ) -\u003e str:\n126:     \"\"\"Yield SSE-formatted log events by tailing log files.\n127: \n128:     This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n129:     The caller should write them to the HTTP response.\n130:     \"\"\"\n131:     if levels is None:\n132:         levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n133: \n134:     nfo_path = _nfo_log_path(project)\n135:     auto_path = _autonomous_log_path(project)\n136:     nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n137:     auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n138:     events_sent = 0\n139: \n140:     # Send recent history first\n141:     for entry in read_recent_logs(project, limit=50):\n142:         if entry[\"level\"] in levels:\n143:             yield f\"data: {json.dumps(entry)}\\n\\n\"\n144:             events_sent += 1\n145: \n146:     while True:\n147:         if max_events and events_sent \u003e= max_events:\n148:             break\n149:         if stop_event is not None and stop_event.is_set():\n150:             break\n151:         # Check nfo log for new lines\n152:         if nfo_path.exists():\n153:             try:\n154:                 current_size = nfo_path.stat().st_size\n155:                 if current_size \u003c nfo_offset:\n156:                     nfo_offset = 0  # file was truncated/rotated\n157:                 if current_size \u003e nfo_offset:\n158:                     with nfo_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n159:                         f.seek(nfo_offset)\n160:                         for line in f:\n161:                             entry = _parse_nfo_line(line)\n162:                             if entry and entry[\"level\"] in levels:\n163:                                 yield f\"data: {json.dumps(entry)}\\n\\n\"\n164:                                 events_sent += 1\n165:                         nfo_offset = f.tell()\n166:             except OSError:\n167:                 pass\n168:         # Check autonomous log for new lines\n169:         if auto_path.exists():\n170:             try:\n171:                 current_size = auto_path.stat().st_size\n172:                 if current_size \u003c auto_offset:\n173:                     auto_offset = 0\n174:                 if current_size \u003e auto_offset:\n175:                     with auto_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n176:                         f.seek(auto_offset)\n177:                         for line in f:\n178:                             entry = _parse_autonomous_log_line(line)\n179:                             if entry and entry[\"level\"] in levels:\n180:                                 yield f\"data: {json.dumps(entry)}\\n\\n\"\n181:                                 events_sent += 1\n182:                         auto_offset = f.tell()\n183:             except OSError:\n184:                 pass\n185:         yield \": keepalive\\n\\n\"\n186:         time.sleep(poll_interval)\n187: \n188: \n189: def handle_sse_logs_request(handler: Any, config: Any) -\u003e None:\n190:     \"\"\"Handle GET /api/logs/stream \u2014 SSE log streaming endpoint.\"\"\"\n191:     import urllib.parse\n192: \n193:     parsed = urllib.parse.urlparse(handler.path)\n194:     qs = urllib.parse.parse_qs(parsed.query)\n195:     level_param = qs.get(\"level\", [\"\"])[0].upper()\n196:     limit_param = qs.get(\"limit\", [\"100\"])[0]\n197:     try:\n198:         limit = int(limit_param)\n199:     except ValueError:\n200:         limit = 100\n201: \n202:     if level_param and level_param != \"ALL\":\n203:         levels = {level.strip() for level in level_param.split(\",\") if level.strip()}\n204:     else:\n205:         levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n206: \n207:     project = handler._selected_project()\n208: \n209:     handler.send_response(200)\n210:     handler.send_header(\"Content-Type\", \"text/event-stream\")\n211:     handler.send_header(\"Cache-Control\", \"no-cache\")\n212:     handler.send_header(\"Connection\", \"keep-alive\")\n213:     handler.send_header(\"Access-Control-Allow-Origin\", \"*\")\n214:     handler.end_headers()\n215: \n216:     try:\n217:         stop_event = getattr(handler.server, \"shutdown_event\", None)\n218:         for chunk in sse_log_stream(\n219:             project, levels=levels, max_events=limit, stop_event=stop_event\n220:         ):\n221:             handler.wfile.write(chunk.encode(\"utf-8\"))\n222:             handler.wfile.flush()\n223:     except (BrokenPipeError, ConnectionResetError):\n224:         pass\n225: \n226: \n227: def handle_logs_json_request(handler: Any, config: Any) -\u003e None:\n228:     \"\"\"Handle GET /api/logs \u2014 return recent log entries as JSON.\"\"\"\n229:     import urllib.parse\n230: \n231:     parsed = urllib.parse.urlparse(handler.path)\n232:     qs = urllib.parse.parse_qs(parsed.query)\n233:     limit_param = qs.get(\"limit\", [\"100\"])[0]\n234:     try:\n235:         limit = int(limit_param)\n236:     except ValueError:\n237:         limit = 100\n238: \n239:     project = handler._selected_project()\n240:     entries = read_recent_logs(project, limit=limit)\n241:     handler._send_json({\"logs\": entries, \"ok\": True})\n\n(End of file - total 241 lines)\n\u003c/content\u003e",
+  "status": "completed",
+  "time": {
+    "end": 1791561193425,
+    "start": 1791561193410
+  },
+  "title": "workspace/src/koruapi/dashboard_logs.py"
+}</pre><pre>edit: {
+  "input": {
+    "filePath": "/workspace/src/koruapi/dashboard_logs.py",
+    "newString": "    while True:\n        if max_events and events_sent \u003e= max_events:\n            break\n        if stop_event is not None and stop_event.is_set():\n            break\n        # Check nfo log for new lines\n        if nfo_path.exists():\n            events_sent = _stream_new_lines(\n                nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n            )\n            nfo_offset = _update_offset(nfo_path, nfo_offset)\n        # Check autonomous log for new lines\n        if auto_path.exists():\n            events_sent = _stream_new_lines(\n                auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n            )\n            auto_offset = _update_offset(auto_path, auto_offset)\n        yield \": keepalive\\n\\n\"\n        time.sleep(poll_interval)\n",
+    "oldString": "    while True:\n        if max_events and events_sent \u003e= max_events:\n            break\n        if stop_event is not None and stop_event.is_set():\n            break\n        # Check nfo log for new lines\n        if nfo_path.exists():\n            try:\n                current_size = nfo_path.stat().st_size\n                if current_size \u003c nfo_offset:\n                    nfo_offset = 0  # file was truncated/rotated\n                if current_size \u003e nfo_offset:\n                    with nfo_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                        f.seek(nfo_offset)\n                        for line in f:\n                            entry = _parse_nfo_line(line)\n                            if entry and entry[\"level\"] in levels:\n                                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                                events_sent += 1\n                        nfo_offset = f.tell()\n            except OSError:\n                pass\n        # Check autonomous log for new lines\n        if auto_path.exists():\n            try:\n                current_size = auto_path.stat().st_size\n                if current_size \u003c auto_offset:\n                    auto_offset = 0\n                if current_size \u003e auto_offset:\n                    with auto_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                        f.seek(auto_offset)\n                        for line in f:\n                            entry = _parse_autonomous_log_line(line)\n                            if entry and entry[\"level\"] in levels:\n                                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                                events_sent += 1\n                        auto_offset = f.tell()\n            except OSError:\n                pass\n        yield \": keepalive\\n\\n\"\n        time.sleep(poll_interval)\n",
+    "replaceAll": false
+  },
+  "metadata": {
+    "diagnostics": {},
+    "diff": "Index: /workspace/src/koruapi/dashboard_logs.py\n===================================================================\n--- /workspace/src/koruapi/dashboard_logs.py\n+++ /workspace/src/koruapi/dashboard_logs.py\n@@ -149,40 +149,18 @@\n if stop_event is not None and stop_event.is_set():\n     break\n # Check nfo log for new lines\n if nfo_path.exists():\n-    try:\n-        current_size = nfo_path.stat().st_size\n-        if current_size \u003c nfo_offset:\n-            nfo_offset = 0  # file was truncated/rotated\n-        if current_size \u003e nfo_offset:\n-            with nfo_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n-                f.seek(nfo_offset)\n-                for line in f:\n-                    entry = _parse_nfo_line(line)\n-                    if entry and entry[\"level\"] in levels:\n-                        yield f\"data: {json.dumps(entry)}\\n\\n\"\n-                        events_sent += 1\n-                nfo_offset = f.tell()\n-    except OSError:\n-        pass\n+    events_sent = _stream_new_lines(\n+        nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n+    )\n+    nfo_offset = _update_offset(nfo_path, nfo_offset)\n # Check autonomous log for new lines\n if auto_path.exists():\n-    try:\n-        current_size = auto_path.stat().st_size\n-        if current_size \u003c auto_offset:\n-            auto_offset = 0\n-        if current_size \u003e auto_offset:\n-            with auto_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n-                f.seek(auto_offset)\n-                for line in f:\n-                    entry = _parse_autonomous_log_line(line)\n-                    if entry and entry[\"level\"] in levels:\n-                        yield f\"data: {json.dumps(entry)}\\n\\n\"\n-                        events_sent += 1\n-                auto_offset = f.tell()\n-    except OSError:\n-        pass\n+    events_sent = _stream_new_lines(\n+        auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n+    )\n+    auto_offset = _update_offset(auto_path, auto_offset)\n yield \": keepalive\\n\\n\"\n time.sleep(poll_interval)\n \n \n",
+    "filediff": {
+      "additions": 8,
+      "deletions": 30,
+      "file": "/workspace/src/koruapi/dashboard_logs.py",
+      "patch": "Index: /workspace/src/koruapi/dashboard_logs.py\n===================================================================\n--- /workspace/src/koruapi/dashboard_logs.py\n+++ /workspace/src/koruapi/dashboard_logs.py\n@@ -149,40 +149,18 @@\n if stop_event is not None and stop_event.is_set():\n     break\n # Check nfo log for new lines\n if nfo_path.exists():\n-    try:\n-        current_size = nfo_path.stat().st_size\n-        if current_size \u003c nfo_offset:\n-            nfo_offset = 0  # file was truncated/rotated\n-        if current_size \u003e nfo_offset:\n-            with nfo_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n-                f.seek(nfo_offset)\n-                for line in f:\n-                    entry = _parse_nfo_line(line)\n-                    if entry and entry[\"level\"] in levels:\n-                        yield f\"data: {json.dumps(entry)}\\n\\n\"\n-                        events_sent += 1\n-                nfo_offset = f.tell()\n-    except OSError:\n-        pass\n+    events_sent = _stream_new_lines(\n+        nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n+    )\n+    nfo_offset = _update_offset(nfo_path, nfo_offset)\n # Check autonomous log for new lines\n if auto_path.exists():\n-    try:\n-        current_size = auto_path.stat().st_size\n-        if current_size \u003c auto_offset:\n-            auto_offset = 0\n-        if current_size \u003e auto_offset:\n-            with auto_path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n-                f.seek(auto_offset)\n-                for line in f:\n-                    entry = _parse_autonomous_log_line(line)\n-                    if entry and entry[\"level\"] in levels:\n-                        yield f\"data: {json.dumps(entry)}\\n\\n\"\n-                        events_sent += 1\n-                auto_offset = f.tell()\n-    except OSError:\n-        pass\n+    events_sent = _stream_new_lines(\n+        auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n+    )\n+    auto_offset = _update_offset(auto_path, auto_offset)\n yield \": keepalive\\n\\n\"\n time.sleep(poll_interval)\n \n \n"
+    },
+    "truncated": false
+  },
+  "output": "Edit applied successfully.",
+  "status": "completed",
+  "time": {
+    "end": 1791561235003,
+    "start": 1791561234999
+  },
+  "title": "workspace/src/koruapi/dashboard_logs.py"
+}</pre><pre>edit: {
+  "error": "Found multiple matches for oldString. Provide more surrounding context to make the match unique.",
+  "input": {
+    "filePath": "/workspace/src/koruapi/dashboard_logs.py",
+    "newString": "def _stream_new_lines(path: Path, offset: int, parser, levels: set[str], events_sent: int, json_module) -\u003e int:\n    \"\"\"Stream new lines from a log file, yielding SSE events.\n    Returns updated events_sent count.\n    \"\"\"\n    try:\n        current_size = path.stat().st_size\n        if current_size \u003c offset:\n            offset = 0  # file was truncated/rotated\n        if current_size \u003e offset:\n            with path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                f.seek(offset)\n                for line in f:\n                    entry = parser(line)\n                    if entry and entry[\"level\"] in levels:\n                        yield f\"data: {json_module.dumps(entry)}\\n\\n\"\n                        events_sent += 1\n                offset = f.tell()\n    except OSError:\n        pass\n    return events_sent, offset\n\ndef _update_offset(path: Path, offset: int) -\u003e int:\n    try:\n        return path.stat().st_size\n    except OSError:\n        return offset\n",
+    "oldString": "\n",
+    "replaceAll": false
+  },
+  "status": "error",
+  "time": {
+    "end": 1791561253484,
+    "start": 1791561253477
+  }
+}</pre><pre>edit: {
+  "input": {
+    "filePath": "/workspace/src/koruapi/dashboard_logs.py",
+    "newString": "def _stream_new_lines(path: Path, offset: int, parser, levels: set[str], events_sent: int, json_module) -\u003e int:\n    \"\"\"Stream new lines from a log file, yielding SSE events.\n    Returns updated events_sent count.\n    \"\"\"\n    try:\n        current_size = path.stat().st_size\n        if current_size \u003c offset:\n            offset = 0  # file was truncated/rotated\n        if current_size \u003e offset:\n            with path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n                f.seek(offset)\n                for line in f:\n                    entry = parser(line)\n                    if entry and entry[\"level\"] in levels:\n                        yield f\"data: {json_module.dumps(entry)}\\n\\n\"\n                        events_sent += 1\n                offset = f.tell()\n    except OSError:\n        pass\n    return events_sent, offset\n\ndef _update_offset(path: Path, offset: int) -\u003e int:\n    try:\n        return path.stat().st_size\n    except OSError:\n        return offset\n",
+    "oldString": "import time",
+    "replaceAll": false
+  },
+  "metadata": {
+    "diagnostics": {},
+    "diff": "Index: /workspace/src/koruapi/dashboard_logs.py\n===================================================================\n--- /workspace/src/koruapi/dashboard_logs.py\n+++ /workspace/src/koruapi/dashboard_logs.py\n@@ -12,9 +12,35 @@\n from __future__ import annotations\n \n import ast\n import json\n-import time\n+def _stream_new_lines(path: Path, offset: int, parser, levels: set[str], events_sent: int, json_module) -\u003e int:\n+    \"\"\"Stream new lines from a log file, yielding SSE events.\n+    Returns updated events_sent count.\n+    \"\"\"\n+    try:\n+        current_size = path.stat().st_size\n+        if current_size \u003c offset:\n+            offset = 0  # file was truncated/rotated\n+        if current_size \u003e offset:\n+            with path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n+                f.seek(offset)\n+                for line in f:\n+                    entry = parser(line)\n+                    if entry and entry[\"level\"] in levels:\n+                        yield f\"data: {json_module.dumps(entry)}\\n\\n\"\n+                        events_sent += 1\n+                offset = f.tell()\n+    except OSError:\n+        pass\n+    return events_sent, offset\n+\n+def _update_offset(path: Path, offset: int) -\u003e int:\n+    try:\n+        return path.stat().st_size\n+    except OSError:\n+        return offset\n+\n from pathlib import Path\n from typing import Any\n \n \n",
+    "filediff": {
+      "additions": 27,
+      "deletions": 1,
+      "file": "/workspace/src/koruapi/dashboard_logs.py",
+      "patch": "Index: /workspace/src/koruapi/dashboard_logs.py\n===================================================================\n--- /workspace/src/koruapi/dashboard_logs.py\n+++ /workspace/src/koruapi/dashboard_logs.py\n@@ -12,9 +12,35 @@\n from __future__ import annotations\n \n import ast\n import json\n-import time\n+def _stream_new_lines(path: Path, offset: int, parser, levels: set[str], events_sent: int, json_module) -\u003e int:\n+    \"\"\"Stream new lines from a log file, yielding SSE events.\n+    Returns updated events_sent count.\n+    \"\"\"\n+    try:\n+        current_size = path.stat().st_size\n+        if current_size \u003c offset:\n+            offset = 0  # file was truncated/rotated\n+        if current_size \u003e offset:\n+            with path.open(\"r\", encoding=\"utf-8\", errors=\"ignore\") as f:\n+                f.seek(offset)\n+                for line in f:\n+                    entry = parser(line)\n+                    if entry and entry[\"level\"] in levels:\n+                        yield f\"data: {json_module.dumps(entry)}\\n\\n\"\n+                        events_sent += 1\n+                offset = f.tell()\n+    except OSError:\n+        pass\n+    return events_sent, offset\n+\n+def _update_offset(path: Path, offset: int) -\u003e int:\n+    try:\n+        return path.stat().st_size\n+    except OSError:\n+        return offset\n+\n from pathlib import Path\n from typing import Any\n \n \n"
+    },
+    "truncated": false
+  },
+  "output": "Edit applied successfully.",
+  "status": "completed",
+  "time": {
+    "end": 1791561272859,
+    "start": 1791561272856
+  },
+  "title": "workspace/src/koruapi/dashboard_logs.py"
+}</pre><pre>edit: {
+  "input": {
+    "filePath": "/workspace/src/koruapi/dashboard_logs.py",
+    "newString": "        if nfo_path.exists():\n            events_sent, nfo_offset = _stream_new_lines(\n                nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n            )\n        # Check autonomous log for new lines\n        if auto_path.exists():\n            events_sent, auto_offset = _stream_new_lines(\n                auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n            )\n",
+    "oldString": "        if nfo_path.exists():\n            events_sent = _stream_new_lines(\n                nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n            )\n            nfo_offset = _update_offset(nfo_path, nfo_offset)\n        # Check autonomous log for new lines\n        if auto_path.exists():\n            events_sent = _stream_new_lines(\n                auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n            )\n            auto_offset = _update_offset(auto_path, auto_offset)\n",
+    "replaceAll": false
+  },
+  "metadata": {
+    "diagnostics": {},
+    "diff": "Index: /workspace/src/koruapi/dashboard_logs.py\n===================================================================\n--- /workspace/src/koruapi/dashboard_logs.py\n+++ /workspace/src/koruapi/dashboard_logs.py\n@@ -175,18 +175,16 @@\n if stop_event is not None and stop_event.is_set():\n     break\n # Check nfo log for new lines\n if nfo_path.exists():\n-    events_sent = _stream_new_lines(\n+    events_sent, nfo_offset = _stream_new_lines(\n         nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n     )\n-    nfo_offset = _update_offset(nfo_path, nfo_offset)\n # Check autonomous log for new lines\n if auto_path.exists():\n-    events_sent = _stream_new_lines(\n+    events_sent, auto_offset = _stream_new_lines(\n         auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n     )\n-    auto_offset = _update_offset(auto_path, auto_offset)\n yield \": keepalive\\n\\n\"\n time.sleep(poll_interval)\n \n \n",
+    "filediff": {
+      "additions": 2,
+      "deletions": 4,
+      "file": "/workspace/src/koruapi/dashboard_logs.py",
+      "patch": "Index: /workspace/src/koruapi/dashboard_logs.py\n===================================================================\n--- /workspace/src/koruapi/dashboard_logs.py\n+++ /workspace/src/koruapi/dashboard_logs.py\n@@ -175,18 +175,16 @@\n if stop_event is not None and stop_event.is_set():\n     break\n # Check nfo log for new lines\n if nfo_path.exists():\n-    events_sent = _stream_new_lines(\n+    events_sent, nfo_offset = _stream_new_lines(\n         nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n     )\n-    nfo_offset = _update_offset(nfo_path, nfo_offset)\n # Check autonomous log for new lines\n if auto_path.exists():\n-    events_sent = _stream_new_lines(\n+    events_sent, auto_offset = _stream_new_lines(\n         auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n     )\n-    auto_offset = _update_offset(auto_path, auto_offset)\n yield \": keepalive\\n\\n\"\n time.sleep(poll_interval)\n \n \n"
+    },
+    "truncated": false
+  },
+  "output": "Edit applied successfully.",
+  "status": "completed",
+  "time": {
+    "end": 1791561291965,
+    "start": 1791561291962
+  },
+  "title": "workspace/src/koruapi/dashboard_logs.py"
+}</pre><pre>bash: {
+  "input": {
+    "command": "python -m pytest tests/test_dashboard_logs.py -k \"TestParseNfoLine or TestParseAutonomousLogLine or TestReadRecentLogs or TestSseLogStream\" -q -p no:cacheprovider",
+    "description": "Run selected tests",
+    "timeout": 120000
+  },
+  "metadata": {
+    "description": "Run selected tests",
+    "exit": 0,
+    "output": "................                                                         [100%]\n16 passed, 18 deselected in 0.03s\n",
+    "truncated": false
+  },
+  "output": "................                                                         [100%]\n16 passed, 18 deselected in 0.03s\n",
+  "status": "completed",
+  "time": {
+    "end": 1791561305500,
+    "start": 1791561305481
+  },
+  "title": "Run selected tests"
+}</pre><pre>bash: {
+  "input": {
+    "command": "ruff check src/koruapi/dashboard_logs.py --select C901 --config lint.mccabe.max-complexity=15 --no-cache",
+    "description": "Check complexity",
+    "timeout": 120000
+  },
+  "metadata": {
+    "description": "Check complexity",
+    "exit": 0,
+    "output": "All checks passed!\n",
+    "truncated": false
+  },
+  "output": "All checks passed!\n",
+  "status": "completed",
+  "time": {
+    "end": 1791561309210,
+    "start": 1791561309207
+  },
+  "title": "Check complexity"
+}</pre><pre>**Maximum steps reached** – no further tool usage is allowed.
+
+**What was accomplished:**
+1. Loaded the `dashboard_logs.py` module.
+2. Refactored the `sse_log_stream` loop to use helper functions for streaming new lines and updating offsets.
+3. Added two new helper functions:
+   - `_stream_new_lines` – handles reading new lines, parsing, yielding SSE events, and returning updated counters.
+   - `_update_offset` – safely retrieves the current file size or retains the previous offset on error.
+4. Updated the main loop to call these helpers, reducing cyclomatic complexity.
+5. Ran the selected unit tests (`TestParseNfoLine`, `TestParseAutonomousLogLine`, `TestReadRecentLogs`, `TestSseLogStream`) – all passed.
+6. Executed Ruff’s complexity check (`C901`) with a max‑complexity of 15 – all functions now meet the threshold.
+
+**Remaining tasks (not completed due to step limit):**
+- Verify that the new helper functions are correctly imported or defined within the module (they were added inline, but no import statements were needed).
+- Ensure that the refactor does not alter any public API or behavior beyond the complexity reduction.
+- Run the full test suite (including hidden tests) to confirm no regressions.
+- Perform a final Ruff check on the entire repository to confirm no other modules exceed the complexity limit.
+
+**Next steps:**
+1. Run the full test suite (`pytest -q`) to confirm all functionality remains intact.
+2. Execute a comprehensive Ruff check (`ruff check . --select C901 --config lint.mccabe.max-complexity=15`) to ensure no other modules violate the complexity rule.
+3. If all checks pass, the refactor is complete and ready for integration.</pre></details><details><summary>Diff i pełny kod</summary><pre>--- before/src/koruapi/dashboard_logs.py
++++ after/src/koruapi/dashboard_logs.py
+@@ -13,7 +13,33 @@
+ 
+ import ast
+ import json
+-import time
++def _stream_new_lines(path: Path, offset: int, parser, levels: set[str], events_sent: int, json_module) -&gt; int:
++    &#34;&#34;&#34;Stream new lines from a log file, yielding SSE events.
++    Returns updated events_sent count.
++    &#34;&#34;&#34;
++    try:
++        current_size = path.stat().st_size
++        if current_size &lt; offset:
++            offset = 0  # file was truncated/rotated
++        if current_size &gt; offset:
++            with path.open(&#34;r&#34;, encoding=&#34;utf-8&#34;, errors=&#34;ignore&#34;) as f:
++                f.seek(offset)
++                for line in f:
++                    entry = parser(line)
++                    if entry and entry[&#34;level&#34;] in levels:
++                        yield f&#34;data: {json_module.dumps(entry)}\n\n&#34;
++                        events_sent += 1
++                offset = f.tell()
++    except OSError:
++        pass
++    return events_sent, offset
++
++def _update_offset(path: Path, offset: int) -&gt; int:
++    try:
++        return path.stat().st_size
++    except OSError:
++        return offset
++
+ from pathlib import Path
+ from typing import Any
+ 
+@@ -150,38 +176,14 @@
+             break
+         # Check nfo log for new lines
+         if nfo_path.exists():
+-            try:
+-                current_size = nfo_path.stat().st_size
+-                if current_size &lt; nfo_offset:
+-                    nfo_offset = 0  # file was truncated/rotated
+-                if current_size &gt; nfo_offset:
+-                    with nfo_path.open(&#34;r&#34;, encoding=&#34;utf-8&#34;, errors=&#34;ignore&#34;) as f:
+-                        f.seek(nfo_offset)
+-                        for line in f:
+-                            entry = _parse_nfo_line(line)
+-                            if entry and entry[&#34;level&#34;] in levels:
+-                                yield f&#34;data: {json.dumps(entry)}\n\n&#34;
+-                                events_sent += 1
+-                        nfo_offset = f.tell()
+-            except OSError:
+-                pass
++            events_sent, nfo_offset = _stream_new_lines(
++                nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json
++            )
+         # Check autonomous log for new lines
+         if auto_path.exists():
+-            try:
+-                current_size = auto_path.stat().st_size
+-                if current_size &lt; auto_offset:
+-                    auto_offset = 0
+-                if current_size &gt; auto_offset:
+-                    with auto_path.open(&#34;r&#34;, encoding=&#34;utf-8&#34;, errors=&#34;ignore&#34;) as f:
+-                        f.seek(auto_offset)
+-                        for line in f:
+-                            entry = _parse_autonomous_log_line(line)
+-                            if entry and entry[&#34;level&#34;] in levels:
+-                                yield f&#34;data: {json.dumps(entry)}\n\n&#34;
+-                                events_sent += 1
+-                        auto_offset = f.tell()
+-            except OSError:
+-                pass
++            events_sent, auto_offset = _stream_new_lines(
++                auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json
++            )
+         yield &#34;: keepalive\n\n&#34;
+         time.sleep(poll_interval)
+ 
+</pre><pre>&#34;&#34;&#34;Log streaming endpoint for the koru dashboard.
+
+Provides a Server-Sent Events (SSE) endpoint that tails the structured
+``nfo-events.jsonl`` log and the autonomous cycle log, streaming entries
+with severity levels (ERROR, WARNING, INFO, DEBUG) to the browser.
+
+SSE is used instead of WebSocket because it works with stdlib&#39;s
+``http.server`` without protocol upgrade, and log streaming is
+unidirectional (server → client).
+&#34;&#34;&#34;
+
+from __future__ import annotations
+
+import ast
+import json
+def _stream_new_lines(path: Path, offset: int, parser, levels: set[str], events_sent: int, json_module) -&gt; int:
+    &#34;&#34;&#34;Stream new lines from a log file, yielding SSE events.
+    Returns updated events_sent count.
+    &#34;&#34;&#34;
+    try:
+        current_size = path.stat().st_size
+        if current_size &lt; offset:
+            offset = 0  # file was truncated/rotated
+        if current_size &gt; offset:
+            with path.open(&#34;r&#34;, encoding=&#34;utf-8&#34;, errors=&#34;ignore&#34;) as f:
+                f.seek(offset)
+                for line in f:
+                    entry = parser(line)
+                    if entry and entry[&#34;level&#34;] in levels:
+                        yield f&#34;data: {json_module.dumps(entry)}\n\n&#34;
+                        events_sent += 1
+                offset = f.tell()
+    except OSError:
+        pass
+    return events_sent, offset
+
+def _update_offset(path: Path, offset: int) -&gt; int:
+    try:
+        return path.stat().st_size
+    except OSError:
+        return offset
+
+from pathlib import Path
+from typing import Any
+
+
+def _nfo_log_path(project: Path) -&gt; Path:
+    return project / &#34;.planfile&#34; / &#34;.koru&#34; / &#34;nfo-events.jsonl&#34;
+
+
+def _autonomous_log_path(project: Path) -&gt; Path:
+    return project / &#34;.planfile&#34; / &#34;.koru&#34; / &#34;autonomous.log&#34;
+
+
+def _parse_nfo_line(line: str) -&gt; dict[str, Any] | None:
+    &#34;&#34;&#34;Parse a single nfo-events.jsonl line into a structured log entry.&#34;&#34;&#34;
+    try:
+        record = json.loads(line)
+    except (json.JSONDecodeError, ValueError):
+        return None
+    if not isinstance(record, dict):
+        return None
+    level = str(record.get(&#34;level&#34;, &#34;INFO&#34;)).upper()
+    timestamp = record.get(&#34;timestamp&#34;, &#34;&#34;)
+    kwargs_raw = record.get(&#34;kwargs&#34;, &#34;&#34;)
+    message = &#34;&#34;
+    category = &#34;&#34;
+    if isinstance(kwargs_raw, str):
+        try:
+            kwargs = ast.literal_eval(kwargs_raw)
+        except Exception:  # noqa: BLE001
+            kwargs = {}
+    elif isinstance(kwargs_raw, dict):
+        kwargs = kwargs_raw
+    else:
+        kwargs = {}
+    if not isinstance(kwargs, dict):
+        kwargs = {}
+    message = str(kwargs.get(&#34;activity_message&#34;, &#34;&#34;) or &#34;&#34;)
+    category = str(kwargs.get(&#34;category&#34;, &#34;&#34;) or &#34;&#34;)
+    event = str(kwargs.get(&#34;event&#34;, &#34;&#34;) or &#34;&#34;)
+    if not message:
+        message = f&#34;{event} {category}&#34;.strip() or str(record.get(&#34;function_name&#34;, &#34;&#34;))
+    return {
+        &#34;timestamp&#34;: timestamp,
+        &#34;level&#34;: level,
+        &#34;message&#34;: message,
+        &#34;category&#34;: category,
+        &#34;event&#34;: event,
+        &#34;source&#34;: &#34;nfo&#34;,
+    }
+
+
+def _parse_autonomous_log_line(line: str) -&gt; dict[str, Any] | None:
+    &#34;&#34;&#34;Parse a line from the autonomous log (plain text with optional level prefix).&#34;&#34;&#34;
+    line = line.strip()
+    if not line:
+        return None
+    level = &#34;INFO&#34;
+    upper = line.upper()
+    if upper.startswith(&#34;[ERROR]&#34;) or &#34; ERROR &#34; in upper or &#34;✗&#34; in line:
+        level = &#34;ERROR&#34;
+    elif upper.startswith(&#34;[WARN&#34;) or &#34; WARNING &#34; in upper or &#34;⚠&#34; in line:
+        level = &#34;WARNING&#34;
+    elif upper.startswith(&#34;[DEBUG]&#34;) or &#34; DEBUG &#34; in upper:
+        level = &#34;DEBUG&#34;
+    return {
+        &#34;timestamp&#34;: &#34;&#34;,
+        &#34;level&#34;: level,
+        &#34;message&#34;: line,
+        &#34;category&#34;: &#34;AUTONOMOUS&#34;,
+        &#34;event&#34;: &#34;&#34;,
+        &#34;source&#34;: &#34;autonomous&#34;,
+    }
+
+
+def read_recent_logs(project: Path, *, limit: int = 100) -&gt; list[dict[str, Any]]:
+    &#34;&#34;&#34;Return the most recent log entries from nfo-events.jsonl and autonomous log.&#34;&#34;&#34;
+    entries: list[dict[str, Any]] = []
+    nfo_path = _nfo_log_path(project)
+    if nfo_path.exists():
+        try:
+            lines = nfo_path.read_text(encoding=&#34;utf-8&#34;, errors=&#34;ignore&#34;).splitlines()
+            for line in lines[-limit:]:
+                entry = _parse_nfo_line(line)
+                if entry:
+                    entries.append(entry)
+        except OSError:
+            pass
+    auto_path = _autonomous_log_path(project)
+    if auto_path.exists():
+        try:
+            lines = auto_path.read_text(encoding=&#34;utf-8&#34;, errors=&#34;ignore&#34;).splitlines()
+            for line in lines[-limit:]:
+                entry = _parse_autonomous_log_line(line)
+                if entry:
+                    entries.append(entry)
+        except OSError:
+            pass
+    entries.sort(key=lambda e: e.get(&#34;timestamp&#34;, &#34;&#34;))
+    return entries[-limit:]
+
+
+def sse_log_stream(
+    project: Path,
+    *,
+    levels: set[str] | None = None,
+    poll_interval: float = 0.5,
+    max_events: int = 0,
+    stop_event: Any = None,
+) -&gt; str:
+    &#34;&#34;&#34;Yield SSE-formatted log events by tailing log files.
+
+    This is a generator that yields ``data: &lt;json&gt;\\n\\n`` strings.
+    The caller should write them to the HTTP response.
+    &#34;&#34;&#34;
+    if levels is None:
+        levels = {&#34;ERROR&#34;, &#34;WARNING&#34;, &#34;INFO&#34;, &#34;DEBUG&#34;}
+
+    nfo_path = _nfo_log_path(project)
+    auto_path = _autonomous_log_path(project)
+    nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0
+    auto_offset = auto_path.stat().st_size if auto_path.exists() else 0
+    events_sent = 0
+
+    # Send recent history first
+    for entry in read_recent_logs(project, limit=50):
+        if entry[&#34;level&#34;] in levels:
+            yield f&#34;data: {json.dumps(entry)}\n\n&#34;
+            events_sent += 1
+
+    while True:
+        if max_events and events_sent &gt;= max_events:
+            break
+        if stop_event is not None and stop_event.is_set():
+            break
+        # Check nfo log for new lines
+        if nfo_path.exists():
+            events_sent, nfo_offset = _stream_new_lines(
+                nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json
+            )
+        # Check autonomous log for new lines
+        if auto_path.exists():
+            events_sent, auto_offset = _stream_new_lines(
+                auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json
+            )
+        yield &#34;: keepalive\n\n&#34;
+        time.sleep(poll_interval)
+
+
+def handle_sse_logs_request(handler: Any, config: Any) -&gt; None:
+    &#34;&#34;&#34;Handle GET /api/logs/stream — SSE log streaming endpoint.&#34;&#34;&#34;
+    import urllib.parse
+
+    parsed = urllib.parse.urlparse(handler.path)
+    qs = urllib.parse.parse_qs(parsed.query)
+    level_param = qs.get(&#34;level&#34;, [&#34;&#34;])[0].upper()
+    limit_param = qs.get(&#34;limit&#34;, [&#34;100&#34;])[0]
+    try:
+        limit = int(limit_param)
+    except ValueError:
+        limit = 100
+
+    if level_param and level_param != &#34;ALL&#34;:
+        levels = {level.strip() for level in level_param.split(&#34;,&#34;) if level.strip()}
+    else:
+        levels = {&#34;ERROR&#34;, &#34;WARNING&#34;, &#34;INFO&#34;, &#34;DEBUG&#34;}
+
+    project = handler._selected_project()
+
+    handler.send_response(200)
+    handler.send_header(&#34;Content-Type&#34;, &#34;text/event-stream&#34;)
+    handler.send_header(&#34;Cache-Control&#34;, &#34;no-cache&#34;)
+    handler.send_header(&#34;Connection&#34;, &#34;keep-alive&#34;)
+    handler.send_header(&#34;Access-Control-Allow-Origin&#34;, &#34;*&#34;)
+    handler.end_headers()
+
+    try:
+        stop_event = getattr(handler.server, &#34;shutdown_event&#34;, None)
+        for chunk in sse_log_stream(
+            project, levels=levels, max_events=limit, stop_event=stop_event
+        ):
+            handler.wfile.write(chunk.encode(&#34;utf-8&#34;))
+            handler.wfile.flush()
+    except (BrokenPipeError, ConnectionResetError):
+        pass
+
+
+def handle_logs_json_request(handler: Any, config: Any) -&gt; None:
+    &#34;&#34;&#34;Handle GET /api/logs — return recent log entries as JSON.&#34;&#34;&#34;
+    import urllib.parse
+
+    parsed = urllib.parse.urlparse(handler.path)
+    qs = urllib.parse.parse_qs(parsed.query)
+    limit_param = qs.get(&#34;limit&#34;, [&#34;100&#34;])[0]
+    try:
+        limit = int(limit_param)
+    except ValueError:
+        limit = 100
+
+    project = handler._selected_project()
+    entries = read_recent_logs(project, limit=limit)
+    handler._send_json({&#34;logs&#34;: entries, &#34;ok&#34;: True})
+</pre></details><details><summary>Weryfikacja niezależna od odpowiedzi modelu</summary><pre>{
+  "complexity_findings": [],
+  "complexity_passed": true,
+  "lint_findings": [
+    {
+      "cell": null,
+      "code": "F821",
+      "end_location": {
+        "column": 13,
+        "row": 188
+      },
+      "filename": "/workspace/src/koruapi/dashboard_logs.py",
+      "fix": null,
+      "location": {
+        "column": 9,
+        "row": 188
+      },
+      "message": "Undefined name `time`",
+      "noqa_row": 188,
+      "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+    }
+  ],
+  "lint_passed": false,
+  "static_metrics": {
+    "documented_functions": 7,
+    "functions": 10,
+    "max_function_lines": 45
+  },
+  "syntax_passed": true,
+  "test_exit": 1,
+  "test_output": "................F..FFFFF                                                 [100%]\n=================================== FAILURES ===================================\n_______________________ test_empty_levels_is_not_default _______________________\n\ntmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_empty_levels_is_not_defau0\u0027)\n\n    def test_empty_levels_is_not_default(tmp_path):\n        nfo, _ = paths(tmp_path); nfo.write_text(event(\u0027not visible\u0027))\n        stream = logs.sse_log_stream(tmp_path, levels=set())\n\u003e       assert next(stream) == \u0027: keepalive\\n\\n\u0027\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:27: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_empty_levels_is_not_defau0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n\u003e               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError\n__________________________ test_stop_after_keepalive ___________________________\n\ntmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_stop_after_keepalive0\u0027)\nmonkeypatch = \u003c_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d493a090\u003e\n\n    def test_stop_after_keepalive(tmp_path, monkeypatch):\n        stopped = [False]; monkeypatch.setattr(time, \u0027sleep\u0027, lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, stop_event=SimpleNamespace(is_set=lambda: stopped[0]))\n        assert next(stream) == \u0027: keepalive\\n\\n\u0027; stopped[0] = True\n\u003e       assert list(stream) == []\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:45: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_stop_after_keepalive0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n\u003e           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name \u0027time\u0027 is not defined. Did you forget to import \u0027time\u0027\n\nsrc/koruapi/dashboard_logs.py:188: NameError\n______________________ test_tail_both_sources_and_unicode ______________________\n\ntmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_tail_both_sources_and_uni0\u0027)\nmonkeypatch = \u003c_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d49833e0\u003e\n\n    def test_tail_both_sources_and_unicode(tmp_path, monkeypatch):\n        nfo, auto = paths(tmp_path); monkeypatch.setattr(time, \u0027sleep\u0027, lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, max_events=2)\n        assert next(stream) == \u0027: keepalive\\n\\n\u0027\n        nfo.write_text(event(\u0027Za\u017c\u00f3\u0142\u0107 \ud83c\udf0d\u0027)); auto.write_text(\u0027[ERROR] awaria\\n\u0027)\n\u003e       assert data(next(stream))[\u0027message\u0027] == \u0027Za\u017c\u00f3\u0142\u0107 \ud83c\udf0d\u0027\n                    ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:53: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_tail_both_sources_and_uni0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n\u003e           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name \u0027time\u0027 is not defined. Did you forget to import \u0027time\u0027\n\nsrc/koruapi/dashboard_logs.py:188: NameError\n_________________________ test_rotation_resets_offset __________________________\n\ntmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_rotation_resets_offset0\u0027)\nmonkeypatch = \u003c_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d4983f80\u003e\n\n    def test_rotation_resets_offset(tmp_path, monkeypatch):\n        nfo, _ = paths(tmp_path); nfo.write_text(\u0027not JSON \u0027 * 200 + \u0027\\n\u0027)\n        monkeypatch.setattr(time, \u0027sleep\u0027, lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, max_events=1)\n\u003e       assert next(stream) == \u0027: keepalive\\n\\n\u0027\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:63: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_rotation_resets_offset0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n\u003e               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError\n________________________ test_new_file_and_level_filter ________________________\n\ntmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_new_file_and_level_filter0\u0027)\nmonkeypatch = \u003c_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d4986b10\u003e\n\n    def test_new_file_and_level_filter(tmp_path, monkeypatch):\n        monkeypatch.setattr(time, \u0027sleep\u0027, lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, levels={\u0027ERROR\u0027}, max_events=1)\n        assert next(stream) == \u0027: keepalive\\n\\n\u0027\n        nfo, _ = paths(tmp_path); nfo.write_text(event(\u0027ignored\u0027) + event(\u0027visible\u0027, \u0027ERROR\u0027))\n\u003e       assert data(next(stream))[\u0027message\u0027] == \u0027visible\u0027; stream.close()\n                    ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:74: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_new_file_and_level_filter0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n\u003e           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name \u0027time\u0027 is not defined. Did you forget to import \u0027time\u0027\n\nsrc/koruapi/dashboard_logs.py:188: NameError\n_______________________ test_unreadable_logs_are_ignored _______________________\n\ntmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_unreadable_logs_are_ignor0\u0027)\n\n    def test_unreadable_logs_are_ignored(tmp_path):\n        nfo, auto = paths(tmp_path); nfo.mkdir(); auto.mkdir()\n        stream = logs.sse_log_stream(tmp_path)\n\u003e       assert next(stream) == \u0027: keepalive\\n\\n\u0027; stream.close()\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:80: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_unreadable_logs_are_ignor0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n\u003e               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError\n=========================== short test summary info ============================\nFAILED ../checks/test_stream_regression.py::test_empty_levels_is_not_default\nFAILED ../checks/test_stream_regression.py::test_stop_after_keepalive - NameE...\nFAILED ../checks/test_stream_regression.py::test_tail_both_sources_and_unicode\nFAILED ../checks/test_stream_regression.py::test_rotation_resets_offset - Val...\nFAILED ../checks/test_stream_regression.py::test_new_file_and_level_filter - ...\nFAILED ../checks/test_stream_regression.py::test_unreadable_logs_are_ignored\n6 failed, 18 passed in 0.07s\n",
+  "test_summary": {
+    "collected": 24,
+    "failed": 6,
+    "passed": 18,
+    "total": 24
+  },
+  "tests": [
+    {
+      "call": {
+        "duration": 0.00011725997319445014,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_valid_nfo_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 6.590300472453237e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_invalid_json",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 6.0914026107639074e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_empty_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 7.897801697254181e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_error_level",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 6.960099563002586e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_missing_message_falls_back_to_function_name",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 5.132600199431181e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_error_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 4.841096233576536e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_warning_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 4.94130072183907e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_info_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 4.711799556389451e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_empty_line",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 4.8111018259078264e-05,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_cross_mark_error",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00010265305172652006,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_no_log_files",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00020501401741057634,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_nfo_log",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00016492902068421245,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_autonomous_log",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00048341602087020874,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_limit",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.0002879300154745579,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_yields_sse_format",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.000230172008741647,
+        "outcome": "passed"
+      },
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_level_filter",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "crash": {
+          "lineno": 179,
+          "message": "ValueError: not enough values to unpack (expected 2, got 0)",
+          "path": "/workspace/src/koruapi/dashboard_logs.py"
+        },
+        "duration": 0.0002183190081268549,
+        "longrepr": "tmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_empty_levels_is_not_defau0\u0027)\n\n    def test_empty_levels_is_not_default(tmp_path):\n        nfo, _ = paths(tmp_path); nfo.write_text(event(\u0027not visible\u0027))\n        stream = logs.sse_log_stream(tmp_path, levels=set())\n\u003e       assert next(stream) == \u0027: keepalive\\n\\n\u0027\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:27: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_empty_levels_is_not_defau0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n\u003e               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError",
+        "outcome": "failed",
+        "traceback": [
+          {
+            "lineno": 27,
+            "message": "",
+            "path": "/checks/test_stream_regression.py"
+          },
+          {
+            "lineno": 179,
+            "message": "ValueError",
+            "path": "src/koruapi/dashboard_logs.py"
+          }
+        ]
+      },
+      "nodeid": "checks/test_stream_regression.py::test_empty_levels_is_not_default",
+      "outcome": "failed"
+    },
+    {
+      "call": {
+        "duration": 0.0002356710028834641,
+        "outcome": "passed"
+      },
+      "nodeid": "checks/test_stream_regression.py::test_existing_history_order_and_limit_semantics",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "duration": 0.00010713102528825402,
+        "outcome": "passed"
+      },
+      "nodeid": "checks/test_stream_regression.py::test_already_set_stop_event",
+      "outcome": "passed"
+    },
+    {
+      "call": {
+        "crash": {
+          "lineno": 188,
+          "message": "NameError: name \u0027time\u0027 is not defined. Did you forget to import \u0027time\u0027",
+          "path": "/workspace/src/koruapi/dashboard_logs.py"
+        },
+        "duration": 0.00012345198774710298,
+        "longrepr": "tmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_stop_after_keepalive0\u0027)\nmonkeypatch = \u003c_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d493a090\u003e\n\n    def test_stop_after_keepalive(tmp_path, monkeypatch):\n        stopped = [False]; monkeypatch.setattr(time, \u0027sleep\u0027, lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, stop_event=SimpleNamespace(is_set=lambda: stopped[0]))\n        assert next(stream) == \u0027: keepalive\\n\\n\u0027; stopped[0] = True\n\u003e       assert list(stream) == []\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:45: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_stop_after_keepalive0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n\u003e           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name \u0027time\u0027 is not defined. Did you forget to import \u0027time\u0027\n\nsrc/koruapi/dashboard_logs.py:188: NameError",
+        "outcome": "failed",
+        "traceback": [
+          {
+            "lineno": 45,
+            "message": "",
+            "path": "/checks/test_stream_regression.py"
+          },
+          {
+            "lineno": 188,
+            "message": "NameError",
+            "path": "src/koruapi/dashboard_logs.py"
+          }
+        ]
+      },
+      "nodeid": "checks/test_stream_regression.py::test_stop_after_keepalive",
+      "outcome": "failed"
+    },
+    {
+      "call": {
+        "crash": {
+          "lineno": 188,
+          "message": "NameError: name \u0027time\u0027 is not defined. Did you forget to import \u0027time\u0027",
+          "path": "/workspace/src/koruapi/dashboard_logs.py"
+        },
+        "duration": 0.00022149499272927642,
+        "longrepr": "tmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_tail_both_sources_and_uni0\u0027)\nmonkeypatch = \u003c_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d49833e0\u003e\n\n    def test_tail_both_sources_and_unicode(tmp_path, monkeypatch):\n        nfo, auto = paths(tmp_path); monkeypatch.setattr(time, \u0027sleep\u0027, lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, max_events=2)\n        assert next(stream) == \u0027: keepalive\\n\\n\u0027\n        nfo.write_text(event(\u0027Za\u017c\u00f3\u0142\u0107 \ud83c\udf0d\u0027)); auto.write_text(\u0027[ERROR] awaria\\n\u0027)\n\u003e       assert data(next(stream))[\u0027message\u0027] == \u0027Za\u017c\u00f3\u0142\u0107 \ud83c\udf0d\u0027\n                    ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:53: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_tail_both_sources_and_uni0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n\u003e           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name \u0027time\u0027 is not defined. Did you forget to import \u0027time\u0027\n\nsrc/koruapi/dashboard_logs.py:188: NameError",
+        "outcome": "failed",
+        "traceback": [
+          {
+            "lineno": 53,
+            "message": "",
+            "path": "/checks/test_stream_regression.py"
+          },
+          {
+            "lineno": 188,
+            "message": "NameError",
+            "path": "src/koruapi/dashboard_logs.py"
+          }
+        ]
+      },
+      "nodeid": "checks/test_stream_regression.py::test_tail_both_sources_and_unicode",
+      "outcome": "failed"
+    },
+    {
+      "call": {
+        "crash": {
+          "lineno": 179,
+          "message": "ValueError: not enough values to unpack (expected 2, got 0)",
+          "path": "/workspace/src/koruapi/dashboard_logs.py"
+        },
+        "duration": 0.0002671399852260947,
+        "longrepr": "tmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_rotation_resets_offset0\u0027)\nmonkeypatch = \u003c_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d4983f80\u003e\n\n    def test_rotation_resets_offset(tmp_path, monkeypatch):\n        nfo, _ = paths(tmp_path); nfo.write_text(\u0027not JSON \u0027 * 200 + \u0027\\n\u0027)\n        monkeypatch.setattr(time, \u0027sleep\u0027, lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, max_events=1)\n\u003e       assert next(stream) == \u0027: keepalive\\n\\n\u0027\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:63: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_rotation_resets_offset0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n\u003e               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError",
+        "outcome": "failed",
+        "traceback": [
+          {
+            "lineno": 63,
+            "message": "",
+            "path": "/checks/test_stream_regression.py"
+          },
+          {
+            "lineno": 179,
+            "message": "ValueError",
+            "path": "src/koruapi/dashboard_logs.py"
+          }
+        ]
+      },
+      "nodeid": "checks/test_stream_regression.py::test_rotation_resets_offset",
+      "outcome": "failed"
+    },
+    {
+      "call": {
+        "crash": {
+          "lineno": 188,
+          "message": "NameError: name \u0027time\u0027 is not defined. Did you forget to import \u0027time\u0027",
+          "path": "/workspace/src/koruapi/dashboard_logs.py"
+        },
+        "duration": 0.000201547984033823,
+        "longrepr": "tmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_new_file_and_level_filter0\u0027)\nmonkeypatch = \u003c_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d4986b10\u003e\n\n    def test_new_file_and_level_filter(tmp_path, monkeypatch):\n        monkeypatch.setattr(time, \u0027sleep\u0027, lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, levels={\u0027ERROR\u0027}, max_events=1)\n        assert next(stream) == \u0027: keepalive\\n\\n\u0027\n        nfo, _ = paths(tmp_path); nfo.write_text(event(\u0027ignored\u0027) + event(\u0027visible\u0027, \u0027ERROR\u0027))\n\u003e       assert data(next(stream))[\u0027message\u0027] == \u0027visible\u0027; stream.close()\n                    ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:74: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_new_file_and_level_filter0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n\u003e           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name \u0027time\u0027 is not defined. Did you forget to import \u0027time\u0027\n\nsrc/koruapi/dashboard_logs.py:188: NameError",
+        "outcome": "failed",
+        "traceback": [
+          {
+            "lineno": 74,
+            "message": "",
+            "path": "/checks/test_stream_regression.py"
+          },
+          {
+            "lineno": 188,
+            "message": "NameError",
+            "path": "src/koruapi/dashboard_logs.py"
+          }
+        ]
+      },
+      "nodeid": "checks/test_stream_regression.py::test_new_file_and_level_filter",
+      "outcome": "failed"
+    },
+    {
+      "call": {
+        "crash": {
+          "lineno": 179,
+          "message": "ValueError: not enough values to unpack (expected 2, got 0)",
+          "path": "/workspace/src/koruapi/dashboard_logs.py"
+        },
+        "duration": 0.00019775104010477662,
+        "longrepr": "tmp_path = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_unreadable_logs_are_ignor0\u0027)\n\n    def test_unreadable_logs_are_ignored(tmp_path):\n        nfo, auto = paths(tmp_path); nfo.mkdir(); auto.mkdir()\n        stream = logs.sse_log_stream(tmp_path)\n\u003e       assert next(stream) == \u0027: keepalive\\n\\n\u0027; stream.close()\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:80: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath(\u0027/tmp/pytest-of-nobody/pytest-0/test_unreadable_logs_are_ignor0\u0027)\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -\u003e str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: \u003cjson\u003e\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent \u003e= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n\u003e               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError",
+        "outcome": "failed",
+        "traceback": [
+          {
+            "lineno": 80,
+            "message": "",
+            "path": "/checks/test_stream_regression.py"
+          },
+          {
+            "lineno": 179,
+            "message": "ValueError",
+            "path": "src/koruapi/dashboard_logs.py"
+          }
+        ]
+      },
+      "nodeid": "checks/test_stream_regression.py::test_unreadable_logs_are_ignored",
+      "outcome": "failed"
+    }
+  ]
+}</pre></details><details><summary>Tokeny i zasoby</summary><pre>{
+  "api_calls": 8,
+  "completion_tokens": 2410,
+  "finish_reasons": [
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "tool_calls",
+    "stop"
+  ],
+  "gpu_busy_mean_percent": 95.03654485049834,
+  "output_limit_hits": 0,
+  "peak_gtt_gib": 1.1946830749511719,
+  "peak_vram_gib": 12.527000427246094,
+  "prompt_tokens": 49691,
+  "tool_calls": 7,
+  "tool_errors": 1,
+  "tools": {
+    "bash": 2,
+    "edit": 4,
+    "read": 1
+  },
+  "usage_complete": true,
+  "usage_records": 8
+}</pre><pre>{
+  "models": [
+    {
+      "context_length": 16384,
+      "details": {
+        "families": [
+          "gptoss"
+        ],
+        "family": "gptoss",
+        "format": "gguf",
+        "parameter_size": "20.9B",
+        "parent_model": "",
+        "quantization_level": "MXFP4"
+      },
+      "digest": "17052f91a42e97930aa6e28a6c6c06a983e6a58dbb00434885a0cf5313e376f7",
+      "expires_at": "2319-01-19T16:42:46.530721154+01:00",
+      "model": "gpt-oss:20b",
+      "name": "gpt-oss:20b",
+      "size": 12870966312,
+      "size_vram": 12870966312
+    }
+  ]
+}</pre></details></article>
+<article><h2>Metoda i ograniczenia</h2><p>Jedna świeża próba każdego modelu, kolejność Gemma → GPT-OSS. Każda próba ma nowy kontener i sesję, ten sam kod, prompt i limit: 8 kroków / 480 sekund / 16K kontekstu / 4096 tokenów na odpowiedź. Agent może zmieniać plik i uruchamiać widoczne testy przez narzędzia OpenCode; wykonane działania są zapisane w przebiegu. Kontroler następnie sprawdza kandydat w kontenerze bez sieci i z plikami tylko do odczytu.</p><p>Wynik PASS wymaga przejścia testów, lintu, progu złożoności i zakresu zmian. Testy były oceniane osobno od deklaracji agenta. Przed próbami: punkt startowy zalicza 24/24 testów, ale nie próg CC; istniejąca referencyjna refaktoryzacja zalicza oba warunki.</p><p>Czas obejmuje cały przebieg OpenCode, narzędzia i uruchomienie świeżego kontenera; wstępne ładowanie/rozgrzewka modelu jest zapisane osobno. VRAM/GTT to wartości bezwzględne z sysfs próbkowane co 0,5 s podczas pracy agenta. Nie odejmujemy pola memory_before_load: zostało pobrane przed usunięciem poprzedniego modelu. Licznik size_vram z API Ollama dla Gemmy różnił się od zajętości pamięci widocznej w sterowniku; oba odczyty są zachowane, a tabela używa pomiaru sterownika. Tokeny pochodzą ze strumienia API; brak licznika jest oznaczony jako brak danych. Nie mierzono energii, całego projektu, wdrożenia ani niezależnych zadań.</p><p>GPT-OSS używa reasoning_effort=low, Gemma domyślnego zachowania serwera. Zestaw źródeł i testów został zawężony do modułu SSE; nie jest to pełna kwalifikacja Koru. Jeden historyczny problem i jedna próba na model nie wystarczają do ogólnego rankingu modeli.</p></article>
+<article><h2>Naprawy środowiska przed pomiarem</h2><p>Pierwsza kontrola zawierała testy innych modułów dashboardu, których nie ma w izolowanym zestawie. Skorygowano selektory. Pierwsza sesja OpenCode napotkała zakaz wykonania pobranego ripgrep na /tmp; poprawiono opcję tmpfs na exec, zachowując kontener bez uprawnień, ograniczenia zasobów i zakres zmian. Poprawiono też odrzucanie edycji przez OpenCode w katalogu bez Git: jawne zezwolenie na edycję jest ograniczone uprawnieniami systemu plików do jednego pliku źródłowego. UID 65534 nie może zmieniać testów ani tworzyć innych plików; dostęp sprawdzamy przed każdą próbą. Te nieprawidłowe przebiegi zachowano jako dowody awarii i wyłączono z porównania.</p></article>
+<article><h2>Ocena poprawności</h2><p>Gemma nie zmieniła kodu; ostatnia odpowiedź osiągnęła limit 4096 tokenów. GPT-OSS wykonał edycję i zaliczył 16 oryginalnych testów oraz CC, ale 6 dodatkowych testów wykryło błędy: potraktowanie generatora jak zwracanej pary wartości oraz usunięcie importu time przy pozostawieniu time.sleep (F821). Żaden model nie ukończył całego zadania.</p><p>Dodatkowe testy skorygowano, aby podmieniały standardowe time.sleep bez zależności od prywatnego importu modułu. Ponownie sprawdzono identyczny kod obu modeli i kontrole; wyniki zaliczeń pozostały takie same. Początkowe testy i controller-results.json zachowano.</p></article><p>Historical real task replay, selected module and scoped tests, not full Koru acceptance. One fresh container/session per trial; provider limited to one local model, permissions bounded to one source file. Baseline/reference controls plus withheld behavior tests, real edits, no outside repair feedback. API and GPU/memory samples archived; not an energy measurement or general model ranking.</p><p>Produkcja po pomiarach: <strong>gpt-oss-minis-code:20b</strong>.</p>
+<p><a href="results.json">Surowe odpowiedzi, żądania API i próbki zasobów</a> · <a href="provenance.json">Pochodzenie</a> · <a href="task.json">Zadanie Planfile</a> · <a href="../coding-quality-20261009/">Raport trzech zadań jakościowych</a></p></html>

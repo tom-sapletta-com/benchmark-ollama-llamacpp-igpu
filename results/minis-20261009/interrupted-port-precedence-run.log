@@ -1,0 +1,23 @@
+1/54 round=1 q8 lru_cache pass=True wall=8.96s rate=28.46137910494
+2/54 round=1 q8 deep_merge pass=True wall=10.99s rate=28.990810815799414
+3/54 round=1 q8 topological_sort pass=True wall=14.48s rate=28.67684585164781
+4/54 round=1 q8 merge_intervals pass=True wall=11.04s rate=28.947552143906794
+5/54 round=1 q8 csv_totals pass=True wall=11.34s rate=28.953128005288377
+6/54 round=1 q8 unique_ordered pass=True wall=6.25s rate=28.76046425524873
+CONTEXT round=1 q8 tokens=4957 ttft=13.703640774998348 wall=14.53s pass=True
+7/54 round=1 bf16 lru_cache pass=True wall=12.23s rate=20.45817732070394
+8/54 round=1 bf16 deep_merge pass=True wall=18.34s rate=20.515560117166643
+9/54 round=1 bf16 topological_sort pass=True wall=19.95s rate=20.630154222995248
+10/54 round=1 bf16 merge_intervals pass=True wall=15.42s rate=20.40649310602995
+11/54 round=1 bf16 csv_totals pass=True wall=15.40s rate=20.626969451740806
+12/54 round=1 bf16 unique_ordered pass=True wall=8.59s rate=20.54353878674185
+CONTEXT round=1 bf16 tokens=4957 ttft=16.88617254901328 wall=17.98s pass=True
+Traceback (most recent call last):
+  File "/home/tom/.local/state/minis-llamacpp-ab-20261009/runtime_compare.py", line 297, in <module>
+    main()
+  File "/home/tom/.local/state/minis-llamacpp-ab-20261009/runtime_compare.py", line 242, in main
+    version=ready(profile)
+            ^^^^^^^^^^^^^^
+  File "/home/tom/.local/state/minis-llamacpp-ab-20261009/runtime_compare.py", line 85, in ready
+    raise RuntimeError('Runtime did not become ready: ' + profile)
+RuntimeError: Runtime did not become ready: ollama

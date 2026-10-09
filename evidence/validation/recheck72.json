@@ -1,0 +1,578 @@
+[
+  {
+    "profile": "q8",
+    "task": "lru_cache",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "deep_merge",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "topological_sort",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "merge_intervals",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "csv_totals",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "unique_ordered",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "lru_cache",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "deep_merge",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "topological_sort",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "merge_intervals",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "csv_totals",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "unique_ordered",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "lru_cache",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "deep_merge",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "topological_sort",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "merge_intervals",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "csv_totals",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "unique_ordered",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "csv_totals",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "merge_intervals",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "lru_cache",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "unique_ordered",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "deep_merge",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "topological_sort",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "csv_totals",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "merge_intervals",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "lru_cache",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "unique_ordered",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "deep_merge",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "topological_sort",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "csv_totals",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "merge_intervals",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "lru_cache",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "unique_ordered",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "deep_merge",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "topological_sort",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "lru_cache",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "unique_ordered",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "merge_intervals",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "deep_merge",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "topological_sort",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "bf16",
+    "task": "csv_totals",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "lru_cache",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "unique_ordered",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "merge_intervals",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "deep_merge",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "topological_sort",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama",
+    "task": "csv_totals",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "lru_cache",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "unique_ordered",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "merge_intervals",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "deep_merge",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "topological_sort",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "q8",
+    "task": "csv_totals",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "lru_cache",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "deep_merge",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "topological_sort",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "merge_intervals",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "csv_totals",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "unique_ordered",
+    "repeat": 1,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "csv_totals",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "merge_intervals",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "lru_cache",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "unique_ordered",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "deep_merge",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "topological_sort",
+    "repeat": 2,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "lru_cache",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "unique_ordered",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "merge_intervals",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "deep_merge",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "topological_sort",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  },
+  {
+    "profile": "ollama_q8",
+    "task": "csv_totals",
+    "repeat": 3,
+    "passed": true,
+    "status": "passed",
+    "output": ""
+  }
+]

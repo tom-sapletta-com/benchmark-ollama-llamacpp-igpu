@@ -1,0 +1,13 @@
+{
+  "config": {
+    "ollama.enable": true,
+    "ollama.base_urls": [
+      "http://host.docker.internal:11434"
+    ],
+    "openai.enable": false,
+    "ui.default_models": "gpt-oss-minis-code:20b"
+  },
+  "users": 1,
+  "chats": 4,
+  "container_upstream": "upstream Q8 model reachable from OpenWebUI container"
+}
