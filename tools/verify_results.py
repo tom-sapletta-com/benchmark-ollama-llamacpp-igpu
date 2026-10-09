@@ -72,11 +72,14 @@ def verify():
     assert all(row['passed'] for row in replay['results'] + replay['context_results'])
     rechecked = load('evidence/validation/recheck72.json')
     assert len(rechecked) == 72 and all(row['passed'] for row in rechecked)
+    from verify_quality import verify as verify_quality
+    quality = verify_quality()
     return {'checksum_files': len(checked), 'coding_passed': 72, 'long_input_passed': 12,
             'paired_prompts': 21, 'q8_matching_tensors': 459,
             'prior_report_trials': len(prior['results']),
             'interrupted_preserved_trials': len(interrupted['results']),
             'saved_code_rechecked': 72, 'production_replay_coding': 6, 'production_replay_context': 1,
+            'coding_quality': quality,
             'deployment': 'Ollama Q8 enabled; llama.cpp disabled (historical deployment receipt)'}
 
 

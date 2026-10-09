@@ -4,6 +4,46 @@ Pełne wyniki benchmarków wykonanych na **minis** 8–9 października 2026 r., 
 
 Sprzęt: **AMD Ryzen 9 7940HS, Radeon 780M, 64 GB DDR5, 16 GiB pamięci zarezerwowanej dla iGPU**. Ubuntu 24.04.5, Mesa 25.2.8, Vulkan 1.4.318. Pamięć UMA jest współdzielona; rezerwacja 16 GiB nie oznacza odrębnych 16 GiB VRAM.
 
+## Jakość kodu: generowanie i dwie naprawy
+
+Wcześniejsze raporty badały szybkość i testy funkcjonalne sześciu małych funkcji. Nie obejmowały zmian w istniejącym kodzie ani osobnego raportu regresji i czytelności. Dodano [raport jakości trzech use case](results/coding-quality-20261009/index.html), [pełne odpowiedzi](results/coding-quality-20261009/results.json) i [fixtures z testami i referencjami](results/coding-quality-20261009/cases.json).
+
+| Use case | Zakres | Sprawdzane zachowanie |
+| --- | --- | --- |
+| Generowanie agregatora faktur NDJSON | `invoice_summary.py` | Decimal, sumowanie przed zaokrągleniem, walidacja, numery błędnych linii, sortowanie wyników |
+| Naprawa cache TTL + LRU | `ttl_cache.py` | Granica wygaśnięcia, odczyt bez przedłużania TTL, LRU, nadpisanie, usuwanie wygasłych wpisów, parametry |
+| Naprawa rozliczenia faktury | `money.py`, `cart.py`, `invoice.py` | Dokładne grosze, mnożenie przed zaokrągleniem, rabat całej faktury, walidacja i zachowanie wejścia |
+
+**Zmierzony wynik GPT-OSS 20B Q8: 2/9 w pełni poprawnych odpowiedzi.**
+
+| Use case | Pełne zaliczenia | Testy poprawności | Testy kompatybilności/regresji | Wykryty problem |
+| --- | ---: | ---: | ---: | --- |
+| Generowanie | 2/3 | 16/24 | 8/12 | Jedna odpowiedź zawierała błąd składni w przykładzie z zagnieżdżonymi potrójnymi cudzysłowami; testów tej odpowiedzi nie uruchomiono |
+| Naprawa jednego pliku | 0/3 | 21/24 | 12/12 | Nadpisanie klucza w pełnym cache usuwało inny, nadal ważny wpis |
+| Naprawa trzech plików | 0/3 | 21/24 | 12/12 | Cena jednostkowa była zaokrąglana przed mnożeniem: `0.005 × 2` dawało 2 grosze zamiast 1 |
+
+Wykonano 96 metod testowych: 90 zaliczeń i 6 niezaliczeń. Pozostałych 12 metod nie uruchomiono z powodu błędu składni. „0 zaliczeń” przy takiej odpowiedzi oznacza brak działającego rozwiązania, nie wykonanie tych testów. Wszystkie poprawnie sparsowane odpowiedzi zmieniły wyłącznie wymagane pliki. Wynik pokazuje ograniczenia badanego modelu i promptu; nie jest porównaniem innych modeli ani trybów rozumowania.
+
+Każda próba ma **8 testów poprawności + 4 testy kompatybilności/regresji**. Metoda z podprzypadkami zalicza się dopiero po zaliczeniu ich wszystkich. Dla generowania „regresja” oznacza zgodność podstawowego kontraktu, ponieważ wejście zawiera tylko stub. Model widzi specyfikację i pliki wejściowe; nie widzi kodu testów ani referencji. Zwraca pełne pliki w JSON. Nie dostaje informacji o błędach ani kolejnej szansy naprawy w ramach próby. Zapisujemy też nieudane i niekompletne odpowiedzi.
+
+Prawidłowy zakres oznacza zmianę dokładnie żądanych plików, bez modyfikacji testów i dodatkowych ścieżek. Statyczny przegląd AST podaje długość funkcji, liczbę rozgałęzień, dokumentację, adnotacje i ostrzeżenia. To wskaźniki do przeglądu; nie zastępują oceny architektury, czytelności i bezpieczeństwa. Nie wyliczamy arbitralnej zbiorczej oceny jakości.
+
+Kontrole: każda referencja musi zaliczyć 12/12, każda wersja wejściowa musi zawieść. Dla naprawy trzech plików przywrócenie osobno każdego wadliwego pliku również musi spowodować błąd. Kod modelu jest uruchamiany jako użytkownik bez uprawnień w przypiętym obrazie Python 3.12, bez sieci i zapisu do repozytorium, z limitami CPU/RAM/procesów oraz zapisem wyłącznie do tymczasowego `/work`.
+
+Podczas pomiaru poprawiono też benchmark: pierwszy ewaluator odrzucał legalny import `__future__`, a test numeru linii rozróżniał wielkość liter w słowie „line”. [Pierwszy przebieg](results/coding-quality-initial-20261009/results.json) i jego testy oraz dokładny początkowy skrypt zachowano. Po korekcie oceniono ponownie **te same bajty odpowiedzi**, bez ponownego generowania i bez ręcznych napraw kodu. [tools/recheck_quality.py](tools/recheck_quality.py) pozwala odtworzyć tę korektę; weryfikator sprawdza identyczność odpowiedzi, promptów i czasów z pierwszym przebiegiem.
+
+Pomiar dotyczy **jednego wdrożonego GPT-OSS 20B w Ollama Q8/MXFP4**, z natywnym szablonem rozmowy, `think=low`, temperaturą 0, seed 42, kontekstem 16384 i limitem 8192 tokenów, z formatem odpowiedzi JSON. Trzy powtórzenia tego samego promptu mierzą powtarzalność; nie tworzą dziewięciu niezależnych zadań. Wyników nie łączymy z historycznymi medianami silników ani z rankingiem modeli. Nie przeprowadzono niezależnej oceny przez ludzi.
+
+Odtworzenie trzech use case na już działającym Ollama:
+
+```bash
+DOCKER_HOST=ssh://tom@minis .venv/bin/python tools/quality_benchmark.py \
+  --url http://minis:11434 --model gpt-oss-minis-code:20b \
+  --output replays/coding-quality --repeats 3
+```
+
+Spójność zapisanego raportu: `python3 tools/verify_quality.py`. Skrypt sprawdza również nieudane próby; FAIL modelu jest wynikiem benchmarku, a nie powodem usunięcia danych.
+
 ## Wyniki GPT-OSS 20B — 9 października
 
 Wszystkie profile mają 72 tensory ekspertów **MXFP4**. Oznaczenie **Q8** dotyczy 98 macierzy attention/output/embedding, a nie całego modelu. Warianty Q8/Q8 i BF16/BF16 mają odpowiednio identyczne wszystkie 459 tensorów.
@@ -61,6 +101,7 @@ Potwierdzenia znajdują się w [evidence/deployment](evidence/deployment). Przen
 
 | Ścieżka | Zawartość |
 | --- | --- |
+| [results/coding-quality-20261009](results/coding-quality-20261009) | Trzy use case: generowanie, naprawa jednego pliku, naprawa trzech plików; testy, regresje, diff i wskaźniki AST |
 | [results/minis-20261009](results/minis-20261009) | Końcowe 72 próby kodowania i 12 prób długiego wejścia; dokładne prompty, początkowy zestaw 54 prób, przerwana próba i logi |
 | [results/minis-20261008](results/minis-20261008) | Wcześniejsze 60 prób pięciu modeli; odpowiedzi, testy, zakłócenia i metryki |
 | [evidence/model-parity](evidence/model-parity) | SHA256 modeli, przypięte rewizje, typy/wymiary/hashes wszystkich tensorów, sparsowane nagłówki GGUF |

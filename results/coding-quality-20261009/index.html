@@ -1,0 +1,2666 @@
+<!doctype html><html lang="pl"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Jakość kodu · 3 use case · minis</title>
+<style>body{font:16px system-ui;max-width:1200px;margin:32px auto;padding:20px;background:#10151b;color:#eaf1f8}h1{font-size:36px}a{color:#8ebaff}article{padding:20px;background:#1b232d;border-radius:12px;margin:20px 0}p{line-height:1.6}table{border-collapse:collapse;width:100%}td,th{padding:12px;text-align:left;border-bottom:1px solid #394553}.pass{color:#7beba7}.fail{color:#ff9393}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#10151b;padding:16px;border-radius:8px}summary{cursor:pointer;padding:10px}small{color:#b9c8d8}</style>
+<h1>Jakość wygenerowanego kodu</h1><p>3 zadania · gpt-oss-minis-code:20b · Ollama · 3 powtórzenia · status: complete</p>
+<article><h2>2/9 odpowiedzi w pełni poprawnych</h2><table><thead><tr><th>Use case</th><th>Pełne zaliczenia</th><th>Poprawność</th><th>Kompatybilność/regresje</th></tr></thead><tbody><tr><td>Generowanie: agregator faktur NDJSON</td><td>2/3</td><td>16/24</td><td>8/12</td></tr><tr><td>Naprawa w jednym pliku: cache TTL + LRU</td><td>0/3</td><td>21/24</td><td>12/12</td></tr><tr><td>Naprawa w trzech plikach: kwoty, pozycje i rabat faktury</td><td>0/3</td><td>21/24</td><td>12/12</td></tr></tbody></table></article>
+<p>Każda odpowiedź jest sprawdzana bez ręcznych poprawek: 8 testów poprawności i 4 testy kompatybilności/regresji. Przy generowaniu „regresja” oznacza kompatybilność kontraktu, ponieważ nie było działającej implementacji. Test z podprzypadkami liczy się jako jedna metoda; musi zaliczyć wszystkie podprzypadki.</p>
+<p>Brak jednej arbitralnej oceny „jakości”. Poprawność, regresje i zakres zmian mierzymy oddzielnie. Długość funkcji, dokumentacja, adnotacje i ostrzeżenia AST pomagają przeglądać kod; nie dowodzą jego czytelności ani bezpieczeństwa.</p>
+<table><thead><tr><th>Use case / próba</th><th>Poprawność</th><th>Regresja</th><th>Zakres plików</th><th>Status oceny</th><th>Wynik</th><th>Czas / tok/s</th></tr></thead><tbody>
+<tr><td>fix_checkout_three_files #1</td><td>7/8</td><td>4/4</td><td>OK</td><td>complete</td><td class="fail">FAIL</td><td>35.9 s / 28.7</td></tr><tr><td>fix_ttl_cache #1</td><td>7/8</td><td>4/4</td><td>OK</td><td>complete</td><td class="fail">FAIL</td><td>27.8 s / 28.7</td></tr><tr><td>generate_invoice_summary #1</td><td>0/8</td><td>0/4</td><td>OK</td><td>syntax_error</td><td class="fail">FAIL</td><td>44.5 s / 28.6</td></tr><tr><td>fix_checkout_three_files #2</td><td>7/8</td><td>4/4</td><td>OK</td><td>complete</td><td class="fail">FAIL</td><td>30.9 s / 28.7</td></tr><tr><td>generate_invoice_summary #2</td><td>8/8</td><td>4/4</td><td>OK</td><td>complete</td><td class="pass">PASS</td><td>38.4 s / 28.7</td></tr><tr><td>fix_ttl_cache #2</td><td>7/8</td><td>4/4</td><td>OK</td><td>complete</td><td class="fail">FAIL</td><td>23.6 s / 28.7</td></tr><tr><td>generate_invoice_summary #3</td><td>8/8</td><td>4/4</td><td>OK</td><td>complete</td><td class="pass">PASS</td><td>38.3 s / 28.7</td></tr><tr><td>fix_checkout_three_files #3</td><td>7/8</td><td>4/4</td><td>OK</td><td>complete</td><td class="fail">FAIL</td><td>34.7 s / 28.7</td></tr><tr><td>fix_ttl_cache #3</td><td>7/8</td><td>4/4</td><td>OK</td><td>complete</td><td class="fail">FAIL</td><td>23.6 s / 28.6</td></tr>
+</tbody></table>
+<small>Status syntax_error/invalid_output oznacza, że testów nie uruchomiono. Licznik 0 oznacza wtedy brak zaliczeń, a nie wykonanie wszystkich testów z błędnym wynikiem.</small>
+<article><h2>Korekta oceniającego skryptu</h2><p>Poprawiono oceniający skrypt: legalny import __future__ nie jest blokowany, numer linii jest akceptowany niezależnie od wielkości liter, a błąd składni jest oddzielony od poprawności zakresu plików. Nie poprawiano odpowiedzi modelu.</p><p>Oceniono ponownie dokładnie te same odpowiedzi; kod modelu, prompty i czasy generowania pozostały niezmienione. Zachowano <a href="../coding-quality-initial-20261009/results.json">pierwsze wyniki</a> oraz <a href="../coding-quality-initial-20261009/cases.json">pierwszy zestaw testów</a>.</p></article>
+<article><h2>Generowanie: agregator faktur NDJSON</h2><p>Pliki: invoice_summary.py</p><details><summary>Specyfikacja przekazana modelowi</summary><pre>Create invoice_summary.py with summarize_invoices(text: str) -&gt; dict[str, str].
+Input is NDJSON: one JSON object per nonblank line, with customer (nonempty string),
+amount (nonnegative finite Decimal string), and status (paid or pending).
+Return paid totals per customer as fixed two-decimal strings, sorted by customer.
+Sum exact Decimal amounts before rounding the customer total with ROUND_HALF_UP.
+Ignore pending invoices in totals but validate them too. Empty input returns {}.
+Reject malformed JSON, non-object records, missing/invalid fields, numeric rather
+than string amounts, unknown status, and nonfinite or negative amounts with
+ValueError identifying the physical input line (e.g. line 3). Blank lines count
+for line numbering. Accept extra object fields. Use only the Python standard library.</pre></details>
+<details><summary>Próba 1: FAIL — kod, diff i testy</summary>
+
+<pre>invalid syntax (invoice_summary.py, line 132)</pre>
+<h3>Wskaźniki statyczne</h3><pre>{}</pre>
+<h3>Zmiany względem wejścia</h3><pre>--- before/invoice_summary.py
++++ after/invoice_summary.py
+@@ -1,2 +1,138 @@
+-def summarize_invoices(text: str) -&gt; dict[str, str]:
+-    raise NotImplementedError
++&#34;&#34;&#34;
++Invoice summary utility.
++
++The module exposes a single public function:
++
++    summarize_invoices(text: str) -&gt; dict[str, str]
++
++The function accepts a string containing NDJSON (newline‑delimited JSON) where
++each non‑blank line is a JSON object with the following required fields:
++
++* ``customer`` – a non‑empty string.
++* ``amount``   – a string representation of a non‑negative, finite Decimal.
++* ``status``   – either ``&#34;paid&#34;`` or ``&#34;pending&#34;``.
++
++The function returns a mapping from customer name to the total amount of all
++*paid* invoices for that customer.  The totals are rounded to two decimal
++places using ``ROUND_HALF_UP`` and represented as strings with exactly two
++decimal digits.  The mapping is sorted by customer name.
++
++If the input is empty or contains only blank lines the function returns an
++empty dictionary.
++
++Any malformed line causes a ``ValueError`` to be raised.  The exception
++message contains the line number (starting at 1) and a short description of
++the problem.
++
++Only the Python standard library is used.
++&#34;&#34;&#34;
++
++from __future__ import annotations
++
++import json
++from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
++from typing import Dict
++
++__all__ = [&#34;summarize_invoices&#34;]
++
++
++def _validate_and_extract(record: dict, line_no: int) -&gt; tuple[str, Decimal, str]:
++    &#34;&#34;&#34;Validate a single record and return its fields.
++
++    Parameters
++    ----------
++    record:
++        The parsed JSON object.
++    line_no:
++        The 1‑based line number of the record.
++
++    Returns
++    -------
++    tuple
++        ``(customer, amount, status)``.
++
++    Raises
++    ------
++    ValueError
++        If the record is invalid.
++    &#34;&#34;&#34;
++    # Ensure record is a dict
++    if not isinstance(record, dict):
++        raise ValueError(f&#34;Line {line_no}: record is not a JSON object&#34;)
++
++    # Customer
++    if &#34;customer&#34; not in record:
++        raise ValueError(f&#34;Line {line_no}: missing &#39;customer&#39; field&#34;)
++    customer = record[&#34;customer&#34;]
++    if not isinstance(customer, str) or not customer:
++        raise ValueError(f&#34;Line {line_no}: &#39;customer&#39; must be a non‑empty string&#34;)
++
++    # Amount
++    if &#34;amount&#34; not in record:
++        raise ValueError(f&#34;Line {line_no}: missing &#39;amount&#39; field&#34;)
++    amount_raw = record[&#34;amount&#34;]
++    if not isinstance(amount_raw, str):
++        raise ValueError(f&#34;Line {line_no}: &#39;amount&#39; must be a string&#34;)
++    try:
++        amount = Decimal(amount_raw)
++    except InvalidOperation:
++        raise ValueError(f&#34;Line {line_no}: &#39;amount&#39; is not a valid Decimal&#34;)
++    if amount.is_nan() or amount.is_infinite() or amount &lt; 0:
++        raise ValueError(f&#34;Line {line_no}: &#39;amount&#39; must be non‑negative and finite&#34;)
++
++    # Status
++    if &#34;status&#34; not in record:
++        raise ValueError(f&#34;Line {line_no}: missing &#39;status&#39; field&#34;)
++    status = record[&#34;status&#34;]
++    if status not in {&#34;paid&#34;, &#34;pending&#34;}:
++        raise ValueError(f&#34;Line {line_no}: unknown status &#39;{status}&#39;&#34;)
++
++    return customer, amount, status
++
++
++def summarize_invoices(text: str) -&gt; Dict[str, str]:
++    &#34;&#34;&#34;Summarise paid invoices from NDJSON input.
++
++    Parameters
++    ----------
++    text:
++        NDJSON string.
++
++    Returns
++    -------
++    dict
++        Mapping from customer name to total paid amount as a two‑decimal string.
++    &#34;&#34;&#34;
++    totals: Dict[str, Decimal] = {}
++    lines = text.splitlines()
++    for idx, raw_line in enumerate(lines, start=1):
++        line = raw_line.strip()
++        if not line:
++            # Blank lines are allowed and counted for line numbering
++            continue
++        try:
++            record = json.loads(line)
++        except json.JSONDecodeError as exc:
++            raise ValueError(f&#34;Line {idx}: malformed JSON: {exc.msg}&#34;)
++        customer, amount, status = _validate_and_extract(record, idx)
++        if status == &#34;paid&#34;:
++            totals[customer] = totals.get(customer, Decimal(&#34;0&#34;)) + amount
++
++    # Prepare final output
++    result: Dict[str, str] = {}
++    for customer in sorted(totals):
++        total = totals[customer].quantize(Decimal(&#34;0.01&#34;), rounding=ROUND_HALF_UP)
++        result[customer] = f&#34;{total:.2f}&#34;
++    return result
++
++&#34;&#34;&#34;
++Example usage:
++
++&gt;&gt;&gt; ndjson = &#34;&#34;&#34;
++... {&#34;customer&#34;: &#34;Alice&#34;, &#34;amount&#34;: &#34;10.00&#34;, &#34;status&#34;: &#34;paid&#34;}
++... {&#34;customer&#34;: &#34;Bob&#34;, &#34;amount&#34;: &#34;5.5&#34;, &#34;status&#34;: &#34;pending&#34;}
++... {&#34;customer&#34;: &#34;Alice&#34;, &#34;amount&#34;: &#34;3.1415&#34;, &#34;status&#34;: &#34;paid&#34;}
++... &#34;&#34;&#34;
++&gt;&gt;&gt; summarize_invoices(ndjson)
++{&#39;Alice&#39;: &#39;13.14&#39;}
++&#34;&#34;&#34;
+</pre>
+<h3>Pełne wyniki testów</h3><pre>{
+  "error": "invalid syntax (invoice_summary.py, line 132)",
+  "expected_tests": [
+    "withheld_tests.Functional.test_aggregate_before_rounding",
+    "withheld_tests.Functional.test_decimal_precision",
+    "withheld_tests.Functional.test_half_up",
+    "withheld_tests.Functional.test_sorted_customers",
+    "withheld_tests.Functional.test_invalid_line_number",
+    "withheld_tests.Functional.test_invalid_records",
+    "withheld_tests.Functional.test_invalid_decimal",
+    "withheld_tests.Functional.test_validate_pending",
+    "withheld_tests.Regression.test_empty",
+    "withheld_tests.Regression.test_pending_ignored",
+    "withheld_tests.Regression.test_extra_fields",
+    "withheld_tests.Regression.test_independent_calls"
+  ],
+  "status": "syntax_error",
+  "tests": []
+}</pre>
+<details><summary>Surowa odpowiedź modelu</summary><pre>{&#34;files&#34;:{&#34;invoice_summary.py&#34;:&#34;\&#34;\&#34;\&#34;\nInvoice summary utility.\n\nThe module exposes a single public function:\n\n    summarize_invoices(text: str) -&gt; dict[str, str]\n\nThe function accepts a string containing NDJSON (newline‑delimited JSON) where\neach non‑blank line is a JSON object with the following required fields:\n\n* ``customer`` – a non‑empty string.\n* ``amount``   – a string representation of a non‑negative, finite Decimal.\n* ``status``   – either ``\&#34;paid\&#34;`` or ``\&#34;pending\&#34;``.\n\nThe function returns a mapping from customer name to the total amount of all\n*paid* invoices for that customer.  The totals are rounded to two decimal\nplaces using ``ROUND_HALF_UP`` and represented as strings with exactly two\ndecimal digits.  The mapping is sorted by customer name.\n\nIf the input is empty or contains only blank lines the function returns an\nempty dictionary.\n\nAny malformed line causes a ``ValueError`` to be raised.  The exception\nmessage contains the line number (starting at 1) and a short description of\nthe problem.\n\nOnly the Python standard library is used.\n\&#34;\&#34;\&#34;\n\nfrom __future__ import annotations\n\nimport json\nfrom decimal import Decimal, ROUND_HALF_UP, InvalidOperation\nfrom typing import Dict\n\n__all__ = [\&#34;summarize_invoices\&#34;]\n\n\ndef _validate_and_extract(record: dict, line_no: int) -&gt; tuple[str, Decimal, str]:\n    \&#34;\&#34;\&#34;Validate a single record and return its fields.\n\n    Parameters\n    ----------\n    record:\n        The parsed JSON object.\n    line_no:\n        The 1‑based line number of the record.\n\n    Returns\n    -------\n    tuple\n        ``(customer, amount, status)``.\n\n    Raises\n    ------\n    ValueError\n        If the record is invalid.\n    \&#34;\&#34;\&#34;\n    # Ensure record is a dict\n    if not isinstance(record, dict):\n        raise ValueError(f\&#34;Line {line_no}: record is not a JSON object\&#34;)\n\n    # Customer\n    if \&#34;customer\&#34; not in record:\n        raise ValueError(f\&#34;Line {line_no}: missing &#39;customer&#39; field\&#34;)\n    customer = record[\&#34;customer\&#34;]\n    if not isinstance(customer, str) or not customer:\n        raise ValueError(f\&#34;Line {line_no}: &#39;customer&#39; must be a non‑empty string\&#34;)\n\n    # Amount\n    if \&#34;amount\&#34; not in record:\n        raise ValueError(f\&#34;Line {line_no}: missing &#39;amount&#39; field\&#34;)\n    amount_raw = record[\&#34;amount\&#34;]\n    if not isinstance(amount_raw, str):\n        raise ValueError(f\&#34;Line {line_no}: &#39;amount&#39; must be a string\&#34;)\n    try:\n        amount = Decimal(amount_raw)\n    except InvalidOperation:\n        raise ValueError(f\&#34;Line {line_no}: &#39;amount&#39; is not a valid Decimal\&#34;)\n    if amount.is_nan() or amount.is_infinite() or amount &lt; 0:\n        raise ValueError(f\&#34;Line {line_no}: &#39;amount&#39; must be non‑negative and finite\&#34;)\n\n    # Status\n    if \&#34;status\&#34; not in record:\n        raise ValueError(f\&#34;Line {line_no}: missing &#39;status&#39; field\&#34;)\n    status = record[\&#34;status\&#34;]\n    if status not in {\&#34;paid\&#34;, \&#34;pending\&#34;}:\n        raise ValueError(f\&#34;Line {line_no}: unknown status &#39;{status}&#39;\&#34;)\n\n    return customer, amount, status\n\n\ndef summarize_invoices(text: str) -&gt; Dict[str, str]:\n    \&#34;\&#34;\&#34;Summarise paid invoices from NDJSON input.\n\n    Parameters\n    ----------\n    text:\n        NDJSON string.\n\n    Returns\n    -------\n    dict\n        Mapping from customer name to total paid amount as a two‑decimal string.\n    \&#34;\&#34;\&#34;\n    totals: Dict[str, Decimal] = {}\n    lines = text.splitlines()\n    for idx, raw_line in enumerate(lines, start=1):\n        line = raw_line.strip()\n        if not line:\n            # Blank lines are allowed and counted for line numbering\n            continue\n        try:\n            record = json.loads(line)\n        except json.JSONDecodeError as exc:\n            raise ValueError(f\&#34;Line {idx}: malformed JSON: {exc.msg}\&#34;)\n        customer, amount, status = _validate_and_extract(record, idx)\n        if status == \&#34;paid\&#34;:\n            totals[customer] = totals.get(customer, Decimal(\&#34;0\&#34;)) + amount\n\n    # Prepare final output\n    result: Dict[str, str] = {}\n    for customer in sorted(totals):\n        total = totals[customer].quantize(Decimal(\&#34;0.01\&#34;), rounding=ROUND_HALF_UP)\n        result[customer] = f\&#34;{total:.2f}\&#34;\n    return result\n\n\&#34;\&#34;\&#34;\nExample usage:\n\n&gt;&gt;&gt; ndjson = \&#34;\&#34;\&#34;\n... {\&#34;customer\&#34;: \&#34;Alice\&#34;, \&#34;amount\&#34;: \&#34;10.00\&#34;, \&#34;status\&#34;: \&#34;paid\&#34;}\n... {\&#34;customer\&#34;: \&#34;Bob\&#34;, \&#34;amount\&#34;: \&#34;5.5\&#34;, \&#34;status\&#34;: \&#34;pending\&#34;}\n... {\&#34;customer\&#34;: \&#34;Alice\&#34;, \&#34;amount\&#34;: \&#34;3.1415\&#34;, \&#34;status\&#34;: \&#34;paid\&#34;}\n... \&#34;\&#34;\&#34;\n&gt;&gt;&gt; summarize_invoices(ndjson)\n{&#39;Alice&#39;: &#39;13.14&#39;}\n\&#34;\&#34;\&#34;\n&#34;} }</pre></details>
+</details><details><summary>Próba 2: PASS — kod, diff i testy</summary>
+
+
+<h3>Wskaźniki statyczne</h3><pre>{
+  "blocked": [],
+  "files": {
+    "invoice_summary.py": {
+      "alerts": [
+        "broad exception handler"
+      ],
+      "branch_nodes": 14,
+      "documented_functions": 2,
+      "functions": 2,
+      "functions_with_any_annotation": 2,
+      "lines": 116,
+      "max_function_lines": 40
+    }
+  }
+}</pre>
+<h3>Zmiany względem wejścia</h3><pre>--- before/invoice_summary.py
++++ after/invoice_summary.py
+@@ -1,2 +1,116 @@
+-def summarize_invoices(text: str) -&gt; dict[str, str]:
+-    raise NotImplementedError
++&#34;&#34;&#34;
++Invoice summary utility.
++
++The module exposes a single public function:
++
++    summarize_invoices(text: str) -&gt; dict[str, str]
++
++The function accepts a string containing NDJSON (newline‑delimited JSON) where
++each non‑blank line is a JSON object with the following required fields:
++
++* ``customer`` – a non‑empty string.
++* ``amount``   – a string representation of a non‑negative, finite Decimal.
++* ``status``   – either ``&#34;paid&#34;`` or ``&#34;pending&#34;``.
++
++The function returns a mapping from customer name to the total amount of all
++*paid* invoices for that customer.  The totals are rounded to two decimal
++places using ``ROUND_HALF_UP`` and represented as strings with exactly two
++decimal digits.  The mapping is sorted by customer name.
++
++If the input is empty or contains only blank lines the function returns an
++empty dictionary.
++
++Any malformed line causes a ``ValueError`` to be raised.  The exception
++message contains the line number (starting at 1) and a short description of
++the problem.
++&#34;&#34;&#34;
++
++from __future__ import annotations
++
++import json
++from decimal import Decimal, ROUND_HALF_UP
++from typing import Dict
++
++__all__ = [&#34;summarize_invoices&#34;]
++
++
++def _validate_record(record: dict, line_no: int) -&gt; None:
++    &#34;&#34;&#34;Validate a single invoice record.
++
++    Raises ``ValueError`` with a message that includes the line number if the
++    record is invalid.
++    &#34;&#34;&#34;
++    # Ensure record is a dict
++    if not isinstance(record, dict):
++        raise ValueError(f&#34;Line {line_no}: record is not a JSON object&#34;)
++
++    # Required fields
++    required = {&#34;customer&#34;, &#34;amount&#34;, &#34;status&#34;}
++    missing = required - record.keys()
++    if missing:
++        raise ValueError(f&#34;Line {line_no}: missing field(s) {&#39;, &#39;.join(sorted(missing))}&#34;)
++
++    # Customer
++    customer = record[&#34;customer&#34;]
++    if not isinstance(customer, str) or not customer:
++        raise ValueError(f&#34;Line {line_no}: &#39;customer&#39; must be a non‑empty string&#34;)
++
++    # Amount
++    amount = record[&#34;amount&#34;]
++    if not isinstance(amount, str):
++        raise ValueError(f&#34;Line {line_no}: &#39;amount&#39; must be a string&#34;)
++    try:
++        dec = Decimal(amount)
++    except Exception:
++        raise ValueError(f&#34;Line {line_no}: &#39;amount&#39; is not a valid Decimal string&#34;)
++    if dec.is_nan() or dec.is_infinite() or dec &lt; 0:
++        raise ValueError(f&#34;Line {line_no}: &#39;amount&#39; must be non‑negative and finite&#34;)
++
++    # Status
++    status = record[&#34;status&#34;]
++    if status not in {&#34;paid&#34;, &#34;pending&#34;}:
++        raise ValueError(f&#34;Line {line_no}: unknown status &#39;{status}&#39;&#34;)
++
++
++def summarize_invoices(text: str) -&gt; Dict[str, str]:
++    &#34;&#34;&#34;Summarise paid invoices from NDJSON input.
++
++    Parameters
++    ----------
++    text:
++        NDJSON string.  Blank lines are ignored but still count for line
++        numbering.
++
++    Returns
++    -------
++    dict[str, str]
++        Mapping from customer name to the total paid amount formatted as a
++        two‑decimal string.  The mapping is sorted by customer name.
++    &#34;&#34;&#34;
++    totals: Dict[str, Decimal] = {}
++
++    lines = text.splitlines()
++    for idx, raw_line in enumerate(lines, start=1):
++        line = raw_line.strip()
++        if not line:
++            continue  # blank line – skip but keep line number
++        try:
++            record = json.loads(line)
++        except json.JSONDecodeError as exc:
++            raise ValueError(f&#34;Line {idx}: malformed JSON: {exc.msg}&#34;) from None
++
++        _validate_record(record, idx)
++
++        if record[&#34;status&#34;] == &#34;paid&#34;:
++            customer = record[&#34;customer&#34;]
++            amount = Decimal(record[&#34;amount&#34;])
++            totals[customer] = totals.get(customer, Decimal(&#34;0&#34;)) + amount
++
++    # Prepare final output
++    result: Dict[str, str] = {}
++    for customer in sorted(totals):
++        total = totals[customer].quantize(Decimal(&#34;0.01&#34;), rounding=ROUND_HALF_UP)
++        result[customer] = f&#34;{total:.2f}&#34;
++    return result
++
++&#34;&#34;&#34;End of module.&#34;&#34;&#34;
+</pre>
+<h3>Pełne wyniki testów</h3><pre>{
+  "expected_tests": [
+    "withheld_tests.Functional.test_aggregate_before_rounding",
+    "withheld_tests.Functional.test_decimal_precision",
+    "withheld_tests.Functional.test_half_up",
+    "withheld_tests.Functional.test_sorted_customers",
+    "withheld_tests.Functional.test_invalid_line_number",
+    "withheld_tests.Functional.test_invalid_records",
+    "withheld_tests.Functional.test_invalid_decimal",
+    "withheld_tests.Functional.test_validate_pending",
+    "withheld_tests.Regression.test_empty",
+    "withheld_tests.Regression.test_pending_ignored",
+    "withheld_tests.Regression.test_extra_fields",
+    "withheld_tests.Regression.test_independent_calls"
+  ],
+  "status": "complete",
+  "tests": [
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_aggregate_before_rounding",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_decimal_precision",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_half_up",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_decimal",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_line_number",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_records",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_sorted_customers",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_validate_pending",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_empty",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_extra_fields",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_independent_calls",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_pending_ignored",
+      "passed": true
+    }
+  ]
+}</pre>
+<details><summary>Surowa odpowiedź modelu</summary><pre>{&#34;files&#34;:{&#34;invoice_summary.py&#34;:&#34;\&#34;\&#34;\&#34;\nInvoice summary utility.\n\nThe module exposes a single public function:\n\n    summarize_invoices(text: str) -&gt; dict[str, str]\n\nThe function accepts a string containing NDJSON (newline‑delimited JSON) where\neach non‑blank line is a JSON object with the following required fields:\n\n* ``customer`` – a non‑empty string.\n* ``amount``   – a string representation of a non‑negative, finite Decimal.\n* ``status``   – either ``\&#34;paid\&#34;`` or ``\&#34;pending\&#34;``.\n\nThe function returns a mapping from customer name to the total amount of all\n*paid* invoices for that customer.  The totals are rounded to two decimal\nplaces using ``ROUND_HALF_UP`` and represented as strings with exactly two\ndecimal digits.  The mapping is sorted by customer name.\n\nIf the input is empty or contains only blank lines the function returns an\nempty dictionary.\n\nAny malformed line causes a ``ValueError`` to be raised.  The exception\nmessage contains the line number (starting at 1) and a short description of\nthe problem.\n\&#34;\&#34;\&#34;\n\nfrom __future__ import annotations\n\nimport json\nfrom decimal import Decimal, ROUND_HALF_UP\nfrom typing import Dict\n\n__all__ = [\&#34;summarize_invoices\&#34;]\n\n\ndef _validate_record(record: dict, line_no: int) -&gt; None:\n    \&#34;\&#34;\&#34;Validate a single invoice record.\n\n    Raises ``ValueError`` with a message that includes the line number if the\n    record is invalid.\n    \&#34;\&#34;\&#34;\n    # Ensure record is a dict\n    if not isinstance(record, dict):\n        raise ValueError(f\&#34;Line {line_no}: record is not a JSON object\&#34;)\n\n    # Required fields\n    required = {\&#34;customer\&#34;, \&#34;amount\&#34;, \&#34;status\&#34;}\n    missing = required - record.keys()\n    if missing:\n        raise ValueError(f\&#34;Line {line_no}: missing field(s) {&#39;, &#39;.join(sorted(missing))}\&#34;)\n\n    # Customer\n    customer = record[\&#34;customer\&#34;]\n    if not isinstance(customer, str) or not customer:\n        raise ValueError(f\&#34;Line {line_no}: &#39;customer&#39; must be a non‑empty string\&#34;)\n\n    # Amount\n    amount = record[\&#34;amount\&#34;]\n    if not isinstance(amount, str):\n        raise ValueError(f\&#34;Line {line_no}: &#39;amount&#39; must be a string\&#34;)\n    try:\n        dec = Decimal(amount)\n    except Exception:\n        raise ValueError(f\&#34;Line {line_no}: &#39;amount&#39; is not a valid Decimal string\&#34;)\n    if dec.is_nan() or dec.is_infinite() or dec &lt; 0:\n        raise ValueError(f\&#34;Line {line_no}: &#39;amount&#39; must be non‑negative and finite\&#34;)\n\n    # Status\n    status = record[\&#34;status\&#34;]\n    if status not in {\&#34;paid\&#34;, \&#34;pending\&#34;}:\n        raise ValueError(f\&#34;Line {line_no}: unknown status &#39;{status}&#39;\&#34;)\n\n\ndef summarize_invoices(text: str) -&gt; Dict[str, str]:\n    \&#34;\&#34;\&#34;Summarise paid invoices from NDJSON input.\n\n    Parameters\n    ----------\n    text:\n        NDJSON string.  Blank lines are ignored but still count for line\n        numbering.\n\n    Returns\n    -------\n    dict[str, str]\n        Mapping from customer name to the total paid amount formatted as a\n        two‑decimal string.  The mapping is sorted by customer name.\n    \&#34;\&#34;\&#34;\n    totals: Dict[str, Decimal] = {}\n\n    lines = text.splitlines()\n    for idx, raw_line in enumerate(lines, start=1):\n        line = raw_line.strip()\n        if not line:\n            continue  # blank line – skip but keep line number\n        try:\n            record = json.loads(line)\n        except json.JSONDecodeError as exc:\n            raise ValueError(f\&#34;Line {idx}: malformed JSON: {exc.msg}\&#34;) from None\n\n        _validate_record(record, idx)\n\n        if record[\&#34;status\&#34;] == \&#34;paid\&#34;:\n            customer = record[\&#34;customer\&#34;]\n            amount = Decimal(record[\&#34;amount\&#34;])\n            totals[customer] = totals.get(customer, Decimal(\&#34;0\&#34;)) + amount\n\n    # Prepare final output\n    result: Dict[str, str] = {}\n    for customer in sorted(totals):\n        total = totals[customer].quantize(Decimal(\&#34;0.01\&#34;), rounding=ROUND_HALF_UP)\n        result[customer] = f\&#34;{total:.2f}\&#34;\n    return result\n\n\&#34;\&#34;\&#34;End of module.\&#34;\&#34;\&#34;\n&#34;} }</pre></details>
+</details><details><summary>Próba 3: PASS — kod, diff i testy</summary>
+
+
+<h3>Wskaźniki statyczne</h3><pre>{
+  "blocked": [],
+  "files": {
+    "invoice_summary.py": {
+      "alerts": [
+        "broad exception handler"
+      ],
+      "branch_nodes": 15,
+      "documented_functions": 2,
+      "functions": 2,
+      "functions_with_any_annotation": 2,
+      "lines": 114,
+      "max_function_lines": 35
+    }
+  }
+}</pre>
+<h3>Zmiany względem wejścia</h3><pre>--- before/invoice_summary.py
++++ after/invoice_summary.py
+@@ -1,2 +1,114 @@
+-def summarize_invoices(text: str) -&gt; dict[str, str]:
+-    raise NotImplementedError
++&#34;&#34;&#34;
++Invoice summary utility.
++
++The module exposes a single public function:
++
++    summarize_invoices(text: str) -&gt; dict[str, str]
++
++The function accepts a string containing NDJSON (newline‑delimited JSON) where
++each non‑blank line is a JSON object with the following required fields:
++
++* ``customer`` – a non‑empty string.
++* ``amount``   – a string representation of a non‑negative, finite Decimal.
++* ``status``   – either ``&#34;paid&#34;`` or ``&#34;pending&#34;``.
++
++The function returns a mapping from customer name to the total amount of all
++*paid* invoices for that customer.  The totals are rounded to two decimal
++places using ``ROUND_HALF_UP`` and represented as strings with exactly two
++decimal digits.  The mapping is sorted by customer name.
++
++If the input is empty or contains only blank lines the function returns an
++empty dictionary.
++
++Any malformed line (invalid JSON, missing or invalid fields, numeric amount
++instead of a string, unknown status, negative or non‑finite amount) causes a
++``ValueError`` to be raised.  The exception message contains the line number
++(1‑based, counting blank lines) where the error was detected.
++
++Only the Python standard library is used.
++&#34;&#34;&#34;
++
++from __future__ import annotations
++
++import json
++from decimal import Decimal, ROUND_HALF_UP
++from typing import Dict
++
++__all__ = [&#34;summarize_invoices&#34;]
++
++
++def _validate_record(record: dict, line_no: int) -&gt; None:
++    &#34;&#34;&#34;Validate a single invoice record.
++
++    Raises ValueError with a message containing the line number if the record
++    is invalid.
++    &#34;&#34;&#34;
++    # Ensure record is a dict
++    if not isinstance(record, dict):
++        raise ValueError(f&#34;Line {line_no}: record is not a JSON object&#34;)
++
++    # Required fields
++    for field in (&#34;customer&#34;, &#34;amount&#34;, &#34;status&#34;):
++        if field not in record:
++            raise ValueError(f&#34;Line {line_no}: missing field &#39;{field}&#39;&#34;)
++
++    # customer
++    customer = record[&#34;customer&#34;]
++    if not isinstance(customer, str) or not customer:
++        raise ValueError(f&#34;Line {line_no}: &#39;customer&#39; must be a non‑empty string&#34;)
++
++    # amount
++    amount = record[&#34;amount&#34;]
++    if not isinstance(amount, str):
++        raise ValueError(f&#34;Line {line_no}: &#39;amount&#39; must be a string&#34;)
++    try:
++        dec = Decimal(amount)
++    except Exception as exc:
++        raise ValueError(f&#34;Line {line_no}: invalid Decimal amount: {exc}&#34;)
++    if dec.is_nan() or dec.is_infinite() or dec &lt; 0:
++        raise ValueError(f&#34;Line {line_no}: amount must be non‑negative finite&#34;)
++
++    # status
++    status = record[&#34;status&#34;]
++    if status not in (&#34;paid&#34;, &#34;pending&#34;):
++        raise ValueError(f&#34;Line {line_no}: unknown status &#39;{status}&#39;&#34;)
++
++
++def summarize_invoices(text: str) -&gt; Dict[str, str]:
++    &#34;&#34;&#34;Summarize paid invoices from NDJSON input.
++
++    Parameters
++    ----------
++    text:
++        NDJSON string.  Blank lines are ignored but counted for line numbering.
++
++    Returns
++    -------
++    dict[str, str]
++        Mapping from customer name to total paid amount as a two‑decimal string.
++    &#34;&#34;&#34;
++    totals: Dict[str, Decimal] = {}
++    lines = text.splitlines()
++    for idx, raw_line in enumerate(lines, start=1):
++        line = raw_line.strip()
++        if not line:
++            continue  # skip blank lines but keep line number
++        try:
++            record = json.loads(line)
++        except json.JSONDecodeError as exc:
++            raise ValueError(f&#34;Line {idx}: invalid JSON: {exc}&#34;)
++        _validate_record(record, idx)
++        if record[&#34;status&#34;] == &#34;paid&#34;:
++            customer = record[&#34;customer&#34;]
++            amount = Decimal(record[&#34;amount&#34;])
++            totals[customer] = totals.get(customer, Decimal(&#34;0&#34;)) + amount
++    # Prepare output
++    result: Dict[str, str] = {}
++    for customer in sorted(totals):
++        total = totals[customer].quantize(Decimal(&#34;0.01&#34;), rounding=ROUND_HALF_UP)
++        result[customer] = f&#34;{total:.2f}&#34;
++    return result
++
++&#34;&#34;&#34;
++# End of module
++&#34;&#34;&#34;
+</pre>
+<h3>Pełne wyniki testów</h3><pre>{
+  "expected_tests": [
+    "withheld_tests.Functional.test_aggregate_before_rounding",
+    "withheld_tests.Functional.test_decimal_precision",
+    "withheld_tests.Functional.test_half_up",
+    "withheld_tests.Functional.test_sorted_customers",
+    "withheld_tests.Functional.test_invalid_line_number",
+    "withheld_tests.Functional.test_invalid_records",
+    "withheld_tests.Functional.test_invalid_decimal",
+    "withheld_tests.Functional.test_validate_pending",
+    "withheld_tests.Regression.test_empty",
+    "withheld_tests.Regression.test_pending_ignored",
+    "withheld_tests.Regression.test_extra_fields",
+    "withheld_tests.Regression.test_independent_calls"
+  ],
+  "status": "complete",
+  "tests": [
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_aggregate_before_rounding",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_decimal_precision",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_half_up",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_decimal",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_line_number",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_records",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_sorted_customers",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_validate_pending",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_empty",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_extra_fields",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_independent_calls",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_pending_ignored",
+      "passed": true
+    }
+  ]
+}</pre>
+<details><summary>Surowa odpowiedź modelu</summary><pre>{&#34;files&#34;:{&#34;invoice_summary.py&#34;:&#34;\&#34;\&#34;\&#34;\nInvoice summary utility.\n\nThe module exposes a single public function:\n\n    summarize_invoices(text: str) -&gt; dict[str, str]\n\nThe function accepts a string containing NDJSON (newline‑delimited JSON) where\neach non‑blank line is a JSON object with the following required fields:\n\n* ``customer`` – a non‑empty string.\n* ``amount``   – a string representation of a non‑negative, finite Decimal.\n* ``status``   – either ``\&#34;paid\&#34;`` or ``\&#34;pending\&#34;``.\n\nThe function returns a mapping from customer name to the total amount of all\n*paid* invoices for that customer.  The totals are rounded to two decimal\nplaces using ``ROUND_HALF_UP`` and represented as strings with exactly two\ndecimal digits.  The mapping is sorted by customer name.\n\nIf the input is empty or contains only blank lines the function returns an\nempty dictionary.\n\nAny malformed line (invalid JSON, missing or invalid fields, numeric amount\ninstead of a string, unknown status, negative or non‑finite amount) causes a\n``ValueError`` to be raised.  The exception message contains the line number\n(1‑based, counting blank lines) where the error was detected.\n\nOnly the Python standard library is used.\n\&#34;\&#34;\&#34;\n\nfrom __future__ import annotations\n\nimport json\nfrom decimal import Decimal, ROUND_HALF_UP\nfrom typing import Dict\n\n__all__ = [\&#34;summarize_invoices\&#34;]\n\n\ndef _validate_record(record: dict, line_no: int) -&gt; None:\n    \&#34;\&#34;\&#34;Validate a single invoice record.\n\n    Raises ValueError with a message containing the line number if the record\n    is invalid.\n    \&#34;\&#34;\&#34;\n    # Ensure record is a dict\n    if not isinstance(record, dict):\n        raise ValueError(f\&#34;Line {line_no}: record is not a JSON object\&#34;)\n\n    # Required fields\n    for field in (\&#34;customer\&#34;, \&#34;amount\&#34;, \&#34;status\&#34;):\n        if field not in record:\n            raise ValueError(f\&#34;Line {line_no}: missing field &#39;{field}&#39;\&#34;)\n\n    # customer\n    customer = record[\&#34;customer\&#34;]\n    if not isinstance(customer, str) or not customer:\n        raise ValueError(f\&#34;Line {line_no}: &#39;customer&#39; must be a non‑empty string\&#34;)\n\n    # amount\n    amount = record[\&#34;amount\&#34;]\n    if not isinstance(amount, str):\n        raise ValueError(f\&#34;Line {line_no}: &#39;amount&#39; must be a string\&#34;)\n    try:\n        dec = Decimal(amount)\n    except Exception as exc:\n        raise ValueError(f\&#34;Line {line_no}: invalid Decimal amount: {exc}\&#34;)\n    if dec.is_nan() or dec.is_infinite() or dec &lt; 0:\n        raise ValueError(f\&#34;Line {line_no}: amount must be non‑negative finite\&#34;)\n\n    # status\n    status = record[\&#34;status\&#34;]\n    if status not in (\&#34;paid\&#34;, \&#34;pending\&#34;):\n        raise ValueError(f\&#34;Line {line_no}: unknown status &#39;{status}&#39;\&#34;)\n\n\ndef summarize_invoices(text: str) -&gt; Dict[str, str]:\n    \&#34;\&#34;\&#34;Summarize paid invoices from NDJSON input.\n\n    Parameters\n    ----------\n    text:\n        NDJSON string.  Blank lines are ignored but counted for line numbering.\n\n    Returns\n    -------\n    dict[str, str]\n        Mapping from customer name to total paid amount as a two‑decimal string.\n    \&#34;\&#34;\&#34;\n    totals: Dict[str, Decimal] = {}\n    lines = text.splitlines()\n    for idx, raw_line in enumerate(lines, start=1):\n        line = raw_line.strip()\n        if not line:\n            continue  # skip blank lines but keep line number\n        try:\n            record = json.loads(line)\n        except json.JSONDecodeError as exc:\n            raise ValueError(f\&#34;Line {idx}: invalid JSON: {exc}\&#34;)\n        _validate_record(record, idx)\n        if record[\&#34;status\&#34;] == \&#34;paid\&#34;:\n            customer = record[\&#34;customer\&#34;]\n            amount = Decimal(record[\&#34;amount\&#34;])\n            totals[customer] = totals.get(customer, Decimal(\&#34;0\&#34;)) + amount\n    # Prepare output\n    result: Dict[str, str] = {}\n    for customer in sorted(totals):\n        total = totals[customer].quantize(Decimal(\&#34;0.01\&#34;), rounding=ROUND_HALF_UP)\n        result[customer] = f\&#34;{total:.2f}\&#34;\n    return result\n\n\&#34;\&#34;\&#34;\n# End of module\n\&#34;\&#34;\&#34;\n&#34;} }</pre></details>
+</details></article><article><h2>Naprawa w jednym pliku: cache TTL + LRU</h2><p>Pliki: ttl_cache.py</p><details><summary>Specyfikacja przekazana modelowi</summary><pre>Fix ttl_cache.py preserving TTLCache(capacity, ttl, clock), put(key, value),
+get(key, default=None), and len(cache). Capacity is a nonnegative integer (not bool),
+ttl is a nonnegative finite number (not bool); invalid values raise ValueError.
+clock is an injected callable, returning monotonic seconds. A key expires at
+now &gt;= insertion_time + ttl. Reads refresh LRU order but NEVER extend expiry.
+An overwrite resets expiry and makes the key most recently used. Purge expired
+entries before capacity eviction and len(). Stored None is a legitimate hit.
+Capacity zero and ttl zero retain nothing. get() returns the caller&#39;s default
+for missing/expired keys. Fix expiry, LRU, capacity and validation bugs; keep all
+changes in this one file and use only the Python standard library.</pre></details>
+<details><summary>Próba 1: FAIL — kod, diff i testy</summary>
+
+
+<h3>Wskaźniki statyczne</h3><pre>{
+  "blocked": [],
+  "files": {
+    "ttl_cache.py": {
+      "alerts": [],
+      "branch_nodes": 10,
+      "documented_functions": 0,
+      "functions": 5,
+      "functions_with_any_annotation": 0,
+      "lines": 58,
+      "max_function_lines": 14
+    }
+  }
+}</pre>
+<h3>Zmiany względem wejścia</h3><pre>--- before/ttl_cache.py
++++ after/ttl_cache.py
+@@ -1,20 +1,58 @@
+ from collections import OrderedDict
++import math
++
+ class TTLCache:
+     def __init__(self, capacity, ttl, clock):
+-        self.capacity, self.ttl, self.clock = capacity, ttl, clock
++        # Validate capacity
++        if isinstance(capacity, bool) or not isinstance(capacity, int) or capacity &lt; 0:
++            raise ValueError(&#34;capacity must be a nonnegative integer&#34;)
++        # Validate ttl
++        if isinstance(ttl, bool) or not isinstance(ttl, (int, float)) or ttl &lt; 0 or math.isinf(ttl) or math.isnan(ttl):
++            raise ValueError(&#34;ttl must be a nonnegative finite number&#34;)
++        # Validate clock
++        if not callable(clock):
++            raise ValueError(&#34;clock must be callable&#34;)
++        self.capacity = capacity
++        self.ttl = ttl
++        self.clock = clock
+         self.entries = OrderedDict()
++
++    def _purge_expired(self):
++        now = self.clock()
++        keys_to_remove = [k for k, (_, exp) in self.entries.items() if now &gt;= exp]
++        for k in keys_to_remove:
++            del self.entries[k]
++
+     def put(self, key, value):
+-        if len(self.entries) &gt;= self.capacity and self.entries:
++        # If capacity is zero, never store
++        if self.capacity == 0:
++            return
++        # Purge expired before eviction
++        self._purge_expired()
++        # Evict LRU if over capacity
++        if len(self.entries) &gt;= self.capacity:
++            # popitem(last=False) removes the oldest (LRU)
+             self.entries.popitem(last=False)
+-        self.entries[key] = (value, self.clock() + self.ttl)
++        # Insert or overwrite; reset expiry and mark MRU
++        expiry = self.clock() + self.ttl
++        self.entries[key] = (value, expiry)
++
+     def get(self, key, default=None):
++        # Purge expired before lookup
++        self._purge_expired()
+         item = self.entries.get(key)
+-        if item is None: return default
++        if item is None:
++            return default
+         value, expiry = item
+-        if self.clock() &gt; expiry:
++        now = self.clock()
++        if now &gt;= expiry:
+             del self.entries[key]
+             return default
+-        self.entries[key] = (value, self.clock() + self.ttl)
++        # Move key to MRU position without changing expiry
++        self.entries.move_to_end(key)
+         return value
++
+     def __len__(self):
++        # Purge expired before reporting length
++        self._purge_expired()
+         return len(self.entries)
+</pre>
+<h3>Pełne wyniki testów</h3><pre>{
+  "expected_tests": [
+    "withheld_tests.Functional.test_expiry_boundary",
+    "withheld_tests.Functional.test_read_no_extension",
+    "withheld_tests.Functional.test_lru_on_read",
+    "withheld_tests.Functional.test_overwrite_at_capacity",
+    "withheld_tests.Functional.test_expired_before_eviction",
+    "withheld_tests.Functional.test_len_purges",
+    "withheld_tests.Functional.test_zero_capacity_and_ttl",
+    "withheld_tests.Functional.test_invalid_parameters",
+    "withheld_tests.Regression.test_none_value",
+    "withheld_tests.Regression.test_custom_default",
+    "withheld_tests.Regression.test_overwrite_resets_expiry",
+    "withheld_tests.Regression.test_instance_isolation"
+  ],
+  "status": "complete",
+  "tests": [
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_expired_before_eviction",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_expiry_boundary",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_parameters",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_len_purges",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_lru_on_read",
+      "passed": true
+    },
+    {
+      "errors": [
+        "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 18, in test_overwrite_at_capacity\nAssertionError: None != 1\n"
+      ],
+      "id": "withheld_tests.Functional.test_overwrite_at_capacity",
+      "passed": false
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_read_no_extension",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_zero_capacity_and_ttl",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_custom_default",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_instance_isolation",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_none_value",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_overwrite_resets_expiry",
+      "passed": true
+    }
+  ]
+}</pre>
+<details><summary>Surowa odpowiedź modelu</summary><pre>{&#34;files&#34;:{&#34;ttl_cache.py&#34;:&#34;from collections import OrderedDict\nimport math\n\nclass TTLCache:\n    def __init__(self, capacity, ttl, clock):\n        # Validate capacity\n        if isinstance(capacity, bool) or not isinstance(capacity, int) or capacity &lt; 0:\n            raise ValueError(\&#34;capacity must be a nonnegative integer\&#34;)\n        # Validate ttl\n        if isinstance(ttl, bool) or not isinstance(ttl, (int, float)) or ttl &lt; 0 or math.isinf(ttl) or math.isnan(ttl):\n            raise ValueError(\&#34;ttl must be a nonnegative finite number\&#34;)\n        # Validate clock\n        if not callable(clock):\n            raise ValueError(\&#34;clock must be callable\&#34;)\n        self.capacity = capacity\n        self.ttl = ttl\n        self.clock = clock\n        self.entries = OrderedDict()\n\n    def _purge_expired(self):\n        now = self.clock()\n        keys_to_remove = [k for k, (_, exp) in self.entries.items() if now &gt;= exp]\n        for k in keys_to_remove:\n            del self.entries[k]\n\n    def put(self, key, value):\n        # If capacity is zero, never store\n        if self.capacity == 0:\n            return\n        # Purge expired before eviction\n        self._purge_expired()\n        # Evict LRU if over capacity\n        if len(self.entries) &gt;= self.capacity:\n            # popitem(last=False) removes the oldest (LRU)\n            self.entries.popitem(last=False)\n        # Insert or overwrite; reset expiry and mark MRU\n        expiry = self.clock() + self.ttl\n        self.entries[key] = (value, expiry)\n\n    def get(self, key, default=None):\n        # Purge expired before lookup\n        self._purge_expired()\n        item = self.entries.get(key)\n        if item is None:\n            return default\n        value, expiry = item\n        now = self.clock()\n        if now &gt;= expiry:\n            del self.entries[key]\n            return default\n        # Move key to MRU position without changing expiry\n        self.entries.move_to_end(key)\n        return value\n\n    def __len__(self):\n        # Purge expired before reporting length\n        self._purge_expired()\n        return len(self.entries)\n&#34;} }</pre></details>
+</details><details><summary>Próba 2: FAIL — kod, diff i testy</summary>
+
+
+<h3>Wskaźniki statyczne</h3><pre>{
+  "blocked": [],
+  "files": {
+    "ttl_cache.py": {
+      "alerts": [],
+      "branch_nodes": 11,
+      "documented_functions": 0,
+      "functions": 5,
+      "functions_with_any_annotation": 0,
+      "lines": 52,
+      "max_function_lines": 14
+    }
+  }
+}</pre>
+<h3>Zmiany względem wejścia</h3><pre>--- before/ttl_cache.py
++++ after/ttl_cache.py
+@@ -1,20 +1,52 @@
+ from collections import OrderedDict
++
+ class TTLCache:
+     def __init__(self, capacity, ttl, clock):
+-        self.capacity, self.ttl, self.clock = capacity, ttl, clock
++        # Validate capacity
++        if not isinstance(capacity, int) or isinstance(capacity, bool) or capacity &lt; 0:
++            raise ValueError(&#34;capacity must be a nonnegative integer&#34;)
++        # Validate ttl
++        if not isinstance(ttl, (int, float)) or isinstance(ttl, bool) or ttl &lt; 0 or ttl != ttl or ttl == float(&#34;inf&#34;):
++            raise ValueError(&#34;ttl must be a nonnegative finite number&#34;)
++        # Validate clock
++        if not callable(clock):
++            raise ValueError(&#34;clock must be callable&#34;)
++        self.capacity = capacity
++        self.ttl = ttl
++        self.clock = clock
+         self.entries = OrderedDict()
++
++    def _purge_expired(self):
++        now = self.clock()
++        keys_to_remove = [k for k, (_, exp) in self.entries.items() if now &gt;= exp]
++        for k in keys_to_remove:
++            del self.entries[k]
++
+     def put(self, key, value):
+-        if len(self.entries) &gt;= self.capacity and self.entries:
++        # Do not store if capacity is zero or ttl is zero
++        if self.capacity == 0 or self.ttl == 0:
++            return
++        # Purge expired entries before eviction
++        self._purge_expired()
++        # Evict LRU if capacity exceeded
++        if len(self.entries) &gt;= self.capacity:
+             self.entries.popitem(last=False)
+-        self.entries[key] = (value, self.clock() + self.ttl)
++        expiry = self.clock() + self.ttl
++        self.entries[key] = (value, expiry)
++
+     def get(self, key, default=None):
+         item = self.entries.get(key)
+-        if item is None: return default
++        if item is None:
++            return default
+         value, expiry = item
+-        if self.clock() &gt; expiry:
++        now = self.clock()
++        if now &gt;= expiry:
+             del self.entries[key]
+             return default
+-        self.entries[key] = (value, self.clock() + self.ttl)
++        # Move key to end to mark as recently used
++        self.entries.move_to_end(key)
+         return value
++
+     def __len__(self):
++        self._purge_expired()
+         return len(self.entries)
+</pre>
+<h3>Pełne wyniki testów</h3><pre>{
+  "expected_tests": [
+    "withheld_tests.Functional.test_expiry_boundary",
+    "withheld_tests.Functional.test_read_no_extension",
+    "withheld_tests.Functional.test_lru_on_read",
+    "withheld_tests.Functional.test_overwrite_at_capacity",
+    "withheld_tests.Functional.test_expired_before_eviction",
+    "withheld_tests.Functional.test_len_purges",
+    "withheld_tests.Functional.test_zero_capacity_and_ttl",
+    "withheld_tests.Functional.test_invalid_parameters",
+    "withheld_tests.Regression.test_none_value",
+    "withheld_tests.Regression.test_custom_default",
+    "withheld_tests.Regression.test_overwrite_resets_expiry",
+    "withheld_tests.Regression.test_instance_isolation"
+  ],
+  "status": "complete",
+  "tests": [
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_expired_before_eviction",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_expiry_boundary",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_parameters",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_len_purges",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_lru_on_read",
+      "passed": true
+    },
+    {
+      "errors": [
+        "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 18, in test_overwrite_at_capacity\nAssertionError: None != 1\n"
+      ],
+      "id": "withheld_tests.Functional.test_overwrite_at_capacity",
+      "passed": false
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_read_no_extension",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_zero_capacity_and_ttl",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_custom_default",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_instance_isolation",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_none_value",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_overwrite_resets_expiry",
+      "passed": true
+    }
+  ]
+}</pre>
+<details><summary>Surowa odpowiedź modelu</summary><pre>{&#34;files&#34;:{&#34;ttl_cache.py&#34;:&#34;from collections import OrderedDict\n\nclass TTLCache:\n    def __init__(self, capacity, ttl, clock):\n        # Validate capacity\n        if not isinstance(capacity, int) or isinstance(capacity, bool) or capacity &lt; 0:\n            raise ValueError(\&#34;capacity must be a nonnegative integer\&#34;)\n        # Validate ttl\n        if not isinstance(ttl, (int, float)) or isinstance(ttl, bool) or ttl &lt; 0 or ttl != ttl or ttl == float(\&#34;inf\&#34;):\n            raise ValueError(\&#34;ttl must be a nonnegative finite number\&#34;)\n        # Validate clock\n        if not callable(clock):\n            raise ValueError(\&#34;clock must be callable\&#34;)\n        self.capacity = capacity\n        self.ttl = ttl\n        self.clock = clock\n        self.entries = OrderedDict()\n\n    def _purge_expired(self):\n        now = self.clock()\n        keys_to_remove = [k for k, (_, exp) in self.entries.items() if now &gt;= exp]\n        for k in keys_to_remove:\n            del self.entries[k]\n\n    def put(self, key, value):\n        # Do not store if capacity is zero or ttl is zero\n        if self.capacity == 0 or self.ttl == 0:\n            return\n        # Purge expired entries before eviction\n        self._purge_expired()\n        # Evict LRU if capacity exceeded\n        if len(self.entries) &gt;= self.capacity:\n            self.entries.popitem(last=False)\n        expiry = self.clock() + self.ttl\n        self.entries[key] = (value, expiry)\n\n    def get(self, key, default=None):\n        item = self.entries.get(key)\n        if item is None:\n            return default\n        value, expiry = item\n        now = self.clock()\n        if now &gt;= expiry:\n            del self.entries[key]\n            return default\n        # Move key to end to mark as recently used\n        self.entries.move_to_end(key)\n        return value\n\n    def __len__(self):\n        self._purge_expired()\n        return len(self.entries)\n&#34;} }</pre></details>
+</details><details><summary>Próba 3: FAIL — kod, diff i testy</summary>
+
+
+<h3>Wskaźniki statyczne</h3><pre>{
+  "blocked": [],
+  "files": {
+    "ttl_cache.py": {
+      "alerts": [],
+      "branch_nodes": 11,
+      "documented_functions": 0,
+      "functions": 5,
+      "functions_with_any_annotation": 0,
+      "lines": 52,
+      "max_function_lines": 14
+    }
+  }
+}</pre>
+<h3>Zmiany względem wejścia</h3><pre>--- before/ttl_cache.py
++++ after/ttl_cache.py
+@@ -1,20 +1,52 @@
+ from collections import OrderedDict
++
+ class TTLCache:
+     def __init__(self, capacity, ttl, clock):
+-        self.capacity, self.ttl, self.clock = capacity, ttl, clock
++        # Validate capacity
++        if not isinstance(capacity, int) or isinstance(capacity, bool) or capacity &lt; 0:
++            raise ValueError(&#34;capacity must be a nonnegative integer&#34;)
++        # Validate ttl
++        if not isinstance(ttl, (int, float)) or isinstance(ttl, bool) or ttl &lt; 0 or ttl != ttl or ttl == float(&#34;inf&#34;):
++            raise ValueError(&#34;ttl must be a nonnegative finite number&#34;)
++        # Validate clock
++        if not callable(clock):
++            raise ValueError(&#34;clock must be callable&#34;)
++        self.capacity = capacity
++        self.ttl = ttl
++        self.clock = clock
+         self.entries = OrderedDict()
++
++    def _purge_expired(self):
++        now = self.clock()
++        keys_to_remove = [k for k, (_, exp) in self.entries.items() if now &gt;= exp]
++        for k in keys_to_remove:
++            del self.entries[k]
++
+     def put(self, key, value):
+-        if len(self.entries) &gt;= self.capacity and self.entries:
++        # Do not store if capacity is zero or ttl is zero
++        if self.capacity == 0 or self.ttl == 0:
++            return
++        # Purge expired entries before eviction
++        self._purge_expired()
++        # Evict LRU if capacity exceeded
++        if len(self.entries) &gt;= self.capacity:
+             self.entries.popitem(last=False)
+-        self.entries[key] = (value, self.clock() + self.ttl)
++        expiry = self.clock() + self.ttl
++        self.entries[key] = (value, expiry)
++
+     def get(self, key, default=None):
+         item = self.entries.get(key)
+-        if item is None: return default
++        if item is None:
++            return default
+         value, expiry = item
+-        if self.clock() &gt; expiry:
++        now = self.clock()
++        if now &gt;= expiry:
+             del self.entries[key]
+             return default
+-        self.entries[key] = (value, self.clock() + self.ttl)
++        # Move key to end to mark as recently used
++        self.entries.move_to_end(key)
+         return value
++
+     def __len__(self):
++        self._purge_expired()
+         return len(self.entries)
+</pre>
+<h3>Pełne wyniki testów</h3><pre>{
+  "expected_tests": [
+    "withheld_tests.Functional.test_expiry_boundary",
+    "withheld_tests.Functional.test_read_no_extension",
+    "withheld_tests.Functional.test_lru_on_read",
+    "withheld_tests.Functional.test_overwrite_at_capacity",
+    "withheld_tests.Functional.test_expired_before_eviction",
+    "withheld_tests.Functional.test_len_purges",
+    "withheld_tests.Functional.test_zero_capacity_and_ttl",
+    "withheld_tests.Functional.test_invalid_parameters",
+    "withheld_tests.Regression.test_none_value",
+    "withheld_tests.Regression.test_custom_default",
+    "withheld_tests.Regression.test_overwrite_resets_expiry",
+    "withheld_tests.Regression.test_instance_isolation"
+  ],
+  "status": "complete",
+  "tests": [
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_expired_before_eviction",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_expiry_boundary",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_parameters",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_len_purges",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_lru_on_read",
+      "passed": true
+    },
+    {
+      "errors": [
+        "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 18, in test_overwrite_at_capacity\nAssertionError: None != 1\n"
+      ],
+      "id": "withheld_tests.Functional.test_overwrite_at_capacity",
+      "passed": false
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_read_no_extension",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_zero_capacity_and_ttl",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_custom_default",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_instance_isolation",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_none_value",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_overwrite_resets_expiry",
+      "passed": true
+    }
+  ]
+}</pre>
+<details><summary>Surowa odpowiedź modelu</summary><pre>{&#34;files&#34;:{&#34;ttl_cache.py&#34;:&#34;from collections import OrderedDict\n\nclass TTLCache:\n    def __init__(self, capacity, ttl, clock):\n        # Validate capacity\n        if not isinstance(capacity, int) or isinstance(capacity, bool) or capacity &lt; 0:\n            raise ValueError(\&#34;capacity must be a nonnegative integer\&#34;)\n        # Validate ttl\n        if not isinstance(ttl, (int, float)) or isinstance(ttl, bool) or ttl &lt; 0 or ttl != ttl or ttl == float(\&#34;inf\&#34;):\n            raise ValueError(\&#34;ttl must be a nonnegative finite number\&#34;)\n        # Validate clock\n        if not callable(clock):\n            raise ValueError(\&#34;clock must be callable\&#34;)\n        self.capacity = capacity\n        self.ttl = ttl\n        self.clock = clock\n        self.entries = OrderedDict()\n\n    def _purge_expired(self):\n        now = self.clock()\n        keys_to_remove = [k for k, (_, exp) in self.entries.items() if now &gt;= exp]\n        for k in keys_to_remove:\n            del self.entries[k]\n\n    def put(self, key, value):\n        # Do not store if capacity is zero or ttl is zero\n        if self.capacity == 0 or self.ttl == 0:\n            return\n        # Purge expired entries before eviction\n        self._purge_expired()\n        # Evict LRU if capacity exceeded\n        if len(self.entries) &gt;= self.capacity:\n            self.entries.popitem(last=False)\n        expiry = self.clock() + self.ttl\n        self.entries[key] = (value, expiry)\n\n    def get(self, key, default=None):\n        item = self.entries.get(key)\n        if item is None:\n            return default\n        value, expiry = item\n        now = self.clock()\n        if now &gt;= expiry:\n            del self.entries[key]\n            return default\n        # Move key to end to mark as recently used\n        self.entries.move_to_end(key)\n        return value\n\n    def __len__(self):\n        self._purge_expired()\n        return len(self.entries)\n&#34;} }</pre></details>
+</details></article><article><h2>Naprawa w trzech plikach: kwoty, pozycje i rabat faktury</h2><p>Pliki: money.py, cart.py, invoice.py</p><details><summary>Specyfikacja przekazana modelowi</summary><pre>Fix the checkout pipeline in exactly money.py, cart.py, invoice.py.
+Public API: money.to_minor(amount: str) -&gt; int; cart.line_total(unit_price: str,
+quantity: int) -&gt; int; invoice.invoice_total(items: list[tuple[str,int]],
+discount_percent: str = &#34;0&#34;) -&gt; int. Results are integer cents, not floats.
+Amounts and discount are finite nonnegative Decimal strings; reject non-string,
+invalid, nonfinite and negative input with ValueError. Discount must be &lt;=100.
+quantity must be a positive integer, not bool; invalid quantity raises ValueError.
+money.to_minor rounds cents with ROUND_HALF_UP. cart.line_total multiplies the
+EXACT unit price by quantity BEFORE rounding to cents (never round unit first).
+invoice.invoice_total sums rounded line totals, applies ONE invoice-level discount
+(percent / 100), then rounds with ROUND_HALF_UP. Empty cart returns 0 but still
+validates discount. Do not mutate items. Preserve names/signatures and fix the
+separate precision/validation bug in money, early rounding/quantity bug in cart,
+and discount/rounding bug in invoice. No additional files or dependencies.</pre></details>
+<details><summary>Próba 1: FAIL — kod, diff i testy</summary>
+
+
+<h3>Wskaźniki statyczne</h3><pre>{
+  "blocked": [],
+  "files": {
+    "cart.py": {
+      "alerts": [],
+      "branch_nodes": 2,
+      "documented_functions": 1,
+      "functions": 1,
+      "functions_with_any_annotation": 1,
+      "lines": 32,
+      "max_function_lines": 25
+    },
+    "invoice.py": {
+      "alerts": [
+        "function longer than 40 lines"
+      ],
+      "branch_nodes": 5,
+      "documented_functions": 1,
+      "functions": 1,
+      "functions_with_any_annotation": 1,
+      "lines": 50,
+      "max_function_lines": 42
+    },
+    "money.py": {
+      "alerts": [],
+      "branch_nodes": 4,
+      "documented_functions": 1,
+      "functions": 1,
+      "functions_with_any_annotation": 1,
+      "lines": 38,
+      "max_function_lines": 31
+    }
+  }
+}</pre>
+<h3>Zmiany względem wejścia</h3><pre>--- before/money.py
++++ after/money.py
+@@ -1,2 +1,38 @@
++&#34;&#34;&#34;Utility for converting monetary amounts to minor units (cents).&#34;&#34;&#34;
++
++from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
++
++__all__ = [&#34;to_minor&#34;]
++
++
+ def to_minor(amount: str) -&gt; int:
+-    return round(float(amount) * 100)
++    &#34;&#34;&#34;Convert a decimal string amount to an integer number of cents.
++
++    Parameters
++    ----------
++    amount: str
++        A string representing a non‑negative, finite decimal number.
++
++    Returns
++    -------
++    int
++        The amount expressed in cents.
++
++    Raises
++    ------
++    ValueError
++        If *amount* is not a string, is not a valid decimal, is negative,
++        or is infinite/NaN.
++    &#34;&#34;&#34;
++    if not isinstance(amount, str):
++        raise ValueError(&#34;amount must be a string&#34;)
++    try:
++        dec = Decimal(amount)
++    except InvalidOperation:
++        raise ValueError(&#34;amount must be a valid decimal string&#34;)
++    if not dec.is_finite():
++        raise ValueError(&#34;amount must be finite&#34;)
++    if dec &lt; 0:
++        raise ValueError(&#34;amount must be non‑negative&#34;)
++    cents = (dec * 100).quantize(Decimal(&#34;1&#34;), rounding=ROUND_HALF_UP)
++    return int(cents)
+--- before/cart.py
++++ after/cart.py
+@@ -1,4 +1,32 @@
++&#34;&#34;&#34;Functions for calculating line totals in a shopping cart.&#34;&#34;&#34;
++
+ from money import to_minor
+ 
++__all__ = [&#34;line_total&#34;]
++
++
+ def line_total(unit_price: str, quantity: int) -&gt; int:
+-    return to_minor(unit_price) * quantity
++    &#34;&#34;&#34;Return the total cents for a line item.
++
++    Parameters
++    ----------
++    unit_price: str
++        The unit price as a decimal string.
++    quantity: int
++        A positive integer quantity.
++
++    Returns
++    -------
++    int
++        The line total in cents.
++
++    Raises
++    ------
++    ValueError
++        If *quantity* is not a positive integer or if *unit_price* is
++        invalid.
++    &#34;&#34;&#34;
++    if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity &lt;= 0:
++        raise ValueError(&#34;quantity must be a positive integer&#34;)
++    unit_cents = to_minor(unit_price)
++    return unit_cents * quantity
+--- before/invoice.py
++++ after/invoice.py
+@@ -1,4 +1,50 @@
++&#34;&#34;&#34;Functions for calculating invoice totals with optional discounts.&#34;&#34;&#34;
++
++from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+ from cart import line_total
+ 
++__all__ = [&#34;invoice_total&#34;]
++
++
+ def invoice_total(items: list[tuple[str, int]], discount_percent: str = &#34;0&#34;) -&gt; int:
+-    return sum(round(line_total(price, quantity) * (1 - float(discount_percent) / 100)) for price, quantity in items)
++    &#34;&#34;&#34;Return the total invoice amount in cents.
++
++    Parameters
++    ----------
++    items: list[tuple[str, int]]
++        A list of (unit_price, quantity) tuples.
++    discount_percent: str, optional
++        Discount percentage as a decimal string (default &#34;0&#34;). Must be
++        between 0 and 100 inclusive.
++
++    Returns
++    -------
++    int
++        The total invoice amount in cents.
++
++    Raises
++    ------
++    ValueError
++        If *discount_percent* is invalid or out of bounds.
++    &#34;&#34;&#34;
++    # Validate discount
++    if not isinstance(discount_percent, str):
++        raise ValueError(&#34;discount_percent must be a string&#34;)
++    try:
++        disc = Decimal(discount_percent)
++    except InvalidOperation:
++        raise ValueError(&#34;discount_percent must be a valid decimal string&#34;)
++    if not disc.is_finite():
++        raise ValueError(&#34;discount_percent must be finite&#34;)
++    if disc &lt; 0 or disc &gt; 100:
++        raise ValueError(&#34;discount_percent must be between 0 and 100 inclusive&#34;)
++
++    # Sum line totals (already in cents)
++    subtotal_cents = sum(line_total(price, qty) for price, qty in items)
++
++    # Apply discount at invoice level
++    factor = (Decimal(&#34;100&#34;) - disc) / Decimal(&#34;100&#34;)
++    total = Decimal(subtotal_cents) * factor
++    # Round to nearest cent
++    total_cents = total.quantize(Decimal(&#34;1&#34;), rounding=ROUND_HALF_UP)
++    return int(total_cents)
+</pre>
+<h3>Pełne wyniki testów</h3><pre>{
+  "expected_tests": [
+    "withheld_tests.Functional.test_money_half_up",
+    "withheld_tests.Functional.test_large_exact_amount",
+    "withheld_tests.Functional.test_invalid_money",
+    "withheld_tests.Functional.test_multiply_before_rounding",
+    "withheld_tests.Functional.test_invalid_quantity",
+    "withheld_tests.Functional.test_discount_once",
+    "withheld_tests.Functional.test_discount_half_up",
+    "withheld_tests.Functional.test_invalid_discount_even_empty",
+    "withheld_tests.Regression.test_empty",
+    "withheld_tests.Regression.test_zero_discount",
+    "withheld_tests.Regression.test_full_discount",
+    "withheld_tests.Regression.test_input_unchanged"
+  ],
+  "status": "complete",
+  "tests": [
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_discount_half_up",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_discount_once",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_discount_even_empty",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_money",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_quantity",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_large_exact_amount",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_money_half_up",
+      "passed": true
+    },
+    {
+      "errors": [
+        "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 11, in test_multiply_before_rounding\nAssertionError: 2 != 1\n"
+      ],
+      "id": "withheld_tests.Functional.test_multiply_before_rounding",
+      "passed": false
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_empty",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_full_discount",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_input_unchanged",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_zero_discount",
+      "passed": true
+    }
+  ]
+}</pre>
+<details><summary>Surowa odpowiedź modelu</summary><pre>{&#34;files&#34;:{&#34;money.py&#34;:&#34;\&#34;\&#34;\&#34;Utility for converting monetary amounts to minor units (cents).\&#34;\&#34;\&#34;\n\nfrom decimal import Decimal, ROUND_HALF_UP, InvalidOperation\n\n__all__ = [\&#34;to_minor\&#34;]\n\n\ndef to_minor(amount: str) -&gt; int:\n    \&#34;\&#34;\&#34;Convert a decimal string amount to an integer number of cents.\n\n    Parameters\n    ----------\n    amount: str\n        A string representing a non‑negative, finite decimal number.\n\n    Returns\n    -------\n    int\n        The amount expressed in cents.\n\n    Raises\n    ------\n    ValueError\n        If *amount* is not a string, is not a valid decimal, is negative,\n        or is infinite/NaN.\n    \&#34;\&#34;\&#34;\n    if not isinstance(amount, str):\n        raise ValueError(\&#34;amount must be a string\&#34;)\n    try:\n        dec = Decimal(amount)\n    except InvalidOperation:\n        raise ValueError(\&#34;amount must be a valid decimal string\&#34;)\n    if not dec.is_finite():\n        raise ValueError(\&#34;amount must be finite\&#34;)\n    if dec &lt; 0:\n        raise ValueError(\&#34;amount must be non‑negative\&#34;)\n    cents = (dec * 100).quantize(Decimal(\&#34;1\&#34;), rounding=ROUND_HALF_UP)\n    return int(cents)\n&#34;,&#34;cart.py&#34;:&#34;\&#34;\&#34;\&#34;Functions for calculating line totals in a shopping cart.\&#34;\&#34;\&#34;\n\nfrom money import to_minor\n\n__all__ = [\&#34;line_total\&#34;]\n\n\ndef line_total(unit_price: str, quantity: int) -&gt; int:\n    \&#34;\&#34;\&#34;Return the total cents for a line item.\n\n    Parameters\n    ----------\n    unit_price: str\n        The unit price as a decimal string.\n    quantity: int\n        A positive integer quantity.\n\n    Returns\n    -------\n    int\n        The line total in cents.\n\n    Raises\n    ------\n    ValueError\n        If *quantity* is not a positive integer or if *unit_price* is\n        invalid.\n    \&#34;\&#34;\&#34;\n    if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity &lt;= 0:\n        raise ValueError(\&#34;quantity must be a positive integer\&#34;)\n    unit_cents = to_minor(unit_price)\n    return unit_cents * quantity\n&#34;,&#34;invoice.py&#34;:&#34;\&#34;\&#34;\&#34;Functions for calculating invoice totals with optional discounts.\&#34;\&#34;\&#34;\n\nfrom decimal import Decimal, ROUND_HALF_UP, InvalidOperation\nfrom cart import line_total\n\n__all__ = [\&#34;invoice_total\&#34;]\n\n\ndef invoice_total(items: list[tuple[str, int]], discount_percent: str = \&#34;0\&#34;) -&gt; int:\n    \&#34;\&#34;\&#34;Return the total invoice amount in cents.\n\n    Parameters\n    ----------\n    items: list[tuple[str, int]]\n        A list of (unit_price, quantity) tuples.\n    discount_percent: str, optional\n        Discount percentage as a decimal string (default \&#34;0\&#34;). Must be\n        between 0 and 100 inclusive.\n\n    Returns\n    -------\n    int\n        The total invoice amount in cents.\n\n    Raises\n    ------\n    ValueError\n        If *discount_percent* is invalid or out of bounds.\n    \&#34;\&#34;\&#34;\n    # Validate discount\n    if not isinstance(discount_percent, str):\n        raise ValueError(\&#34;discount_percent must be a string\&#34;)\n    try:\n        disc = Decimal(discount_percent)\n    except InvalidOperation:\n        raise ValueError(\&#34;discount_percent must be a valid decimal string\&#34;)\n    if not disc.is_finite():\n        raise ValueError(\&#34;discount_percent must be finite\&#34;)\n    if disc &lt; 0 or disc &gt; 100:\n        raise ValueError(\&#34;discount_percent must be between 0 and 100 inclusive\&#34;)\n\n    # Sum line totals (already in cents)\n    subtotal_cents = sum(line_total(price, qty) for price, qty in items)\n\n    # Apply discount at invoice level\n    factor = (Decimal(\&#34;100\&#34;) - disc) / Decimal(\&#34;100\&#34;)\n    total = Decimal(subtotal_cents) * factor\n    # Round to nearest cent\n    total_cents = total.quantize(Decimal(\&#34;1\&#34;), rounding=ROUND_HALF_UP)\n    return int(total_cents)\n&#34;} }</pre></details>
+</details><details><summary>Próba 2: FAIL — kod, diff i testy</summary>
+
+
+<h3>Wskaźniki statyczne</h3><pre>{
+  "blocked": [],
+  "files": {
+    "cart.py": {
+      "alerts": [],
+      "branch_nodes": 2,
+      "documented_functions": 1,
+      "functions": 1,
+      "functions_with_any_annotation": 1,
+      "lines": 30,
+      "max_function_lines": 24
+    },
+    "invoice.py": {
+      "alerts": [
+        "broad exception handler"
+      ],
+      "branch_nodes": 5,
+      "documented_functions": 1,
+      "functions": 1,
+      "functions_with_any_annotation": 1,
+      "lines": 45,
+      "max_function_lines": 38
+    },
+    "money.py": {
+      "alerts": [
+        "broad exception handler"
+      ],
+      "branch_nodes": 4,
+      "documented_functions": 1,
+      "functions": 1,
+      "functions_with_any_annotation": 1,
+      "lines": 35,
+      "max_function_lines": 29
+    }
+  }
+}</pre>
+<h3>Zmiany względem wejścia</h3><pre>--- before/money.py
++++ after/money.py
+@@ -1,2 +1,35 @@
++&#34;&#34;&#34;Utility for converting monetary amounts to minor units (cents).&#34;&#34;&#34;
++
++from decimal import Decimal, ROUND_HALF_UP
++
++
+ def to_minor(amount: str) -&gt; int:
+-    return round(float(amount) * 100)
++    &#34;&#34;&#34;Convert a string amount to integer cents.
++
++    Parameters
++    ----------
++    amount: str
++        Decimal string representing a non‑negative, finite amount.
++
++    Returns
++    -------
++    int
++        The amount in cents.
++
++    Raises
++    ------
++    ValueError
++        If *amount* is not a string, is not a valid decimal, is negative,
++        or is infinite/NaN.
++    &#34;&#34;&#34;
++    if not isinstance(amount, str):
++        raise ValueError(&#34;amount must be a string&#34;)
++    try:
++        dec = Decimal(amount)
++    except Exception as exc:
++        raise ValueError(&#34;invalid decimal string&#34;) from exc
++    if not dec.is_finite() or dec &lt; 0:
++        raise ValueError(&#34;amount must be non‑negative and finite&#34;)
++    cents = (dec * 100).quantize(Decimal(&#34;1&#34;), rounding=ROUND_HALF_UP)
++    return int(cents)
++
+--- before/cart.py
++++ after/cart.py
+@@ -1,4 +1,30 @@
++&#34;&#34;&#34;Functions for calculating line totals in a shopping cart.&#34;&#34;&#34;
++
+ from money import to_minor
+ 
++
+ def line_total(unit_price: str, quantity: int) -&gt; int:
+-    return to_minor(unit_price) * quantity
++    &#34;&#34;&#34;Return the total cents for a line item.
++
++    Parameters
++    ----------
++    unit_price: str
++        Decimal string for the unit price.
++    quantity: int
++        Positive integer quantity (bool is not accepted).
++
++    Returns
++    -------
++    int
++        Total cents for the line.
++
++    Raises
++    ------
++    ValueError
++        If inputs are invalid.
++    &#34;&#34;&#34;
++    if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity &lt;= 0:
++        raise ValueError(&#34;quantity must be a positive integer&#34;)
++    unit_cents = to_minor(unit_price)
++    return unit_cents * quantity
++
+--- before/invoice.py
++++ after/invoice.py
+@@ -1,4 +1,45 @@
++&#34;&#34;&#34;Functions for calculating invoice totals with discounts.&#34;&#34;&#34;
++
++from decimal import Decimal, ROUND_HALF_UP
+ from cart import line_total
+ 
++
+ def invoice_total(items: list[tuple[str, int]], discount_percent: str = &#34;0&#34;) -&gt; int:
+-    return sum(round(line_total(price, quantity) * (1 - float(discount_percent) / 100)) for price, quantity in items)
++    &#34;&#34;&#34;Return the total invoice amount in cents.
++
++    Parameters
++    ----------
++    items: list[tuple[str, int]]
++        List of (unit_price, quantity) tuples.
++    discount_percent: str, optional
++        Discount percentage as a decimal string. Must be between 0 and 100.
++
++    Returns
++    -------
++    int
++        Total invoice amount in cents.
++
++    Raises
++    ------
++    ValueError
++        If discount_percent is invalid.
++    &#34;&#34;&#34;
++    if not isinstance(discount_percent, str):
++        raise ValueError(&#34;discount_percent must be a string&#34;)
++    try:
++        disc = Decimal(discount_percent)
++    except Exception as exc:
++        raise ValueError(&#34;invalid discount percent string&#34;) from exc
++    if not disc.is_finite() or disc &lt; 0 or disc &gt; 100:
++        raise ValueError(&#34;discount_percent must be between 0 and 100 inclusive&#34;)
++
++    # Sum line totals (already in cents)
++    subtotal_cents = sum(line_total(price, qty) for price, qty in items)
++    if subtotal_cents == 0:
++        return 0
++    # Apply discount at invoice level
++    discount_factor = (Decimal(&#34;100&#34;) - disc) / Decimal(&#34;100&#34;)
++    total = Decimal(subtotal_cents) * discount_factor
++    total_cents = total.quantize(Decimal(&#34;1&#34;), rounding=ROUND_HALF_UP)
++    return int(total_cents)
++
+</pre>
+<h3>Pełne wyniki testów</h3><pre>{
+  "expected_tests": [
+    "withheld_tests.Functional.test_money_half_up",
+    "withheld_tests.Functional.test_large_exact_amount",
+    "withheld_tests.Functional.test_invalid_money",
+    "withheld_tests.Functional.test_multiply_before_rounding",
+    "withheld_tests.Functional.test_invalid_quantity",
+    "withheld_tests.Functional.test_discount_once",
+    "withheld_tests.Functional.test_discount_half_up",
+    "withheld_tests.Functional.test_invalid_discount_even_empty",
+    "withheld_tests.Regression.test_empty",
+    "withheld_tests.Regression.test_zero_discount",
+    "withheld_tests.Regression.test_full_discount",
+    "withheld_tests.Regression.test_input_unchanged"
+  ],
+  "status": "complete",
+  "tests": [
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_discount_half_up",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_discount_once",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_discount_even_empty",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_money",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_quantity",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_large_exact_amount",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_money_half_up",
+      "passed": true
+    },
+    {
+      "errors": [
+        "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 11, in test_multiply_before_rounding\nAssertionError: 2 != 1\n"
+      ],
+      "id": "withheld_tests.Functional.test_multiply_before_rounding",
+      "passed": false
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_empty",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_full_discount",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_input_unchanged",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_zero_discount",
+      "passed": true
+    }
+  ]
+}</pre>
+<details><summary>Surowa odpowiedź modelu</summary><pre>{&#34;files&#34;:{&#34;money.py&#34;:&#34;\&#34;\&#34;\&#34;Utility for converting monetary amounts to minor units (cents).\&#34;\&#34;\&#34;\n\nfrom decimal import Decimal, ROUND_HALF_UP\n\n\ndef to_minor(amount: str) -&gt; int:\n    \&#34;\&#34;\&#34;Convert a string amount to integer cents.\n\n    Parameters\n    ----------\n    amount: str\n        Decimal string representing a non‑negative, finite amount.\n\n    Returns\n    -------\n    int\n        The amount in cents.\n\n    Raises\n    ------\n    ValueError\n        If *amount* is not a string, is not a valid decimal, is negative,\n        or is infinite/NaN.\n    \&#34;\&#34;\&#34;\n    if not isinstance(amount, str):\n        raise ValueError(\&#34;amount must be a string\&#34;)\n    try:\n        dec = Decimal(amount)\n    except Exception as exc:\n        raise ValueError(\&#34;invalid decimal string\&#34;) from exc\n    if not dec.is_finite() or dec &lt; 0:\n        raise ValueError(\&#34;amount must be non‑negative and finite\&#34;)\n    cents = (dec * 100).quantize(Decimal(\&#34;1\&#34;), rounding=ROUND_HALF_UP)\n    return int(cents)\n\n&#34;,&#34;cart.py&#34;:&#34;\&#34;\&#34;\&#34;Functions for calculating line totals in a shopping cart.\&#34;\&#34;\&#34;\n\nfrom money import to_minor\n\n\ndef line_total(unit_price: str, quantity: int) -&gt; int:\n    \&#34;\&#34;\&#34;Return the total cents for a line item.\n\n    Parameters\n    ----------\n    unit_price: str\n        Decimal string for the unit price.\n    quantity: int\n        Positive integer quantity (bool is not accepted).\n\n    Returns\n    -------\n    int\n        Total cents for the line.\n\n    Raises\n    ------\n    ValueError\n        If inputs are invalid.\n    \&#34;\&#34;\&#34;\n    if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity &lt;= 0:\n        raise ValueError(\&#34;quantity must be a positive integer\&#34;)\n    unit_cents = to_minor(unit_price)\n    return unit_cents * quantity\n\n&#34;,&#34;invoice.py&#34;:&#34;\&#34;\&#34;\&#34;Functions for calculating invoice totals with discounts.\&#34;\&#34;\&#34;\n\nfrom decimal import Decimal, ROUND_HALF_UP\nfrom cart import line_total\n\n\ndef invoice_total(items: list[tuple[str, int]], discount_percent: str = \&#34;0\&#34;) -&gt; int:\n    \&#34;\&#34;\&#34;Return the total invoice amount in cents.\n\n    Parameters\n    ----------\n    items: list[tuple[str, int]]\n        List of (unit_price, quantity) tuples.\n    discount_percent: str, optional\n        Discount percentage as a decimal string. Must be between 0 and 100.\n\n    Returns\n    -------\n    int\n        Total invoice amount in cents.\n\n    Raises\n    ------\n    ValueError\n        If discount_percent is invalid.\n    \&#34;\&#34;\&#34;\n    if not isinstance(discount_percent, str):\n        raise ValueError(\&#34;discount_percent must be a string\&#34;)\n    try:\n        disc = Decimal(discount_percent)\n    except Exception as exc:\n        raise ValueError(\&#34;invalid discount percent string\&#34;) from exc\n    if not disc.is_finite() or disc &lt; 0 or disc &gt; 100:\n        raise ValueError(\&#34;discount_percent must be between 0 and 100 inclusive\&#34;)\n\n    # Sum line totals (already in cents)\n    subtotal_cents = sum(line_total(price, qty) for price, qty in items)\n    if subtotal_cents == 0:\n        return 0\n    # Apply discount at invoice level\n    discount_factor = (Decimal(\&#34;100\&#34;) - disc) / Decimal(\&#34;100\&#34;)\n    total = Decimal(subtotal_cents) * discount_factor\n    total_cents = total.quantize(Decimal(\&#34;1\&#34;), rounding=ROUND_HALF_UP)\n    return int(total_cents)\n\n&#34;} }</pre></details>
+</details><details><summary>Próba 3: FAIL — kod, diff i testy</summary>
+
+
+<h3>Wskaźniki statyczne</h3><pre>{
+  "blocked": [],
+  "files": {
+    "cart.py": {
+      "alerts": [],
+      "branch_nodes": 2,
+      "documented_functions": 1,
+      "functions": 1,
+      "functions_with_any_annotation": 1,
+      "lines": 31,
+      "max_function_lines": 24
+    },
+    "invoice.py": {
+      "alerts": [
+        "function longer than 40 lines"
+      ],
+      "branch_nodes": 6,
+      "documented_functions": 1,
+      "functions": 1,
+      "functions_with_any_annotation": 1,
+      "lines": 50,
+      "max_function_lines": 42
+    },
+    "money.py": {
+      "alerts": [],
+      "branch_nodes": 5,
+      "documented_functions": 1,
+      "functions": 1,
+      "functions_with_any_annotation": 1,
+      "lines": 38,
+      "max_function_lines": 31
+    }
+  }
+}</pre>
+<h3>Zmiany względem wejścia</h3><pre>--- before/money.py
++++ after/money.py
+@@ -1,2 +1,38 @@
++&#34;&#34;&#34;Utility for converting monetary amounts to minor units (cents).&#34;&#34;&#34;
++
++from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
++
++__all__ = [&#34;to_minor&#34;]
++
++
+ def to_minor(amount: str) -&gt; int:
+-    return round(float(amount) * 100)
++    &#34;&#34;&#34;Convert a decimal string amount to an integer number of cents.
++
++    Parameters
++    ----------
++    amount: str
++        A string representing a non‑negative, finite decimal amount.
++
++    Returns
++    -------
++    int
++        The amount expressed in cents.
++
++    Raises
++    ------
++    ValueError
++        If *amount* is not a string, is not a valid decimal, is negative,
++        or is infinite/NaN.
++    &#34;&#34;&#34;
++    if not isinstance(amount, str):
++        raise ValueError(&#34;amount must be a string&#34;)
++    try:
++        dec = Decimal(amount)
++    except InvalidOperation:
++        raise ValueError(&#34;amount must be a valid decimal string&#34;)
++    if dec.is_nan() or dec.is_infinite():
++        raise ValueError(&#34;amount must be finite&#34;)
++    if dec &lt; 0:
++        raise ValueError(&#34;amount must be non‑negative&#34;)
++    cents = (dec * 100).quantize(Decimal(&#34;1&#34;), rounding=ROUND_HALF_UP)
++    return int(cents)
+--- before/cart.py
++++ after/cart.py
+@@ -1,4 +1,31 @@
++&#34;&#34;&#34;Functions for calculating line totals in a shopping cart.&#34;&#34;&#34;
++
+ from money import to_minor
+ 
++__all__ = [&#34;line_total&#34;]
++
++
+ def line_total(unit_price: str, quantity: int) -&gt; int:
+-    return to_minor(unit_price) * quantity
++    &#34;&#34;&#34;Return the total cents for a line item.
++
++    Parameters
++    ----------
++    unit_price: str
++        The unit price as a decimal string.
++    quantity: int
++        A positive integer quantity.
++
++    Returns
++    -------
++    int
++        The line total in cents.
++
++    Raises
++    ------
++    ValueError
++        If *quantity* is not a positive integer or if *unit_price* is invalid.
++    &#34;&#34;&#34;
++    if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity &lt;= 0:
++        raise ValueError(&#34;quantity must be a positive integer&#34;)
++    unit_cents = to_minor(unit_price)
++    return unit_cents * quantity
+--- before/invoice.py
++++ after/invoice.py
+@@ -1,4 +1,50 @@
++&#34;&#34;&#34;Functions for calculating invoice totals with optional discounts.&#34;&#34;&#34;
++
++from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+ from cart import line_total
+ 
++__all__ = [&#34;invoice_total&#34;]
++
++
+ def invoice_total(items: list[tuple[str, int]], discount_percent: str = &#34;0&#34;) -&gt; int:
+-    return sum(round(line_total(price, quantity) * (1 - float(discount_percent) / 100)) for price, quantity in items)
++    &#34;&#34;&#34;Return the total invoice amount in cents.
++
++    Parameters
++    ----------
++    items: list[tuple[str, int]]
++        A list of (unit_price, quantity) tuples.
++    discount_percent: str, optional
++        Discount percentage as a decimal string (default &#34;0&#34;). Must be
++        between 0 and 100 inclusive.
++
++    Returns
++    -------
++    int
++        The total invoice amount in cents.
++
++    Raises
++    ------
++    ValueError
++        If *discount_percent* is invalid or out of bounds.
++    &#34;&#34;&#34;
++    # Validate discount
++    if not isinstance(discount_percent, str):
++        raise ValueError(&#34;discount_percent must be a string&#34;)
++    try:
++        disc = Decimal(discount_percent)
++    except InvalidOperation:
++        raise ValueError(&#34;discount_percent must be a valid decimal string&#34;)
++    if disc.is_nan() or disc.is_infinite():
++        raise ValueError(&#34;discount_percent must be finite&#34;)
++    if disc &lt; 0 or disc &gt; 100:
++        raise ValueError(&#34;discount_percent must be between 0 and 100 inclusive&#34;)
++
++    # Sum line totals (already in cents)
++    subtotal_cents = sum(line_total(price, qty) for price, qty in items)
++
++    # Apply discount at invoice level
++    factor = (Decimal(&#34;100&#34;) - disc) / Decimal(&#34;100&#34;)
++    total = Decimal(subtotal_cents) * factor
++    # Round to nearest cent
++    total_cents = total.quantize(Decimal(&#34;1&#34;), rounding=ROUND_HALF_UP)
++    return int(total_cents)
+</pre>
+<h3>Pełne wyniki testów</h3><pre>{
+  "expected_tests": [
+    "withheld_tests.Functional.test_money_half_up",
+    "withheld_tests.Functional.test_large_exact_amount",
+    "withheld_tests.Functional.test_invalid_money",
+    "withheld_tests.Functional.test_multiply_before_rounding",
+    "withheld_tests.Functional.test_invalid_quantity",
+    "withheld_tests.Functional.test_discount_once",
+    "withheld_tests.Functional.test_discount_half_up",
+    "withheld_tests.Functional.test_invalid_discount_even_empty",
+    "withheld_tests.Regression.test_empty",
+    "withheld_tests.Regression.test_zero_discount",
+    "withheld_tests.Regression.test_full_discount",
+    "withheld_tests.Regression.test_input_unchanged"
+  ],
+  "status": "complete",
+  "tests": [
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_discount_half_up",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_discount_once",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_discount_even_empty",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_money",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_invalid_quantity",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_large_exact_amount",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Functional.test_money_half_up",
+      "passed": true
+    },
+    {
+      "errors": [
+        "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 11, in test_multiply_before_rounding\nAssertionError: 2 != 1\n"
+      ],
+      "id": "withheld_tests.Functional.test_multiply_before_rounding",
+      "passed": false
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_empty",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_full_discount",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_input_unchanged",
+      "passed": true
+    },
+    {
+      "errors": [],
+      "id": "withheld_tests.Regression.test_zero_discount",
+      "passed": true
+    }
+  ]
+}</pre>
+<details><summary>Surowa odpowiedź modelu</summary><pre>{&#34;files&#34;:{&#34;money.py&#34;:&#34;\&#34;\&#34;\&#34;Utility for converting monetary amounts to minor units (cents).\&#34;\&#34;\&#34;\n\nfrom decimal import Decimal, ROUND_HALF_UP, InvalidOperation\n\n__all__ = [\&#34;to_minor\&#34;]\n\n\ndef to_minor(amount: str) -&gt; int:\n    \&#34;\&#34;\&#34;Convert a decimal string amount to an integer number of cents.\n\n    Parameters\n    ----------\n    amount: str\n        A string representing a non‑negative, finite decimal amount.\n\n    Returns\n    -------\n    int\n        The amount expressed in cents.\n\n    Raises\n    ------\n    ValueError\n        If *amount* is not a string, is not a valid decimal, is negative,\n        or is infinite/NaN.\n    \&#34;\&#34;\&#34;\n    if not isinstance(amount, str):\n        raise ValueError(\&#34;amount must be a string\&#34;)\n    try:\n        dec = Decimal(amount)\n    except InvalidOperation:\n        raise ValueError(\&#34;amount must be a valid decimal string\&#34;)\n    if dec.is_nan() or dec.is_infinite():\n        raise ValueError(\&#34;amount must be finite\&#34;)\n    if dec &lt; 0:\n        raise ValueError(\&#34;amount must be non‑negative\&#34;)\n    cents = (dec * 100).quantize(Decimal(\&#34;1\&#34;), rounding=ROUND_HALF_UP)\n    return int(cents)\n&#34;,&#34;cart.py&#34;:&#34;\&#34;\&#34;\&#34;Functions for calculating line totals in a shopping cart.\&#34;\&#34;\&#34;\n\nfrom money import to_minor\n\n__all__ = [\&#34;line_total\&#34;]\n\n\ndef line_total(unit_price: str, quantity: int) -&gt; int:\n    \&#34;\&#34;\&#34;Return the total cents for a line item.\n\n    Parameters\n    ----------\n    unit_price: str\n        The unit price as a decimal string.\n    quantity: int\n        A positive integer quantity.\n\n    Returns\n    -------\n    int\n        The line total in cents.\n\n    Raises\n    ------\n    ValueError\n        If *quantity* is not a positive integer or if *unit_price* is invalid.\n    \&#34;\&#34;\&#34;\n    if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity &lt;= 0:\n        raise ValueError(\&#34;quantity must be a positive integer\&#34;)\n    unit_cents = to_minor(unit_price)\n    return unit_cents * quantity\n&#34;,&#34;invoice.py&#34;:&#34;\&#34;\&#34;\&#34;Functions for calculating invoice totals with optional discounts.\&#34;\&#34;\&#34;\n\nfrom decimal import Decimal, ROUND_HALF_UP, InvalidOperation\nfrom cart import line_total\n\n__all__ = [\&#34;invoice_total\&#34;]\n\n\ndef invoice_total(items: list[tuple[str, int]], discount_percent: str = \&#34;0\&#34;) -&gt; int:\n    \&#34;\&#34;\&#34;Return the total invoice amount in cents.\n\n    Parameters\n    ----------\n    items: list[tuple[str, int]]\n        A list of (unit_price, quantity) tuples.\n    discount_percent: str, optional\n        Discount percentage as a decimal string (default \&#34;0\&#34;). Must be\n        between 0 and 100 inclusive.\n\n    Returns\n    -------\n    int\n        The total invoice amount in cents.\n\n    Raises\n    ------\n    ValueError\n        If *discount_percent* is invalid or out of bounds.\n    \&#34;\&#34;\&#34;\n    # Validate discount\n    if not isinstance(discount_percent, str):\n        raise ValueError(\&#34;discount_percent must be a string\&#34;)\n    try:\n        disc = Decimal(discount_percent)\n    except InvalidOperation:\n        raise ValueError(\&#34;discount_percent must be a valid decimal string\&#34;)\n    if disc.is_nan() or disc.is_infinite():\n        raise ValueError(\&#34;discount_percent must be finite\&#34;)\n    if disc &lt; 0 or disc &gt; 100:\n        raise ValueError(\&#34;discount_percent must be between 0 and 100 inclusive\&#34;)\n\n    # Sum line totals (already in cents)\n    subtotal_cents = sum(line_total(price, qty) for price, qty in items)\n\n    # Apply discount at invoice level\n    factor = (Decimal(\&#34;100\&#34;) - disc) / Decimal(\&#34;100\&#34;)\n    total = Decimal(subtotal_cents) * factor\n    # Round to nearest cent\n    total_cents = total.quantize(Decimal(\&#34;1\&#34;), rounding=ROUND_HALF_UP)\n    return int(total_cents)\n&#34;} }</pre></details>
+</details></article>
+<article><h2>Kontrole jakości benchmarku</h2><p>Przed wywołaniem modelu testujemy wadliwy punkt wyjścia i poprawną implementację referencyjną. Dla naprawy trzech plików dodatkowo przywracamy osobno każdy wadliwy plik; każda taka próba musi zawieść, aby wykazać konieczność naprawy wszystkich trzech plików.</p><details><summary>Wyniki kontroli</summary><pre>[
+  {
+    "ablations": [],
+    "baseline": {
+      "expected_tests": [
+        "withheld_tests.Functional.test_aggregate_before_rounding",
+        "withheld_tests.Functional.test_decimal_precision",
+        "withheld_tests.Functional.test_half_up",
+        "withheld_tests.Functional.test_sorted_customers",
+        "withheld_tests.Functional.test_invalid_line_number",
+        "withheld_tests.Functional.test_invalid_records",
+        "withheld_tests.Functional.test_invalid_decimal",
+        "withheld_tests.Functional.test_validate_pending",
+        "withheld_tests.Regression.test_empty",
+        "withheld_tests.Regression.test_pending_ignored",
+        "withheld_tests.Regression.test_extra_fields",
+        "withheld_tests.Regression.test_independent_calls"
+      ],
+      "status": "complete",
+      "tests": [
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 7, in test_aggregate_before_rounding\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Functional.test_aggregate_before_rounding",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 9, in test_decimal_precision\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Functional.test_decimal_precision",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 11, in test_half_up\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Functional.test_half_up",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 23, in test_invalid_decimal\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 23, in test_invalid_decimal\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 23, in test_invalid_decimal\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 23, in test_invalid_decimal\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Functional.test_invalid_decimal",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 17, in test_invalid_line_number\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Functional.test_invalid_line_number",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 20, in test_invalid_records\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 20, in test_invalid_records\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 20, in test_invalid_records\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 20, in test_invalid_records\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 20, in test_invalid_records\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Functional.test_invalid_records",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 13, in test_sorted_customers\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Functional.test_sorted_customers",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 25, in test_validate_pending\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Functional.test_validate_pending",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 27, in test_empty\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Regression.test_empty",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 29, in test_extra_fields\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Regression.test_extra_fields",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 31, in test_independent_calls\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Regression.test_independent_calls",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 28, in test_pending_ignored\n  File \"/work/invoice_summary.py\", line 2, in summarize_invoices\n    raise NotImplementedError\nNotImplementedError\n"
+          ],
+          "id": "withheld_tests.Regression.test_pending_ignored",
+          "passed": false
+        }
+      ]
+    },
+    "case": "generate_invoice_summary",
+    "reference": {
+      "expected_tests": [
+        "withheld_tests.Functional.test_aggregate_before_rounding",
+        "withheld_tests.Functional.test_decimal_precision",
+        "withheld_tests.Functional.test_half_up",
+        "withheld_tests.Functional.test_sorted_customers",
+        "withheld_tests.Functional.test_invalid_line_number",
+        "withheld_tests.Functional.test_invalid_records",
+        "withheld_tests.Functional.test_invalid_decimal",
+        "withheld_tests.Functional.test_validate_pending",
+        "withheld_tests.Regression.test_empty",
+        "withheld_tests.Regression.test_pending_ignored",
+        "withheld_tests.Regression.test_extra_fields",
+        "withheld_tests.Regression.test_independent_calls"
+      ],
+      "status": "complete",
+      "tests": [
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_aggregate_before_rounding",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_decimal_precision",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_half_up",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_invalid_decimal",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_invalid_line_number",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_invalid_records",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_sorted_customers",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_validate_pending",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_empty",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_extra_fields",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_independent_calls",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_pending_ignored",
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "ablations": [],
+    "baseline": {
+      "expected_tests": [
+        "withheld_tests.Functional.test_expiry_boundary",
+        "withheld_tests.Functional.test_read_no_extension",
+        "withheld_tests.Functional.test_lru_on_read",
+        "withheld_tests.Functional.test_overwrite_at_capacity",
+        "withheld_tests.Functional.test_expired_before_eviction",
+        "withheld_tests.Functional.test_len_purges",
+        "withheld_tests.Functional.test_zero_capacity_and_ttl",
+        "withheld_tests.Functional.test_invalid_parameters",
+        "withheld_tests.Regression.test_none_value",
+        "withheld_tests.Regression.test_custom_default",
+        "withheld_tests.Regression.test_overwrite_resets_expiry",
+        "withheld_tests.Regression.test_instance_isolation"
+      ],
+      "status": "complete",
+      "tests": [
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_expired_before_eviction",
+          "passed": true
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 9, in test_expiry_boundary\nAssertionError: 1 != \u0027miss\u0027\n"
+          ],
+          "id": "withheld_tests.Functional.test_expiry_boundary",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 29, in test_invalid_parameters\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 29, in test_invalid_parameters\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 29, in test_invalid_parameters\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 29, in test_invalid_parameters\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 29, in test_invalid_parameters\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 29, in test_invalid_parameters\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 29, in test_invalid_parameters\nAssertionError: ValueError not raised\n"
+          ],
+          "id": "withheld_tests.Functional.test_invalid_parameters",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 23, in test_len_purges\nAssertionError: 1 != 0\n"
+          ],
+          "id": "withheld_tests.Functional.test_len_purges",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 15, in test_lru_on_read\nAssertionError: 2 is not None\n"
+          ],
+          "id": "withheld_tests.Functional.test_lru_on_read",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 18, in test_overwrite_at_capacity\nAssertionError: None != 1\n"
+          ],
+          "id": "withheld_tests.Functional.test_overwrite_at_capacity",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 12, in test_read_no_extension\nAssertionError: 1 is not None\n"
+          ],
+          "id": "withheld_tests.Functional.test_read_no_extension",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 26, in test_zero_capacity_and_ttl\nAssertionError: 1 != 0\n"
+          ],
+          "id": "withheld_tests.Functional.test_zero_capacity_and_ttl",
+          "passed": false
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_custom_default",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_instance_isolation",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_none_value",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_overwrite_resets_expiry",
+          "passed": true
+        }
+      ]
+    },
+    "case": "fix_ttl_cache",
+    "reference": {
+      "expected_tests": [
+        "withheld_tests.Functional.test_expiry_boundary",
+        "withheld_tests.Functional.test_read_no_extension",
+        "withheld_tests.Functional.test_lru_on_read",
+        "withheld_tests.Functional.test_overwrite_at_capacity",
+        "withheld_tests.Functional.test_expired_before_eviction",
+        "withheld_tests.Functional.test_len_purges",
+        "withheld_tests.Functional.test_zero_capacity_and_ttl",
+        "withheld_tests.Functional.test_invalid_parameters",
+        "withheld_tests.Regression.test_none_value",
+        "withheld_tests.Regression.test_custom_default",
+        "withheld_tests.Regression.test_overwrite_resets_expiry",
+        "withheld_tests.Regression.test_instance_isolation"
+      ],
+      "status": "complete",
+      "tests": [
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_expired_before_eviction",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_expiry_boundary",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_invalid_parameters",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_len_purges",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_lru_on_read",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_overwrite_at_capacity",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_read_no_extension",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_zero_capacity_and_ttl",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_custom_default",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_instance_isolation",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_none_value",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_overwrite_resets_expiry",
+          "passed": true
+        }
+      ]
+    }
+  },
+  {
+    "ablations": [
+      {
+        "evaluation": {
+          "error": "ImportError: cannot import name \u0027parse_amount\u0027 from \u0027money\u0027 (/work/money.py)",
+          "expected_tests": [
+            "withheld_tests.Functional.test_money_half_up",
+            "withheld_tests.Functional.test_large_exact_amount",
+            "withheld_tests.Functional.test_invalid_money",
+            "withheld_tests.Functional.test_multiply_before_rounding",
+            "withheld_tests.Functional.test_invalid_quantity",
+            "withheld_tests.Functional.test_discount_once",
+            "withheld_tests.Functional.test_discount_half_up",
+            "withheld_tests.Functional.test_invalid_discount_even_empty",
+            "withheld_tests.Regression.test_empty",
+            "withheld_tests.Regression.test_zero_discount",
+            "withheld_tests.Regression.test_full_discount",
+            "withheld_tests.Regression.test_input_unchanged"
+          ],
+          "status": "candidate_error",
+          "tests": []
+        },
+        "restored_buggy_file": "money.py"
+      },
+      {
+        "evaluation": {
+          "expected_tests": [
+            "withheld_tests.Functional.test_money_half_up",
+            "withheld_tests.Functional.test_large_exact_amount",
+            "withheld_tests.Functional.test_invalid_money",
+            "withheld_tests.Functional.test_multiply_before_rounding",
+            "withheld_tests.Functional.test_invalid_quantity",
+            "withheld_tests.Functional.test_discount_once",
+            "withheld_tests.Functional.test_discount_half_up",
+            "withheld_tests.Functional.test_invalid_discount_even_empty",
+            "withheld_tests.Regression.test_empty",
+            "withheld_tests.Regression.test_zero_discount",
+            "withheld_tests.Regression.test_full_discount",
+            "withheld_tests.Regression.test_input_unchanged"
+          ],
+          "status": "complete",
+          "tests": [
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_discount_half_up",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_discount_once",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_invalid_discount_even_empty",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_invalid_money",
+              "passed": true
+            },
+            {
+              "errors": [
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 14, in test_invalid_quantity\nAssertionError: ValueError not raised\n",
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 14, in test_invalid_quantity\nAssertionError: ValueError not raised\n",
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 14, in test_invalid_quantity\nAssertionError: ValueError not raised\n",
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 14, in test_invalid_quantity\nAssertionError: ValueError not raised\n",
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 14, in test_invalid_quantity\nAssertionError: ValueError not raised\n"
+              ],
+              "id": "withheld_tests.Functional.test_invalid_quantity",
+              "passed": false
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_large_exact_amount",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_money_half_up",
+              "passed": true
+            },
+            {
+              "errors": [
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 11, in test_multiply_before_rounding\nAssertionError: 2 != 1\n"
+              ],
+              "id": "withheld_tests.Functional.test_multiply_before_rounding",
+              "passed": false
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Regression.test_empty",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Regression.test_full_discount",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Regression.test_input_unchanged",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Regression.test_zero_discount",
+              "passed": true
+            }
+          ]
+        },
+        "restored_buggy_file": "cart.py"
+      },
+      {
+        "evaluation": {
+          "expected_tests": [
+            "withheld_tests.Functional.test_money_half_up",
+            "withheld_tests.Functional.test_large_exact_amount",
+            "withheld_tests.Functional.test_invalid_money",
+            "withheld_tests.Functional.test_multiply_before_rounding",
+            "withheld_tests.Functional.test_invalid_quantity",
+            "withheld_tests.Functional.test_discount_once",
+            "withheld_tests.Functional.test_discount_half_up",
+            "withheld_tests.Functional.test_invalid_discount_even_empty",
+            "withheld_tests.Regression.test_empty",
+            "withheld_tests.Regression.test_zero_discount",
+            "withheld_tests.Regression.test_full_discount",
+            "withheld_tests.Regression.test_input_unchanged"
+          ],
+          "status": "complete",
+          "tests": [
+            {
+              "errors": [
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 16, in test_discount_half_up\nAssertionError: 0 != 1\n"
+              ],
+              "id": "withheld_tests.Functional.test_discount_half_up",
+              "passed": false
+            },
+            {
+              "errors": [
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 15, in test_discount_once\nAssertionError: 0 != 1\n"
+              ],
+              "id": "withheld_tests.Functional.test_discount_once",
+              "passed": false
+            },
+            {
+              "errors": [
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n",
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n",
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n",
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n",
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n",
+                "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n"
+              ],
+              "id": "withheld_tests.Functional.test_invalid_discount_even_empty",
+              "passed": false
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_invalid_money",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_invalid_quantity",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_large_exact_amount",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_money_half_up",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Functional.test_multiply_before_rounding",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Regression.test_empty",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Regression.test_full_discount",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Regression.test_input_unchanged",
+              "passed": true
+            },
+            {
+              "errors": [],
+              "id": "withheld_tests.Regression.test_zero_discount",
+              "passed": true
+            }
+          ]
+        },
+        "restored_buggy_file": "invoice.py"
+      }
+    ],
+    "baseline": {
+      "expected_tests": [
+        "withheld_tests.Functional.test_money_half_up",
+        "withheld_tests.Functional.test_large_exact_amount",
+        "withheld_tests.Functional.test_invalid_money",
+        "withheld_tests.Functional.test_multiply_before_rounding",
+        "withheld_tests.Functional.test_invalid_quantity",
+        "withheld_tests.Functional.test_discount_once",
+        "withheld_tests.Functional.test_discount_half_up",
+        "withheld_tests.Functional.test_invalid_discount_even_empty",
+        "withheld_tests.Regression.test_empty",
+        "withheld_tests.Regression.test_zero_discount",
+        "withheld_tests.Regression.test_full_discount",
+        "withheld_tests.Regression.test_input_unchanged"
+      ],
+      "status": "complete",
+      "tests": [
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 16, in test_discount_half_up\nAssertionError: 0 != 1\n"
+          ],
+          "id": "withheld_tests.Functional.test_discount_half_up",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 15, in test_discount_once\nAssertionError: 0 != 1\n"
+          ],
+          "id": "withheld_tests.Functional.test_discount_once",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 19, in test_invalid_discount_even_empty\nAssertionError: ValueError not raised\n"
+          ],
+          "id": "withheld_tests.Functional.test_invalid_discount_even_empty",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 10, in test_invalid_money\n  File \"/work/money.py\", line 2, in to_minor\n    return round(float(amount) * 100)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\nOverflowError: cannot convert float infinity to integer\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 10, in test_invalid_money\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 10, in test_invalid_money\nAssertionError: ValueError not raised\n"
+          ],
+          "id": "withheld_tests.Functional.test_invalid_money",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 14, in test_invalid_quantity\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 14, in test_invalid_quantity\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 14, in test_invalid_quantity\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 14, in test_invalid_quantity\nAssertionError: ValueError not raised\n",
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 14, in test_invalid_quantity\nAssertionError: ValueError not raised\n"
+          ],
+          "id": "withheld_tests.Functional.test_invalid_quantity",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 7, in test_large_exact_amount\nAssertionError: 9007199254740994 != 9007199254740993\n"
+          ],
+          "id": "withheld_tests.Functional.test_large_exact_amount",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 6, in test_money_half_up\nAssertionError: 0 != 1\n"
+          ],
+          "id": "withheld_tests.Functional.test_money_half_up",
+          "passed": false
+        },
+        {
+          "errors": [
+            "Traceback (most recent call last):\n  File \"\u003cwithheld-tests\u003e\", line 11, in test_multiply_before_rounding\nAssertionError: 0 != 1\n"
+          ],
+          "id": "withheld_tests.Functional.test_multiply_before_rounding",
+          "passed": false
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_empty",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_full_discount",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_input_unchanged",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_zero_discount",
+          "passed": true
+        }
+      ]
+    },
+    "case": "fix_checkout_three_files",
+    "reference": {
+      "expected_tests": [
+        "withheld_tests.Functional.test_money_half_up",
+        "withheld_tests.Functional.test_large_exact_amount",
+        "withheld_tests.Functional.test_invalid_money",
+        "withheld_tests.Functional.test_multiply_before_rounding",
+        "withheld_tests.Functional.test_invalid_quantity",
+        "withheld_tests.Functional.test_discount_once",
+        "withheld_tests.Functional.test_discount_half_up",
+        "withheld_tests.Functional.test_invalid_discount_even_empty",
+        "withheld_tests.Regression.test_empty",
+        "withheld_tests.Regression.test_zero_discount",
+        "withheld_tests.Regression.test_full_discount",
+        "withheld_tests.Regression.test_input_unchanged"
+      ],
+      "status": "complete",
+      "tests": [
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_discount_half_up",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_discount_once",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_invalid_discount_even_empty",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_invalid_money",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_invalid_quantity",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_large_exact_amount",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_money_half_up",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Functional.test_multiply_before_rounding",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_empty",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_full_discount",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_input_unchanged",
+          "passed": true
+        },
+        {
+          "errors": [],
+          "id": "withheld_tests.Regression.test_zero_discount",
+          "passed": true
+        }
+      ]
+    }
+  }
+]</pre></details></article>
+<p>One current production Ollama model; three fixed tasks, repeated without repair feedback. 8 withheld functional + 4 compatibility tests per task; subtests counted within their parent method. No overall subjective quality score. Static metrics are indicators, not proof of maintainability. Repeated deterministic prompts measure repeatability, not nine independent tasks. Tests run in a resource-limited networkless container; no engine ranking or energy measurement.</p><p><strong>Ograniczenia:</strong> jeden model i trzy zadania, bez oceny ludzi, dużego repozytorium i niezależnej próby porównawczej. Powtórzenia przy temperaturze 0 nie są odrębnymi zadaniami. PASS dotyczy wyłącznie ujawnionego zestawu testów.</p>
+
+<p><a href="results.json">Surowe pomiary i odpowiedzi</a> · <a href="cases.json">Fixtures, ukryte podczas generowania testy i referencje</a> · <a href="../../index.html">Wszystkie benchmarki</a></p></html>

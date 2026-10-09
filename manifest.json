@@ -38,12 +38,25 @@
       "coding_trials": 6,
       "context_trials": 1,
       "method": "additional portable replay on deployed production Q8; not added to comparison medians"
+    },
+    {
+      "path": "results/coding-quality-20261009/results.json",
+      "use_cases": 3,
+      "coding_trials": 9,
+      "fully_passed_trials": 2,
+      "functional_tests_passed": 58,
+      "functional_tests_expected": 72,
+      "regression_tests_passed": 32,
+      "regression_tests_expected": 36,
+      "executed_test_methods": 96,
+      "method": "generation + single-file fix + three-file fix; same raw outputs reassessed after evaluator correction, one current production Ollama Q8 model, 3 deterministic repeats; initial evidence preserved"
     }
   ],
   "preserved_intermediate_results": [
     "results/minis-20261008/before-isolation-review.json",
     "results/minis-20261009/three-profile-final-results.json",
-    "results/minis-20261009/interrupted-port-precedence-results.json"
+    "results/minis-20261009/interrupted-port-precedence-results.json",
+    "results/coding-quality-initial-20261009/results.json"
   ],
   "current_deployment_receipt": "evidence/deployment/20261009-ollama-q8.json",
   "integrity": "SHA256SUMS hashes every archive file except itself; checksum is integrity evidence, not trusted publication approval"
