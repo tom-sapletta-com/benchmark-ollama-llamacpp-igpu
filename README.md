@@ -44,6 +44,31 @@ DOCKER_HOST=ssh://tom@minis .venv/bin/python tools/quality_benchmark.py \
 
 Spójność zapisanego raportu: `python3 tools/verify_quality.py`. Skrypt sprawdza również nieudane próby; FAIL modelu jest wynikiem benchmarku, a nie powodem usunięcia danych.
 
+## OpenCode: Gemma 12B vs GPT-OSS 20B na zadaniu Koru
+
+| Model | Wykonane zadanie | Testy | CC≤15 | Czas | VRAM, szczyt |
+|---|---|---|---|---|---|
+| `gemma4:12b` | FAIL | 24/24 | FAIL | 396.3 s | 9.09 GiB |
+| `gpt-oss:20b` | FAIL | 18/24 | PASS | 150.2 s | 12.53 GiB |
+
+[Raport OpenCode](results/opencode-koru-20261009/index.html) porównuje dokładne lokalne tagi `gemma4:12b` i `gpt-oss:20b` podczas wykonywania **STARTER-614 z historii Planfile Koru**: refaktoryzacji `sse_log_stream` w `src/koruapi/dashboard_logs.py`. Bieżąca kolejka zawiera analizę projektu i instalację; kod w aktualnym `main` już ma wcześniejszą refaktoryzację. Dlatego odtwarzamy rzeczywiste zadanie na przypiętym kodzie sprzed tej zmiany, bez zamykania zadania Planfile i bez zmiany bieżącego repozytorium Koru.
+
+- Źródło: `semcod/koru`, baza `f248f4e5331e75c242ef33f170447acf2a7f550d`; istniejąca refaktoryzacja referencyjna: `01c2810445da0b139696ec637093f7f858d72be1`. Apache-2.0, źródło/testy/licencja i SHA256 w [fixture](results/opencode-koru-20261009/fixture) oraz [provenance.json](results/opencode-koru-20261009/provenance.json).
+- Historyczny ticket podawał code2llm CC=25. Przypięty Ruff mierzy CC=19. Próg akceptacji: wszystkie funkcje w module ≤15, działający kod, poprawny lint i zmiana dokładnie wymaganego pliku.
+- **16 oryginalnych testów modułu + 8 dodatkowych testów zachowania**, których agent nie widzi. Badamy poziomy logów, historię, zatrzymanie strumienia, oba źródła logów, Unicode, rotację i brak dostępu. Testy zachowują istniejącą semantykę, również kolejność sprawdzania limitu zdarzeń. Nie testujemy naprawy tego limitu.
+- OpenCode 1.17.8, nowa sesja/kontener dla każdej próby. Jedna świeża próba na model, kolejność AB: Gemma → GPT-OSS. Budżet: 8 kroków, 480 sekund, 16K kontekstu, 4096 tokenów na odpowiedź, temperatura 0, seed 42 w efektywnych żądaniach. GPT-OSS ma `reasoning_effort=low`; Gemma domyślne zachowanie serwera. Te tryby nie są identyczne.
+- Agent ma narzędzia do odczytu, edycji i uruchamiania widocznych testów; wykonane działania zachowano w przebiegu. Kontroler ocenia końcowy kod w osobnym kontenerze bez sieci i z plikami tylko do odczytu. Kontrola bazowa: 24/24 testów i FAIL CC; referencja: 24/24 i PASS CC.
+- `gemma4:12b`: lokalny Q4_K_M, metadane i digest odczytane z minis. **`gpt-oss:20b` jest oryginalnym MXFP4 + BF16**, odrębnym od produkcyjnego Q8. Po pomiarach przywracamy załadowany `gpt-oss-minis-code:20b` Q8. To porównanie modeli i ustawień, nie izolowana próba formatu wag.
+- Czas obejmuje cały przebieg OpenCode i narzędzi, poza wstępnym załadowaniem/rozgrzewką modelu. Sysfs próbkujemy co 0,5 s. Licznik API size_vram Gemmy jest niższy niż zajętość widoczna w sterowniku; zachowujemy oba odczyty i prezentujemy pomiar sterownika. VRAM i GTT są **wartościami bezwzględnymi**, bez odejmowania wcześniejszego modelu. Tokeny pochodzą z liczników strumienia API; pełne żądania, odpowiedzi, zdarzenia narzędzi, diffy i próbki zasobów są w danych.
+
+Poprawiono zależności pomiaru: pierwszy zestaw obejmował niezwiązane testy innych części dashboardu; zawężono selektory do modułu SSE. Pierwsza sesja OpenCode napotkała błąd wykonania pobranego ripgrep na Dockerowym `/tmp` z `noexec`; jawne `exec` umożliwiło narzędziom działanie w izolowanym kontenerze. OpenCode odrzucał także edycję w katalogu bez Git mimo wzorców uprawnień; poprawiono konfigurację, a zakres zapisu wymusza teraz system plików: tylko docelowy plik jest zapisywalny dla UID 65534, pozostałe pliki i katalogi są tylko do odczytu. Każda próba sprawdza to przed uruchomieniem agenta. Pierwszą kontrolę i zdarzenia awarii zachowano w `evidence/validation/opencode-*`; wykluczono je z wyników modeli.
+
+Dodatkowe testy poprawiono, aby podmieniały standardowe `time.sleep`, bez wymagania prywatnego importu w module. Ponownie oceniono niezmienione odpowiedzi i obie kontrole; wyniki zaliczeń pozostały takie same. Początkowe testy oraz `controller-results.json` zachowano.
+
+**Oba modele nie wykonały całego zadania.** Gemma nie zmieniła kodu i zakończyła ostatnią odpowiedź na limicie tokenów. GPT-OSS zmienił plik i przeszedł oryginalne 16 testów oraz CC, lecz oblał 6 z 8 dodatkowych testów: użył generatora jak zwykłej pary wartości i usunął import `time`, pozostawiając `time.sleep` (F821). Szybsze wykonanie nie oznacza poprawnego rozwiązania.
+
+To **jeden historyczny problem, jedna próba na model i testy wybranego modułu**, bez pełnej kwalifikacji Koru, publikacji kodu modelu, pomiaru energii i ogólnego rankingu modeli. Konfiguracja agenta i uprawnień korzysta z [dokumentacji OpenCode Agents](https://opencode.ai/docs/agents/) oraz [Permissions](https://opencode.ai/docs/permissions/). Skrypty przygotowania/kontroli: `tools/opencode_compare_remote.py`, `tools/opencode_verify.py`, `tools/opencode_sandbox.Dockerfile`; offline: `python3 tools/verify_opencode.py`.
+
 ## Wyniki GPT-OSS 20B — 9 października
 
 Wszystkie profile mają 72 tensory ekspertów **MXFP4**. Oznaczenie **Q8** dotyczy 98 macierzy attention/output/embedding, a nie całego modelu. Warianty Q8/Q8 i BF16/BF16 mają odpowiednio identyczne wszystkie 459 tensorów.
@@ -101,6 +126,7 @@ Potwierdzenia znajdują się w [evidence/deployment](evidence/deployment). Przen
 
 | Ścieżka | Zawartość |
 | --- | --- |
+| [results/opencode-koru-20261009](results/opencode-koru-20261009) | OpenCode + Gemma/GPT-OSS na historycznym zadaniu Koru Planfile: testy, zmiany, API i GPU/RAM |
 | [results/coding-quality-20261009](results/coding-quality-20261009) | Trzy use case: generowanie, naprawa jednego pliku, naprawa trzech plików; testy, regresje, diff i wskaźniki AST |
 | [results/minis-20261009](results/minis-20261009) | Końcowe 72 próby kodowania i 12 prób długiego wejścia; dokładne prompty, początkowy zestaw 54 prób, przerwana próba i logi |
 | [results/minis-20261008](results/minis-20261008) | Wcześniejsze 60 prób pięciu modeli; odpowiedzi, testy, zakłócenia i metryki |

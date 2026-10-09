@@ -50,6 +50,18 @@
       "regression_tests_expected": 36,
       "executed_test_methods": 96,
       "method": "generation + single-file fix + three-file fix; same raw outputs reassessed after evaluator correction, one current production Ollama Q8 model, 3 deterministic repeats; initial evidence preserved"
+    },
+    {
+      "path": "results/opencode-koru-20261009/results.json",
+      "task": "STARTER-614",
+      "models": [
+        "gemma4:12b",
+        "gpt-oss:20b"
+      ],
+      "trials": 2,
+      "repeats": 1,
+      "passed": 0,
+      "method": "OpenCode 1.17.8 historical real Koru Planfile task replay, exact pinned pre-refactor source, AB, 8 steps/480s/16K/4096, 16 original+8 withheld tests and CC<=15, filesystem single-file scope; production Q8 restored"
     }
   ],
   "preserved_intermediate_results": [

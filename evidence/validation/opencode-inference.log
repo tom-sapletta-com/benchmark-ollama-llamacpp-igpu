@@ -1,0 +1,4 @@
+CONTROL PASS baseline {'passed': 24, 'total': 24, 'collected': 24}
+CONTROL PASS reference {'passed': 24, 'total': 24, 'collected': 24}
+TRIAL gemma4-12b-1 FAIL 396.3 {'passed': 24, 'total': 24, 'collected': 24} 4
+TRIAL gpt-oss-20b-1 FAIL 150.2 {'passed': 18, 'failed': 6, 'total': 24, 'collected': 24} 8
