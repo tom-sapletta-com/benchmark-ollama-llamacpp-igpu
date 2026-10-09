@@ -1,0 +1,7 @@
+{
+  "ticket": "PLF-17295",
+  "absolute_deadline": "2026-10-09T10:29:24.312640+00:00",
+  "timer": "minis-ab-restore-absolute.timer",
+  "supersedes_relative_timer": true,
+  "reason": "Absolute deadline cannot move when benchmark switch calls daemon-reload"
+}

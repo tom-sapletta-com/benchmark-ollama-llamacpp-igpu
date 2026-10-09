@@ -1,0 +1,1 @@
+Absolute restoration timer stopped. Previously stopped relative timer no longer exists; second stop returned unit-not-found. Independent systemctl list-timers and status confirm neither owned timer remains.

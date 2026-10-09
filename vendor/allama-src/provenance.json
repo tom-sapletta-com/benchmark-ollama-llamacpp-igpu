@@ -1,0 +1,26 @@
+{
+  "original_repository": "https://github.com/wronai/allama",
+  "local_source_commit": "4e3578ae9e4b616cc1900c5ffd872954c12dcb77",
+  "snapshot_type": "read-only git archive of local benchmark worktree; no upstream publication claimed",
+  "license": "Apache-2.0",
+  "files": {
+    "requirements.txt": "58b16c31a28bd71674b1155a75402e1d8bf0cba2763be4e310642fa539f0deb0",
+    "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "tests/test_benchmark_contracts.py": "14e35154fcc15b4655e4a8d6727cb2411b27aa163bbc7d8bc6ccd24c75d82a89",
+    "allama/report_generator.py": "fe333e6972926257b64bf79eeba567857f1452917a78c69f8e7601aef0c05037",
+    "allama/config_loader.py": "780c8324294bab9a5b42215f250f875e5c915ae674a6496e4c2683e8991de7ba",
+    "allama/evaluator.py": "cad0eba0645f7acb40a3ef7bc4da1ad2e3f014889d77f30a25ba381cf2114229",
+    "allama/__init__.py": "a8233f92ce156b69434965044aa34ee97d33a6dffafb8e6eec679e1406f7782a",
+    "allama/allama.py": "33a4b655c7d0f606d09746347e633712948f3f4ab94b7039b0d87d13444a9042",
+    "allama/benchmark_tasks.json": "5a846dea6d01ae13723efb1cb10c4fb070c0bbe94734f23a14562a07828482a7",
+    "allama/main.py": "54d056c7bdebdde08f7cd4df1bb4d2a2ecdf27d859432f55d6afceb68a6090ff",
+    "allama/benchmark.py": "3173bb99ad860fadbab8a1ea1225ab5990666f49b02cd004d4efa0822dc0aa00",
+    "allama/publisher.py": "d096ea1ce80bb7a504cb257af885113b64c96e6bac4e250a30a2700208486ff3",
+    "allama/open_report.py": "3066b8a33db8de4ba12f0cd9050b9015674d60a6e078e4518e7ba01f56f366c0",
+    "allama/templates/report_template.html": "e0b459a8db291158934db51942dc640933c0df8dcfa65d14f0d1e3f50b932eb1",
+    "allama/templates/benchmark.html": "45b597e508dbc9b95ffcb2bbb969a787234504e4600d6e0b1efe6fc6211e93da",
+    "allama/static/templates/stats-badges.html": "325953e6a283d723badf9f13348d2305d192b68d3de1f0cd29cb553a00cae13b",
+    "allama/static/js/radar-chart.js": "68a00b96d8d6feaf3adde2756f3dae7df402ecbfb947f66ecf0914d666a81fb3",
+    "allama/static/css/allama-charts.css": "694438389c174e861d2ae918528fd432f6f59fa106e56a75053a0395ce1c2aa8"
+  }
+}

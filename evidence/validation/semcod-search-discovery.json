@@ -1,0 +1,163 @@
+{
+  "schema": "subactor.search/answer/v1",
+  "status": "ok",
+  "answer": "[1] wronai/allama — server/index.php:251\n        <h2>Lista benchmarków</h2>\n        \n        <?php if (empty($benchmarks)): ?>\n        <div class=\"alert alert-info\">Brak dostępnych wyników benchmarków.</div>\n        <?php else: ?>\n        \n        <div class=\"benchmark-grid\">\n            <?php foreach ($benchmarks_page as $index => $benchmark): ?>\n            <div class=\"benchmark-card card\">\n                <div class=\"card-header\">\n                    <h5 class=\"card-title\"><?php echo $benchmark['date … \n\n[2] wronai/allama — local_server/index.php:251\n        <h2>Lista benchmarków</h2>\n        \n        <?php if (empty($benchmarks)): ?>\n        <div class=\"alert alert-info\">Brak dostępnych wyników benchmarków.</div>\n        <?php else: ?>\n        \n        <div class=\"benchmark-grid\">\n            <?php foreach ($benchmarks_page as $index => $benchmark): ?>\n            <div class=\"benchmark-card card\">\n                <div class=\"card-header\">\n                    <h5 class=\"card-title\"><?php echo $benchmark['date … \n\n[3] wronai/allama — README.md:201\nThis allows you to:\n- Keep a history of all benchmark runs\n- Compare results over time\n- Share specific benchmark results with others\n\n### Benchmark Visualization\n\nThe benchmark server provides several visualization features:\n- **Responsive 3-column layout**: Displays benchmarks in an easy-to-scan grid (collapses to single column on mobile … \n\n[4] wronai/allama — allama/allama.py:1\n#!/usr/bin/env python3\n\"\"\"\nAllama - Skrypt uruchamiający benchmark modeli LLM\n\"\"\"\n\nimport os\nimport sys\n\ndef main():\n    \"\"\"\n    Główna funkcja uruchamiająca benchmark Allama\n    \"\"\"\n    # Ustaw zmienną środowiskową, aby poinformować moduł o automatycznym uruchomieniu\n    os.environ['ALLAMA_AUTO_RUN'] = '1'\n\n    # Uruchom moduł allama.main\n    try:\n        from allama.main import main as run … \n\n[5] wronai/allama — server/view.php:351\n … as $benchmark): ?>\n                    <tr>\n                        <td><?php echo $benchmark['date']; ?></td>\n                        <td><?php echo $benchmark['models_count']; ?></td>\n                        <td><?php echo $benchmark['total_tests']; ?></td>\n                        <td><?php echo $benchmark['successful_tests']; ?></td>\n                        <td><?php echo $benchmark['success_rate']; ?>%</td>\n                        <td>\n                            <a href=\"view.php?id=<?php echo $benchmark['id']; ?>\" class … \n\n[6] wronai/allama — local_server/view.php:351\n … as $benchmark): ?>\n                    <tr>\n                        <td><?php echo $benchmark['date']; ?></td>\n                        <td><?php echo $benchmark['models_count']; ?></td>\n                        <td><?php echo $benchmark['total_tests']; ?></td>\n                        <td><?php echo $benchmark['successful_tests']; ?></td>\n                        <td><?php echo $benchmark['success_rate']; ?>%</td>\n                        <td>\n                            <a href=\"view.php?id=<?php echo $benchmark['id']; ?>\" class … ",
+  "answer_type": "extractive",
+  "query": {
+    "schema": "subactor.search/query/v1",
+    "project": "wronai/allama",
+    "org": "*",
+    "lang": "",
+    "kind": "",
+    "topic": "",
+    "text": "benchmark",
+    "limit": 6,
+    "mode": "dsl"
+  },
+  "dsl": "project:wronai/allama text:benchmark limit:6",
+  "projects": [
+    {
+      "id": "wronai/allama",
+      "root": "/home/tom/github",
+      "path": "/home/tom/github/wronai/allama",
+      "head": "c8cfea5f81964a060ad81cc8222f952976f80f37",
+      "indexed_at": "2026-10-08T20:00:06.909712+00:00",
+      "profile": {
+        "name": "allama",
+        "description": "",
+        "languages": [
+          "JavaScript",
+          "PHP",
+          "Python"
+        ],
+        "dependencies": [],
+        "commands": {},
+        "facts": [],
+        "standards": [],
+        "readme_excerpt": "A comprehensive testing and benchmarking suite for Large Language Models (LLMs) focused on Python code generation. The project enables automatic quality assessment of generated code through various metrics and generates detailed HTML reports.\ngit clone https://github.com/wronai/allama.git\ncd allama\npip install poetry\npoetry install"
+      },
+      "coverage": {
+        "selection": "allowlisted text plus current declared ticket README summaries; no participant logs",
+        "checkout": {
+          "kind": "primary",
+          "git_common_dir": "/home/tom/github/wronai/allama/.git"
+        },
+        "tasks": {
+          "source": "primary-checkout",
+          "statuses": [
+            "IN_PROGRESS",
+            "BLOCKED",
+            "PLAN"
+          ],
+          "candidate_summaries": 0,
+          "terminal_receipts_verified": false
+        },
+        "source": "git-ls-files",
+        "candidate_files": 47,
+        "indexed_files": 47,
+        "bytes": 265249,
+        "skipped": {},
+        "gaps": [],
+        "bounded": true,
+        "live_runtime_verified": false
+      },
+      "fingerprint": "0237092366e30680a5d539106c40c80c64fa6763078cf45b2339b8ebb012ea7f",
+      "age_seconds": 48959.2,
+      "stale": false,
+      "currency": "indexed_snapshot_not_live_readback"
+    }
+  ],
+  "evidence": [
+    {
+      "id": 1,
+      "project": "wronai/allama",
+      "path": "server/index.php",
+      "kind": "code",
+      "line_start": 251,
+      "line_end": 300,
+      "sha256": "05a81983c7ddb9b25caac59f37a127d502a4deb762e7eb94f568929f5c584990",
+      "head_at_index": "c8cfea5f81964a060ad81cc8222f952976f80f37",
+      "indexed_at": "2026-10-08T20:00:06.909712+00:00",
+      "excerpt": "        <h2>Lista benchmarków</h2>\n        \n        <?php if (empty($benchmarks)): ?>\n        <div class=\"alert alert-info\">Brak dostępnych wyników benchmarków.</div>\n        <?php else: ?>\n        \n        <div class=\"benchmark-grid\">\n            <?php foreach ($benchmarks_page as $index => $benchmark): ?>\n            <div class=\"benchmark-card card\">\n                <div class=\"card-header\">\n                    <h5 class=\"card-title\"><?php echo $benchmark['date … ",
+      "local_path": "/home/tom/github/wronai/allama/server/index.php",
+      "uri": "source://wronai/allama/server/index.php#sha256=05a81983c7ddb9b25caac59f37a127d502a4deb762e7eb94f568929f5c584990"
+    },
+    {
+      "id": 2,
+      "project": "wronai/allama",
+      "path": "local_server/index.php",
+      "kind": "code",
+      "line_start": 251,
+      "line_end": 300,
+      "sha256": "05a81983c7ddb9b25caac59f37a127d502a4deb762e7eb94f568929f5c584990",
+      "head_at_index": "c8cfea5f81964a060ad81cc8222f952976f80f37",
+      "indexed_at": "2026-10-08T20:00:06.909712+00:00",
+      "excerpt": "        <h2>Lista benchmarków</h2>\n        \n        <?php if (empty($benchmarks)): ?>\n        <div class=\"alert alert-info\">Brak dostępnych wyników benchmarków.</div>\n        <?php else: ?>\n        \n        <div class=\"benchmark-grid\">\n            <?php foreach ($benchmarks_page as $index => $benchmark): ?>\n            <div class=\"benchmark-card card\">\n                <div class=\"card-header\">\n                    <h5 class=\"card-title\"><?php echo $benchmark['date … ",
+      "local_path": "/home/tom/github/wronai/allama/local_server/index.php",
+      "uri": "source://wronai/allama/local_server/index.php#sha256=05a81983c7ddb9b25caac59f37a127d502a4deb762e7eb94f568929f5c584990"
+    },
+    {
+      "id": 3,
+      "project": "wronai/allama",
+      "path": "README.md",
+      "kind": "docs",
+      "line_start": 201,
+      "line_end": 250,
+      "sha256": "a705b2b477ff1b511c86bb1f3206f694f37349423590a5b96966796585f5d74b",
+      "head_at_index": "c8cfea5f81964a060ad81cc8222f952976f80f37",
+      "indexed_at": "2026-10-08T20:00:06.909712+00:00",
+      "excerpt": "This allows you to:\n- Keep a history of all benchmark runs\n- Compare results over time\n- Share specific benchmark results with others\n\n### Benchmark Visualization\n\nThe benchmark server provides several visualization features:\n- **Responsive 3-column layout**: Displays benchmarks in an easy-to-scan grid (collapses to single column on mobile … ",
+      "local_path": "/home/tom/github/wronai/allama/README.md",
+      "uri": "source://wronai/allama/README.md#sha256=a705b2b477ff1b511c86bb1f3206f694f37349423590a5b96966796585f5d74b"
+    },
+    {
+      "id": 4,
+      "project": "wronai/allama",
+      "path": "allama/allama.py",
+      "kind": "code",
+      "line_start": 1,
+      "line_end": 33,
+      "sha256": "315887a324369ff6995c5bbeae7182e6f9174e7e7dd8c640279a5a46994d6769",
+      "head_at_index": "c8cfea5f81964a060ad81cc8222f952976f80f37",
+      "indexed_at": "2026-10-08T20:00:06.909712+00:00",
+      "excerpt": "#!/usr/bin/env python3\n\"\"\"\nAllama - Skrypt uruchamiający benchmark modeli LLM\n\"\"\"\n\nimport os\nimport sys\n\ndef main():\n    \"\"\"\n    Główna funkcja uruchamiająca benchmark Allama\n    \"\"\"\n    # Ustaw zmienną środowiskową, aby poinformować moduł o automatycznym uruchomieniu\n    os.environ['ALLAMA_AUTO_RUN'] = '1'\n\n    # Uruchom moduł allama.main\n    try:\n        from allama.main import main as run … ",
+      "local_path": "/home/tom/github/wronai/allama/allama/allama.py",
+      "uri": "source://wronai/allama/allama/allama.py#sha256=315887a324369ff6995c5bbeae7182e6f9174e7e7dd8c640279a5a46994d6769"
+    },
+    {
+      "id": 5,
+      "project": "wronai/allama",
+      "path": "server/view.php",
+      "kind": "code",
+      "line_start": 351,
+      "line_end": 400,
+      "sha256": "6c6ebafbd445ff2dbf3d06d9ed47a029c3c5d896b6703b0758423547b34ac2c3",
+      "head_at_index": "c8cfea5f81964a060ad81cc8222f952976f80f37",
+      "indexed_at": "2026-10-08T20:00:06.909712+00:00",
+      "excerpt": " … as $benchmark): ?>\n                    <tr>\n                        <td><?php echo $benchmark['date']; ?></td>\n                        <td><?php echo $benchmark['models_count']; ?></td>\n                        <td><?php echo $benchmark['total_tests']; ?></td>\n                        <td><?php echo $benchmark['successful_tests']; ?></td>\n                        <td><?php echo $benchmark['success_rate']; ?>%</td>\n                        <td>\n                            <a href=\"view.php?id=<?php echo $benchmark['id']; ?>\" class … ",
+      "local_path": "/home/tom/github/wronai/allama/server/view.php",
+      "uri": "source://wronai/allama/server/view.php#sha256=6c6ebafbd445ff2dbf3d06d9ed47a029c3c5d896b6703b0758423547b34ac2c3"
+    },
+    {
+      "id": 6,
+      "project": "wronai/allama",
+      "path": "local_server/view.php",
+      "kind": "code",
+      "line_start": 351,
+      "line_end": 400,
+      "sha256": "6c6ebafbd445ff2dbf3d06d9ed47a029c3c5d896b6703b0758423547b34ac2c3",
+      "head_at_index": "c8cfea5f81964a060ad81cc8222f952976f80f37",
+      "indexed_at": "2026-10-08T20:00:06.909712+00:00",
+      "excerpt": " … as $benchmark): ?>\n                    <tr>\n                        <td><?php echo $benchmark['date']; ?></td>\n                        <td><?php echo $benchmark['models_count']; ?></td>\n                        <td><?php echo $benchmark['total_tests']; ?></td>\n                        <td><?php echo $benchmark['successful_tests']; ?></td>\n                        <td><?php echo $benchmark['success_rate']; ?>%</td>\n                        <td>\n                            <a href=\"view.php?id=<?php echo $benchmark['id']; ?>\" class … ",
+      "local_path": "/home/tom/github/wronai/allama/local_server/view.php",
+      "uri": "source://wronai/allama/local_server/view.php#sha256=6c6ebafbd445ff2dbf3d06d9ed47a029c3c5d896b6703b0758423547b34ac2c3"
+    }
+  ],
+  "elapsed_ms": 237.913,
+  "limitations": [
+    "Odpowiedź pochodzi z ograniczonego snapshotu plików.",
+    "Status ticketu jest deklaracją lokalnego checkoutu; nie sprawdzono terminalnych receipts ani innych worktrees.",
+    "Deklaracje dokumentacji i konfiguracji nie potwierdzają działania runtime.",
+    "NL v1 to jawne reguły i słownik PL/EN, bez modelu generatywnego."
+  ]
+}

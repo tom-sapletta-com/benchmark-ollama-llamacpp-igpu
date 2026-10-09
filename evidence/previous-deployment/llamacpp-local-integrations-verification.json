@@ -1,0 +1,30 @@
+{
+  "subllm": {
+    "provider": "local-development",
+    "model": "gpt-oss-minis-code:20b",
+    "content": "SUBLLM_LLAMA_CPP_OK",
+    "usage": {
+      "completion_tokens": 56,
+      "prompt_tokens": 82,
+      "prompt_tokens_details": {
+        "cached_tokens": 42
+      },
+      "total_tokens": 138
+    },
+    "seconds": 2.81
+  },
+  "koru": {
+    "model": "local-development/gpt-oss-minis-code:20b",
+    "content": "KORU_LLAMA_CPP_OK",
+    "usage": {
+      "completion_tokens": 38,
+      "prompt_tokens": 82,
+      "prompt_tokens_details": {
+        "cached_tokens": 60
+      },
+      "total_tokens": 120
+    },
+    "seconds": 1.99
+  },
+  "no_cloud_fallback": true
+}

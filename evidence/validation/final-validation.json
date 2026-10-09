@@ -1,0 +1,19 @@
+{
+  "coding_trials": 72,
+  "coding_passed": 72,
+  "context_trials": 12,
+  "context_passed": 12,
+  "unique_trials": 84,
+  "identical_paired_raw_prompts": true,
+  "same_tokenizer": true,
+  "full_gpu_ollama_loads_verified": true,
+  "q8_tensor_parity": 459,
+  "transport_errors": 0,
+  "truncations": 0,
+  "stream_decode_medians": {
+    "llama.cpp / MXFP4 + Q8": 28.823987060131238,
+    "llama.cpp / MXFP4 + BF16": 20.515959217010586,
+    "Ollama / MXFP4 + BF16": 20.585716724008567,
+    "Ollama / MXFP4 + Q8": 28.995504265662248
+  }
+}

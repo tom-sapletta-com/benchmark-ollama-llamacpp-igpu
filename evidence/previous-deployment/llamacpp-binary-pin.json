@@ -1,0 +1,7 @@
+{
+  "tag": "b11429",
+  "name": "llama-b11429-bin-ubuntu-vulkan-x64.tar.gz",
+  "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11429/llama-b11429-bin-ubuntu-vulkan-x64.tar.gz",
+  "sha256": "632c4e98feba2b94407a2130e3133e0c3aefb0ea1ab41337e926d8bfafdd0b74",
+  "size": 31636673
+}

@@ -1,0 +1,38 @@
+{
+  "id": "chatcmpl-560",
+  "object": "chat.completion",
+  "created": 1791554833,
+  "model": "gpt-oss-minis-code:20b",
+  "system_fingerprint": "fp_ollama",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "",
+        "reasoning": "Need to call function.",
+        "tool_calls": [
+          {
+            "id": "call_ht48xb8p",
+            "index": 0,
+            "type": "function",
+            "function": {
+              "name": "add",
+              "arguments": "{\"a\":19,\"b\":23}"
+            }
+          }
+        ]
+      },
+      "finish_reason": "tool_calls"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 145,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens": 32,
+    "total_tokens": 177
+  },
+  "wall_seconds": 1.63
+}
