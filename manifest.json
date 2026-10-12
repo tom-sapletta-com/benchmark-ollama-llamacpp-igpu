@@ -1,0 +1,75 @@
+{
+  "schema": "igpu-benchmark.archive/v1",
+  "repository": "tom-sapletta-com/benchmark-ollama-llamacpp-igpu",
+  "created_at": "2026-10-09T14:25:07.151041+00:00",
+  "request": "PLF-17296",
+  "source_request": "PLF-17295",
+  "benchmark_source": {
+    "repository": "wronai/allama",
+    "local_head": "4e3578ae9e4b616cc1900c5ffd872954c12dcb77",
+    "license": "Apache-2.0",
+    "snapshot": "vendor/allama-src"
+  },
+  "hardware": {
+    "cpu": "Ryzen9 7940HS",
+    "gpu": "Radeon780M gfx1103",
+    "ram_gb": 64,
+    "igpu_reservation_gib": 16
+  },
+  "measurements": [
+    {
+      "path": "results/minis-20261008/results.json",
+      "coding_trials": 60,
+      "profiles": 5,
+      "repeats": 2,
+      "method": "different models; not matched engine comparison"
+    },
+    {
+      "path": "results/minis-20261009/results.json",
+      "coding_trials": 72,
+      "coding_passed": 72,
+      "context_trials": 12,
+      "profiles": 4,
+      "repeats": 3,
+      "method": "three balanced profiles plus subsequent OllamaQ8 cohort; paired raw prompts and tensor parity"
+    },
+    {
+      "path": "results/production-replay-20261009/results.json",
+      "coding_trials": 6,
+      "context_trials": 1,
+      "method": "additional portable replay on deployed production Q8; not added to comparison medians"
+    },
+    {
+      "path": "results/coding-quality-20261009/results.json",
+      "use_cases": 3,
+      "coding_trials": 9,
+      "fully_passed_trials": 2,
+      "functional_tests_passed": 58,
+      "functional_tests_expected": 72,
+      "regression_tests_passed": 32,
+      "regression_tests_expected": 36,
+      "executed_test_methods": 96,
+      "method": "generation + single-file fix + three-file fix; same raw outputs reassessed after evaluator correction, one current production Ollama Q8 model, 3 deterministic repeats; initial evidence preserved"
+    },
+    {
+      "path": "results/opencode-koru-20261009/results.json",
+      "task": "STARTER-614",
+      "models": [
+        "gemma4:12b",
+        "gpt-oss:20b"
+      ],
+      "trials": 2,
+      "repeats": 1,
+      "passed": 0,
+      "method": "OpenCode 1.17.8 historical real Koru Planfile task replay, exact pinned pre-refactor source, AB, 8 steps/480s/16K/4096, 16 original+8 withheld tests and CC<=15, filesystem single-file scope; production Q8 restored"
+    }
+  ],
+  "preserved_intermediate_results": [
+    "results/minis-20261008/before-isolation-review.json",
+    "results/minis-20261009/three-profile-final-results.json",
+    "results/minis-20261009/interrupted-port-precedence-results.json",
+    "results/coding-quality-initial-20261009/results.json"
+  ],
+  "current_deployment_receipt": "evidence/deployment/20261009-ollama-q8.json",
+  "integrity": "SHA256SUMS hashes every archive file except itself; checksum is integrity evidence, not trusted publication approval"
+}

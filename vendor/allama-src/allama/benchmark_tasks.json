@@ -1,0 +1,32 @@
+[
+  {
+    "id": "unique_ordered",
+    "prompt": "Napisz funkcję Python unique_ordered(items), która usuwa duplikaty z listy, zachowując kolejność pierwszych wystąpień. Elementy mogą być niehashowalne (listy, słowniki). Nie modyfikuj wejścia.",
+    "tests": "assert unique_ordered([]) == []\nassert unique_ordered([3,1,3,2,1]) == [3,1,2]\nx = [[1], [2], [1], {'a': 1}, {'a': 1}]\nassert unique_ordered(x) == [[1], [2], {'a': 1}]\nassert x == [[1], [2], [1], {'a': 1}, {'a': 1}]\nassert unique_ordered([None, None, 0, False]) == [None, 0]"
+  },
+  {
+    "id": "merge_intervals",
+    "prompt": "Napisz funkcję Python merge_intervals(intervals). Zwróć posortowaną listę scalonych domkniętych przedziałów jako listy [start, end]; stykające się przedziały też scal. Wejście może być nieposortowane i nie wolno go modyfikować. Dla start > end zgłoś ValueError. Puste wejście daje [].",
+    "tests": "assert merge_intervals([]) == []\nx = [[5,7],[1,3],[3,5],[10,10]]\nassert merge_intervals(x) == [[1,7],[10,10]]\nassert x == [[5,7],[1,3],[3,5],[10,10]]\nassert merge_intervals([[-4,-1],[-3,0],[2,3]]) == [[-4,0],[2,3]]\nassert merge_intervals([[1,9],[2,3],[1,9]]) == [[1,9]]\ntry:\n    merge_intervals([[5,2]])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('invalid interval accepted')"
+  },
+  {
+    "id": "csv_totals",
+    "prompt": "Napisz funkcję Python csv_totals(text). Tekst CSV ma nagłówek category,amount i może zawierać cytowane przecinki w category. Zsumuj kwoty dla każdej kategorii dokładnie z użyciem Decimal; zwróć dict[str, Decimal]. Ignoruj puste wiersze. Błędna kwota ma zgłosić ValueError. Nie zaokrąglaj wyników.",
+    "tests": "from decimal import Decimal\nassert csv_totals('category,amount\\n') == {}\nassert csv_totals('category,amount\\nA,0.1\\nA,0.2\\nB,-2.5\\n\\n') == {'A': Decimal('0.3'), 'B': Decimal('-2.5')}\nassert csv_totals('category,amount\\n\"a,b\",1.20\\n\"a,b\",2.30\\n') == {'a,b': Decimal('3.50')}\ntry:\n    csv_totals('category,amount\\nA,nope\\n')\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('invalid amount accepted')"
+  },
+  {
+    "id": "topological_sort",
+    "prompt": "Napisz funkcję Python topo_sort(graph). graph to dict[str, list[str]], gdzie graph[u] wymienia wierzchołki v krawędzi u -> v. Uwzględnij wierzchołki występujące tylko jako sąsiedzi. Zwróć porządek topologiczny, wybierając leksykograficznie najmniejszy spośród aktualnie dostępnych wierzchołków. Cykl ma zgłosić ValueError. Nie modyfikuj graph.",
+    "tests": "assert topo_sort({}) == []\ng = {'b':['c'], 'a':['c'], 'd':[]}\nassert topo_sort(g) == ['a','b','c','d']\nassert g == {'b':['c'], 'a':['c'], 'd':[]}\nassert topo_sort({'z':['a']}) == ['z','a']\nassert topo_sort({'a':['c','c'], 'b':['c']}) == ['a','b','c']\nfor g in ({'a':['a']}, {'a':['b'],'b':['a']}):\n    try:\n        topo_sort(g)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError('cycle accepted')"
+  },
+  {
+    "id": "deep_merge",
+    "prompt": "Napisz funkcję Python deep_merge(a, b) dla dwóch słowników. Łącz zagnieżdżone słowniki rekurencyjnie; w innych konfliktach wygrywa b (listy zastępuj w całości). Wynik ma być głęboką kopią: modyfikowanie zagnieżdżonych obiektów wyniku nie może zmieniać żadnego wejścia.",
+    "tests": "a = {'x':{'a':1,'items':[1]},'left':[{'v':2}]}\nb = {'x':{'b':2},'right':[3]}\nr = deep_merge(a,b)\nassert r == {'x':{'a':1,'items':[1],'b':2},'left':[{'v':2}],'right':[3]}\nr['x']['items'].append(9)\nr['left'][0]['v'] = 8\nr['right'].append(4)\nassert a == {'x':{'a':1,'items':[1]},'left':[{'v':2}]}\nassert b == {'x':{'b':2},'right':[3]}\nassert deep_merge({'a':{'b':1},'c':[1]}, {'a':None,'c':[2]}) == {'a':None,'c':[2]}\nassert deep_merge({}, {}) == {}"
+  },
+  {
+    "id": "lru_cache",
+    "prompt": "Napisz klasę Python LRUCache(capacity) z metodami get(key) i put(key, value). get zwraca -1 dla braku klucza. Odczyt i zapis istniejącego klucza odnawiają jego użycie. Po przekroczeniu pojemności usuń najdawniej używany klucz. Pojemność 0 jest poprawna (nic nie przechowuje), ujemna zgłasza ValueError. Operacje mają być O(1).",
+    "tests": "c = LRUCache(2)\nc.put('a',1); c.put('b',2)\nassert c.get('a') == 1\nc.put('c',3)\nassert c.get('b') == -1\nc.put('a',4); c.put('d',5)\nassert c.get('c') == -1\nassert c.get('a') == 4 and c.get('d') == 5\nz = LRUCache(0); z.put('a',1); assert z.get('a') == -1\nc = LRUCache(1); c.put('x',None); assert c.get('x') is None\ntry:\n    LRUCache(-1)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError('negative capacity accepted')"
+  }
+]

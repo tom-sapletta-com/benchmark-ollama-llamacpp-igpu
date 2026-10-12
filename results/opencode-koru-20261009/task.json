@@ -1,0 +1,10 @@
+{
+  "id": "STARTER-614",
+  "name": "Reduce cyclomatic complexity: sse_log_stream (CC=25, limit=15)",
+  "description": "BLOCKED: FAIL: [verify_failed_isolated] patch failed verification in an isolated worktree, so the workspace was left untouched. `task quality:regix:local` exited 201: task: [quality:regix:local] regix compare HEAD --local\ntask: Failed to run task \"quality:regix:local\": exit status 1",
+  "files": [
+    "src/koruapi/dashboard_logs.py"
+  ],
+  "status": "blocked",
+  "acceptance_criteria": null
+}

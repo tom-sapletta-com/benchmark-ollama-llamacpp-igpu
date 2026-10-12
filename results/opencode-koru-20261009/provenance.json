@@ -1,0 +1,31 @@
+{
+  "source_repository": "semcod/koru",
+  "source_base": "f248f4e5331e75c242ef33f170447acf2a7f550d",
+  "existing_refactor_commit": "01c2810445da0b139696ec637093f7f858d72be1",
+  "observed_current_main": "e960b60e6316e557fb7a0034b9fef48317d2de09",
+  "planfile_ticket": "STARTER-614",
+  "sprint_file": "history-2026-09-25.yaml",
+  "method": "Historical programming task replay on exact pre-refactor source; isolated benchmark fixtures, not Koru delivery worktrees. Current Koru queue has discovery/installation tasks; source already refactored in current main. Comparison does not complete Koru source/queue work. Four existing test classes are selected; package scaffold is empty to isolate this module. Eight controller-side behavior tests are withheld from the agent.",
+  "files": {
+    "reference_dashboard_logs.py": "008e93d17f22cfcaf8959d70c374565e0c1a7f669b23302d1d1f12dfd5026823",
+    "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "dashboard_logs.py": "af12eb2ebdbdf6866844dbd359bf95e59b25524c142d106de892fe617feb0a1f",
+    "test_dashboard_logs.py": "9b082fa1f58f12916d43389b031ceb45a9e06f5de3e6421ba892a93d10f2b378",
+    "test_stream_regression.py": "4ac9345b94ef428e9d43d95f2edec5efbe8d31a2242bf21e3989b63d63a1a32d"
+  },
+  "opencode_binary_sha256": "ea9f0e7257bbd3d71b788bca397d3b8d951c101c21d3387ca39ae41b66360ec7",
+  "opencode_version": "1.17.8",
+  "execution": {
+    "controller_sha256": "89227232ab2061adaef9e7309bb912f969900d13407607d47bfe6ea9124ce6b1",
+    "verifier_sha256": "70ba01cfab80cb8b0f1282f0b1664af565784ddb89059309f222af1a5f09a204",
+    "dockerfile_sha256": "d79137bb7ce83ca9746a1ed62a70149a08c50e77b77d63b5330964bef7cdcbb1",
+    "docker_image": "sha256:efd1df54c6508cb5089138febe2442e942a052f1352c4d3bdb933ddf21e2016e",
+    "valid_trials": 2,
+    "repeats_per_model": 1,
+    "order": "AB",
+    "discarded_pilots": "Infrastructure failures preserved separately; not ranked",
+    "collection_time": "2026-10-09T15:56:38.860766+00:00"
+  },
+  "initial_withheld_tests_sha256": "c7e44716d2e2c09efc86378744fc05412cfbb171c7ee251cd178e6b2dd678de2",
+  "evaluation_correction": "Patch standard-library time.sleep directly rather than requiring a private module import attribute. Reassess unchanged recorded candidates and baseline/reference, preserving initial fixture and controller results."
+}

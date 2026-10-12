@@ -1,0 +1,19 @@
+<!-- 
+  Allama Benchmark - Szablon statystyk w formie badge'y
+  Do użycia zarówno w lokalnym raporcie HTML jak i na serwerze
+-->
+
+<div class="stats-badges-container d-flex flex-wrap mt-3 mb-3">
+  <div class="stats-badge badge-primary">
+    <i class="bi bi-robot"></i> Modele: {{models_count}}
+  </div>
+  <div class="stats-badge badge-info">
+    <i class="bi bi-list-check"></i> Testy: {{total_tests}}
+  </div>
+  <div class="stats-badge badge-success">
+    <i class="bi bi-check-circle"></i> Udane: {{successful_tests}}
+  </div>
+  <div class="stats-badge badge-warning">
+    <i class="bi bi-graph-up"></i> Sukces: {{success_rate}}%
+  </div>
+</div>

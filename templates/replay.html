@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>GPT-OSS benchmark replay</title><style>body{max-width:1100px;margin:40px auto;padding:20px;font:16px system-ui;background:#10151b;color:#eaf1f8}table{border-collapse:collapse}td,th{padding:14px;border:1px solid #334152}pre{white-space:pre-wrap;background:#1b232d;padding:20px}a{color:#8ebaff}details{margin:20px 0}</style>
+<h1>GPT-OSS benchmark replay</h1><p>Status: {{ report.status }} · {{ report.results|length }}/{{ report.planned }} coding trials</p>
+<p>{{ report.method }}</p>{% if report.error %}<p>{{ report.error }}</p>{% endif %}
+<table><tr><th>Declared profile</th><th>Code tests</th><th>Median response</th><th>Native API tokens/s</th></tr>
+{% for item in report.summary %}<tr><td>{{ item.model }}</td><td>{{ item.passed }}/{{ item.attempts }}</td><td>{{ '%.2f'|format(item.wall_s) if item.wall_s is not none else '—' }} s</td><td>{{ '%.2f'|format(item.tokens_per_second) if item.tokens_per_second is not none else '—' }}</td></tr>{% endfor %}</table>
+<h2>Long input</h2>{% for row in report.context_results %}<p>Round {{ row.repeat }}: {{ 'PASS' if row.passed else 'FAIL' }} · first token {{ '%.2f'|format(row.first_token_s) if row.first_token_s is not none else '—' }} s · response {{ '%.2f'|format(row.wall_s) }} s</p>{% endfor %}
+<h2>Coding answers</h2>{% for row in report.results %}<details><summary>{{ row.task }} · round {{ row.repeat }} · {{ 'PASS' if row.passed else 'FAIL' }}</summary><pre>{{ row.code }}</pre><p>{{ row.evaluation.output }}</p></details>{% endfor %}
+<p><a href="results.json">Full JSON</a> · {{ report.started_at }}</p></html>

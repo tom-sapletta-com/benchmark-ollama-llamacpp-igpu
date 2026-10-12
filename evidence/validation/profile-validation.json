@@ -1,0 +1,9 @@
+{
+  "runtime_profile_sha256": "447646e60a33825e5bc883292d517711158ab7d2bceeb62bab6dc80b3221a318",
+  "source_head": "4e3578ae9e4b616cc1900c5ffd872954c12dcb77",
+  "benchmark_stream_preflight": "PASS",
+  "reference_contract_tests": "6 PASS",
+  "evaluator": "remote minis Docker, networkless/capdrop/read-only pinned Python3.12",
+  "raw_input_pairing": "21 input prompts, same bytes and SHA256 for every profile",
+  "browser_note": "Previous CDP browser no longer running; relaunch for final report"
+}

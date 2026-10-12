@@ -1,0 +1,555 @@
+{
+  "syntax_passed": true,
+  "test_exit": 1,
+  "test_summary": {
+    "passed": 26,
+    "failed": 11,
+    "total": 37,
+    "collected": 42,
+    "deselected": 5
+  },
+  "tests": [
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_valid_nfo_line",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00011682900367304683,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_invalid_json",
+      "outcome": "passed",
+      "call": {
+        "duration": 6.575300358235836e-05,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_empty_line",
+      "outcome": "passed",
+      "call": {
+        "duration": 5.522399442270398e-05,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_error_level",
+      "outcome": "passed",
+      "call": {
+        "duration": 7.65229924581945e-05,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_missing_message_falls_back_to_function_name",
+      "outcome": "passed",
+      "call": {
+        "duration": 7.966998964548111e-05,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_error_line",
+      "outcome": "passed",
+      "call": {
+        "duration": 5.0435017328709364e-05,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_warning_line",
+      "outcome": "passed",
+      "call": {
+        "duration": 4.79400041513145e-05,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_info_line",
+      "outcome": "passed",
+      "call": {
+        "duration": 4.72579849883914e-05,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_empty_line",
+      "outcome": "passed",
+      "call": {
+        "duration": 4.730798536911607e-05,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_cross_mark_error",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00166601303499192,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_no_log_files",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00010866404045373201,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_nfo_log",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00022445997456088662,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_autonomous_log",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00016321602743119001,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_limit",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.0005765709793195128,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_yields_sse_format",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00022169598378241062,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_level_filter",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00023153400979936123,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestWebDashboardStart::test_log_callable_supplies_fmt",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.00017566903261467814,
+        "outcome": "failed",
+        "crash": {
+          "path": "/workspace/tests/test_dashboard_logs.py",
+          "lineno": 231,
+          "message": "ModuleNotFoundError: No module named 'koru'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 231,
+            "message": "ModuleNotFoundError"
+          }
+        ],
+        "longrepr": "self = <test_dashboard_logs.TestWebDashboardStart object at 0x7262d367fe60>\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7262d3655b20>\n\n    def test_log_callable_supplies_fmt(self, monkeypatch) -> None:\n        import argparse\n        import sys\n        import types\n    \n>       from koru.autonomy.operator import operator_up\nE       ModuleNotFoundError: No module named 'koru'\n\ntests/test_dashboard_logs.py:231: ModuleNotFoundError"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestWebDashboardStart::test_web_dashboard_skipped_without_flag",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.00017572002252563834,
+        "outcome": "failed",
+        "crash": {
+          "path": "/workspace/tests/test_dashboard_logs.py",
+          "lineno": 267,
+          "message": "ModuleNotFoundError: No module named 'koru'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 267,
+            "message": "ModuleNotFoundError"
+          }
+        ],
+        "longrepr": "self = <test_dashboard_logs.TestWebDashboardStart object at 0x7262d367ce90>\n\n    def test_web_dashboard_skipped_without_flag(self) -> None:\n        import argparse\n    \n>       from koru.autonomy.operator import operator_up\nE       ModuleNotFoundError: No module named 'koru'\n\ntests/test_dashboard_logs.py:267: ModuleNotFoundError"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestLogsTabSseReconnectGuard::test_connect_guard_exists",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.00012034602696076035,
+        "outcome": "failed",
+        "crash": {
+          "path": "/usr/local/lib/python3.12/pathlib.py",
+          "lineno": 1013,
+          "message": "FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 293,
+            "message": ""
+          },
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 290,
+            "message": "in _template"
+          },
+          {
+            "path": "/usr/local/lib/python3.12/pathlib.py",
+            "lineno": 1027,
+            "message": "in read_text"
+          },
+          {
+            "path": "/usr/local/lib/python3.12/pathlib.py",
+            "lineno": 1013,
+            "message": "FileNotFoundError"
+          }
+        ],
+        "longrepr": "self = <test_dashboard_logs.TestLogsTabSseReconnectGuard object at 0x7262d367cf20>\n\n    def test_connect_guard_exists(self) -> None:\n>       html = self._template()\n               ^^^^^^^^^^^^^^^^\n\ntests/test_dashboard_logs.py:293: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_dashboard_logs.py:290: in _template\n    return path.read_text(encoding=\"utf-8\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/pathlib.py:1027: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/workspace/src/koruapi/dashboard_template.html'), mode = 'r'\nbuffering = -1, encoding = 'utf-8', errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed to by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'\n\n/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestLogsTabSseReconnectGuard::test_render_logs_panel_only_connects_when_absent",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.0001196940429508686,
+        "outcome": "failed",
+        "crash": {
+          "path": "/usr/local/lib/python3.12/pathlib.py",
+          "lineno": 1013,
+          "message": "FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 297,
+            "message": ""
+          },
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 290,
+            "message": "in _template"
+          },
+          {
+            "path": "/usr/local/lib/python3.12/pathlib.py",
+            "lineno": 1027,
+            "message": "in read_text"
+          },
+          {
+            "path": "/usr/local/lib/python3.12/pathlib.py",
+            "lineno": 1013,
+            "message": "FileNotFoundError"
+          }
+        ],
+        "longrepr": "self = <test_dashboard_logs.TestLogsTabSseReconnectGuard object at 0x7262d367c410>\n\n    def test_render_logs_panel_only_connects_when_absent(self) -> None:\n>       html = self._template()\n               ^^^^^^^^^^^^^^^^\n\ntests/test_dashboard_logs.py:297: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_dashboard_logs.py:290: in _template\n    return path.read_text(encoding=\"utf-8\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/pathlib.py:1027: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/workspace/src/koruapi/dashboard_template.html'), mode = 'r'\nbuffering = -1, encoding = 'utf-8', errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed to by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'\n\n/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestLogsTabSseReconnectGuard::test_logs_tab_fast_first_paint",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.00011830200674012303,
+        "outcome": "failed",
+        "crash": {
+          "path": "/usr/local/lib/python3.12/pathlib.py",
+          "lineno": 1013,
+          "message": "FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 301,
+            "message": ""
+          },
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 290,
+            "message": "in _template"
+          },
+          {
+            "path": "/usr/local/lib/python3.12/pathlib.py",
+            "lineno": 1027,
+            "message": "in read_text"
+          },
+          {
+            "path": "/usr/local/lib/python3.12/pathlib.py",
+            "lineno": 1013,
+            "message": "FileNotFoundError"
+          }
+        ],
+        "longrepr": "self = <test_dashboard_logs.TestLogsTabSseReconnectGuard object at 0x7262d367e6c0>\n\n    def test_logs_tab_fast_first_paint(self) -> None:\n>       html = self._template()\n               ^^^^^^^^^^^^^^^^\n\ntests/test_dashboard_logs.py:301: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_dashboard_logs.py:290: in _template\n    return path.read_text(encoding=\"utf-8\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/pathlib.py:1027: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/workspace/src/koruapi/dashboard_template.html'), mode = 'r'\nbuffering = -1, encoding = 'utf-8', errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed to by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'\n\n/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestLogsTabSseReconnectGuard::test_entries_repopulate_after_rerender",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.00011747004464268684,
+        "outcome": "failed",
+        "crash": {
+          "path": "/usr/local/lib/python3.12/pathlib.py",
+          "lineno": 1013,
+          "message": "FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 305,
+            "message": ""
+          },
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 290,
+            "message": "in _template"
+          },
+          {
+            "path": "/usr/local/lib/python3.12/pathlib.py",
+            "lineno": 1027,
+            "message": "in read_text"
+          },
+          {
+            "path": "/usr/local/lib/python3.12/pathlib.py",
+            "lineno": 1013,
+            "message": "FileNotFoundError"
+          }
+        ],
+        "longrepr": "self = <test_dashboard_logs.TestLogsTabSseReconnectGuard object at 0x7262d367f1d0>\n\n    def test_entries_repopulate_after_rerender(self) -> None:\n>       html = self._template()\n               ^^^^^^^^^^^^^^^^\n\ntests/test_dashboard_logs.py:305: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_dashboard_logs.py:290: in _template\n    return path.read_text(encoding=\"utf-8\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/pathlib.py:1027: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/workspace/src/koruapi/dashboard_template.html'), mode = 'r'\nbuffering = -1, encoding = 'utf-8', errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed to by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'\n\n/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestLogsTabSseReconnectGuard::test_history_deduped_on_reconnect",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.0001142140245065093,
+        "outcome": "failed",
+        "crash": {
+          "path": "/usr/local/lib/python3.12/pathlib.py",
+          "lineno": 1013,
+          "message": "FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 311,
+            "message": ""
+          },
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 290,
+            "message": "in _template"
+          },
+          {
+            "path": "/usr/local/lib/python3.12/pathlib.py",
+            "lineno": 1027,
+            "message": "in read_text"
+          },
+          {
+            "path": "/usr/local/lib/python3.12/pathlib.py",
+            "lineno": 1013,
+            "message": "FileNotFoundError"
+          }
+        ],
+        "longrepr": "self = <test_dashboard_logs.TestLogsTabSseReconnectGuard object at 0x7262d367ecc0>\n\n    def test_history_deduped_on_reconnect(self) -> None:\n>       html = self._template()\n               ^^^^^^^^^^^^^^^^\n\ntests/test_dashboard_logs.py:311: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_dashboard_logs.py:290: in _template\n    return path.read_text(encoding=\"utf-8\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/pathlib.py:1027: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/workspace/src/koruapi/dashboard_template.html'), mode = 'r'\nbuffering = -1, encoding = 'utf-8', errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed to by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'\n\n/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestWebDashboardShutdown::test_shutdown_bounded_when_server_shutdown_blocks",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.00018734100740402937,
+        "outcome": "failed",
+        "crash": {
+          "path": "/workspace/tests/test_dashboard_logs.py",
+          "lineno": 331,
+          "message": "ModuleNotFoundError: No module named 'koru'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 331,
+            "message": "ModuleNotFoundError"
+          }
+        ],
+        "longrepr": "self = <test_dashboard_logs.TestWebDashboardShutdown object at 0x7262d367fa10>\n\n    def test_shutdown_bounded_when_server_shutdown_blocks(self) -> None:\n        import threading\n        import time\n    \n>       from koru.autonomy.operator import operator_up\nE       ModuleNotFoundError: No module named 'koru'\n\ntests/test_dashboard_logs.py:331: ModuleNotFoundError"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestWebDashboardShutdown::test_shutdown_closes_server_then_joins_thread",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.00015881797298789024,
+        "outcome": "failed",
+        "crash": {
+          "path": "/workspace/tests/test_dashboard_logs.py",
+          "lineno": 354,
+          "message": "ModuleNotFoundError: No module named 'koru'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 354,
+            "message": "ModuleNotFoundError"
+          }
+        ],
+        "longrepr": "self = <test_dashboard_logs.TestWebDashboardShutdown object at 0x7262d367c530>\n\n    def test_shutdown_closes_server_then_joins_thread(self) -> None:\n>       from koru.autonomy.operator import operator_up\nE       ModuleNotFoundError: No module named 'koru'\n\ntests/test_dashboard_logs.py:354: ModuleNotFoundError"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::TestWebDashboardShutdown::test_shutdown_without_server_is_noop",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.00015686400001868606,
+        "outcome": "failed",
+        "crash": {
+          "path": "/workspace/tests/test_dashboard_logs.py",
+          "lineno": 373,
+          "message": "ModuleNotFoundError: No module named 'koru'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 373,
+            "message": "ModuleNotFoundError"
+          }
+        ],
+        "longrepr": "self = <test_dashboard_logs.TestWebDashboardShutdown object at 0x7262d36cc7a0>\n\n    def test_shutdown_without_server_is_noop(self) -> None:\n>       from koru.autonomy.operator import operator_up\nE       ModuleNotFoundError: No module named 'koru'\n\ntests/test_dashboard_logs.py:373: ModuleNotFoundError"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::test_log_parser_never_executes_repr",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.0001229810295626521,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::test_log_parser_handles_non_mapping_records",
+      "outcome": "passed",
+      "call": {
+        "duration": 7.282698061317205e-05,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "workspace/tests/test_dashboard_logs.py::test_model_history_endpoint_rejects_invalid_limit",
+      "outcome": "failed",
+      "call": {
+        "duration": 0.07469306397251785,
+        "outcome": "failed",
+        "crash": {
+          "path": "/workspace/tests/test_dashboard_logs.py",
+          "lineno": 394,
+          "message": "ModuleNotFoundError: No module named 'koruapi.dashboard_routes'"
+        },
+        "traceback": [
+          {
+            "path": "tests/test_dashboard_logs.py",
+            "lineno": 394,
+            "message": "ModuleNotFoundError"
+          }
+        ],
+        "longrepr": "def test_model_history_endpoint_rejects_invalid_limit():\n        from unittest.mock import Mock\n    \n>       from koruapi.dashboard_routes import _get_model_history\nE       ModuleNotFoundError: No module named 'koruapi.dashboard_routes'\n\ntests/test_dashboard_logs.py:394: ModuleNotFoundError"
+      }
+    },
+    {
+      "nodeid": "checks/test_stream_regression.py::test_empty_levels_is_not_default",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.0002625620109029114,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "checks/test_stream_regression.py::test_existing_history_order_and_limit_semantics",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00023080199025571346,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "checks/test_stream_regression.py::test_already_set_stop_event",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.0001042359508574009,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "checks/test_stream_regression.py::test_stop_after_keepalive",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00011361297219991684,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "checks/test_stream_regression.py::test_tail_both_sources_and_unicode",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.0002862060209736228,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "checks/test_stream_regression.py::test_rotation_resets_offset",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00027375301579013467,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "checks/test_stream_regression.py::test_new_file_and_level_filter",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.0002188609796576202,
+        "outcome": "passed"
+      }
+    },
+    {
+      "nodeid": "checks/test_stream_regression.py::test_unreadable_logs_are_ignored",
+      "outcome": "passed",
+      "call": {
+        "duration": 0.00018409499898552895,
+        "outcome": "passed"
+      }
+    }
+  ],
+  "test_output": "................FFFFFFFFFF..F........                                    [100%]\n=================================== FAILURES ===================================\n_____________ TestWebDashboardStart.test_log_callable_supplies_fmt _____________\n\nself = <test_dashboard_logs.TestWebDashboardStart object at 0x7262d367fe60>\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7262d3655b20>\n\n    def test_log_callable_supplies_fmt(self, monkeypatch) -> None:\n        import argparse\n        import sys\n        import types\n    \n>       from koru.autonomy.operator import operator_up\nE       ModuleNotFoundError: No module named 'koru'\n\ntests/test_dashboard_logs.py:231: ModuleNotFoundError\n________ TestWebDashboardStart.test_web_dashboard_skipped_without_flag _________\n\nself = <test_dashboard_logs.TestWebDashboardStart object at 0x7262d367ce90>\n\n    def test_web_dashboard_skipped_without_flag(self) -> None:\n        import argparse\n    \n>       from koru.autonomy.operator import operator_up\nE       ModuleNotFoundError: No module named 'koru'\n\ntests/test_dashboard_logs.py:267: ModuleNotFoundError\n____________ TestLogsTabSseReconnectGuard.test_connect_guard_exists ____________\n\nself = <test_dashboard_logs.TestLogsTabSseReconnectGuard object at 0x7262d367cf20>\n\n    def test_connect_guard_exists(self) -> None:\n>       html = self._template()\n               ^^^^^^^^^^^^^^^^\n\ntests/test_dashboard_logs.py:293: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_dashboard_logs.py:290: in _template\n    return path.read_text(encoding=\"utf-8\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/pathlib.py:1027: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/workspace/src/koruapi/dashboard_template.html'), mode = 'r'\nbuffering = -1, encoding = 'utf-8', errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed to by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'\n\n/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError\n_ TestLogsTabSseReconnectGuard.test_render_logs_panel_only_connects_when_absent _\n\nself = <test_dashboard_logs.TestLogsTabSseReconnectGuard object at 0x7262d367c410>\n\n    def test_render_logs_panel_only_connects_when_absent(self) -> None:\n>       html = self._template()\n               ^^^^^^^^^^^^^^^^\n\ntests/test_dashboard_logs.py:297: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_dashboard_logs.py:290: in _template\n    return path.read_text(encoding=\"utf-8\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/pathlib.py:1027: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/workspace/src/koruapi/dashboard_template.html'), mode = 'r'\nbuffering = -1, encoding = 'utf-8', errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed to by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'\n\n/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError\n_________ TestLogsTabSseReconnectGuard.test_logs_tab_fast_first_paint __________\n\nself = <test_dashboard_logs.TestLogsTabSseReconnectGuard object at 0x7262d367e6c0>\n\n    def test_logs_tab_fast_first_paint(self) -> None:\n>       html = self._template()\n               ^^^^^^^^^^^^^^^^\n\ntests/test_dashboard_logs.py:301: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_dashboard_logs.py:290: in _template\n    return path.read_text(encoding=\"utf-8\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/pathlib.py:1027: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/workspace/src/koruapi/dashboard_template.html'), mode = 'r'\nbuffering = -1, encoding = 'utf-8', errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed to by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'\n\n/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError\n_____ TestLogsTabSseReconnectGuard.test_entries_repopulate_after_rerender ______\n\nself = <test_dashboard_logs.TestLogsTabSseReconnectGuard object at 0x7262d367f1d0>\n\n    def test_entries_repopulate_after_rerender(self) -> None:\n>       html = self._template()\n               ^^^^^^^^^^^^^^^^\n\ntests/test_dashboard_logs.py:305: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_dashboard_logs.py:290: in _template\n    return path.read_text(encoding=\"utf-8\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/pathlib.py:1027: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/workspace/src/koruapi/dashboard_template.html'), mode = 'r'\nbuffering = -1, encoding = 'utf-8', errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed to by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'\n\n/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError\n________ TestLogsTabSseReconnectGuard.test_history_deduped_on_reconnect ________\n\nself = <test_dashboard_logs.TestLogsTabSseReconnectGuard object at 0x7262d367ecc0>\n\n    def test_history_deduped_on_reconnect(self) -> None:\n>       html = self._template()\n               ^^^^^^^^^^^^^^^^\n\ntests/test_dashboard_logs.py:311: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_dashboard_logs.py:290: in _template\n    return path.read_text(encoding=\"utf-8\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/usr/local/lib/python3.12/pathlib.py:1027: in read_text\n    with self.open(mode='r', encoding=encoding, errors=errors) as f:\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = PosixPath('/workspace/src/koruapi/dashboard_template.html'), mode = 'r'\nbuffering = -1, encoding = 'utf-8', errors = None, newline = None\n\n    def open(self, mode='r', buffering=-1, encoding=None,\n             errors=None, newline=None):\n        \"\"\"\n        Open the file pointed to by this path and return a file object, as\n        the built-in open() function does.\n        \"\"\"\n        if \"b\" not in mode:\n            encoding = io.text_encoding(encoding)\n>       return io.open(self, mode, buffering, encoding, errors, newline)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE       FileNotFoundError: [Errno 2] No such file or directory: '/workspace/src/koruapi/dashboard_template.html'\n\n/usr/local/lib/python3.12/pathlib.py:1013: FileNotFoundError\n__ TestWebDashboardShutdown.test_shutdown_bounded_when_server_shutdown_blocks __\n\nself = <test_dashboard_logs.TestWebDashboardShutdown object at 0x7262d367fa10>\n\n    def test_shutdown_bounded_when_server_shutdown_blocks(self) -> None:\n        import threading\n        import time\n    \n>       from koru.autonomy.operator import operator_up\nE       ModuleNotFoundError: No module named 'koru'\n\ntests/test_dashboard_logs.py:331: ModuleNotFoundError\n____ TestWebDashboardShutdown.test_shutdown_closes_server_then_joins_thread ____\n\nself = <test_dashboard_logs.TestWebDashboardShutdown object at 0x7262d367c530>\n\n    def test_shutdown_closes_server_then_joins_thread(self) -> None:\n>       from koru.autonomy.operator import operator_up\nE       ModuleNotFoundError: No module named 'koru'\n\ntests/test_dashboard_logs.py:354: ModuleNotFoundError\n________ TestWebDashboardShutdown.test_shutdown_without_server_is_noop _________\n\nself = <test_dashboard_logs.TestWebDashboardShutdown object at 0x7262d36cc7a0>\n\n    def test_shutdown_without_server_is_noop(self) -> None:\n>       from koru.autonomy.operator import operator_up\nE       ModuleNotFoundError: No module named 'koru'\n\ntests/test_dashboard_logs.py:373: ModuleNotFoundError\n______________ test_model_history_endpoint_rejects_invalid_limit _______________\n\n    def test_model_history_endpoint_rejects_invalid_limit():\n        from unittest.mock import Mock\n    \n>       from koruapi.dashboard_routes import _get_model_history\nE       ModuleNotFoundError: No module named 'koruapi.dashboard_routes'\n\ntests/test_dashboard_logs.py:394: ModuleNotFoundError\n=========================== short test summary info ============================\nFAILED tests/test_dashboard_logs.py::TestWebDashboardStart::test_log_callable_supplies_fmt\nFAILED tests/test_dashboard_logs.py::TestWebDashboardStart::test_web_dashboard_skipped_without_flag\nFAILED tests/test_dashboard_logs.py::TestLogsTabSseReconnectGuard::test_connect_guard_exists\nFAILED tests/test_dashboard_logs.py::TestLogsTabSseReconnectGuard::test_render_logs_panel_only_connects_when_absent\nFAILED tests/test_dashboard_logs.py::TestLogsTabSseReconnectGuard::test_logs_tab_fast_first_paint\nFAILED tests/test_dashboard_logs.py::TestLogsTabSseReconnectGuard::test_entries_repopulate_after_rerender\nFAILED tests/test_dashboard_logs.py::TestLogsTabSseReconnectGuard::test_history_deduped_on_reconnect\nFAILED tests/test_dashboard_logs.py::TestWebDashboardShutdown::test_shutdown_bounded_when_server_shutdown_blocks\nFAILED tests/test_dashboard_logs.py::TestWebDashboardShutdown::test_shutdown_closes_server_then_joins_thread\nFAILED tests/test_dashboard_logs.py::TestWebDashboardShutdown::test_shutdown_without_server_is_noop\nFAILED tests/test_dashboard_logs.py::test_model_history_endpoint_rejects_invalid_limit\n11 failed, 26 passed, 5 deselected in 0.23s\n",
+  "complexity_passed": false,
+  "complexity_findings": [
+    {
+      "cell": null,
+      "code": "C901",
+      "end_location": {
+        "column": 19,
+        "row": 118
+      },
+      "filename": "/workspace/src/koruapi/dashboard_logs.py",
+      "fix": null,
+      "location": {
+        "column": 5,
+        "row": 118
+      },
+      "message": "`sse_log_stream` is too complex (19 > 15)",
+      "noqa_row": 118,
+      "url": "https://docs.astral.sh/ruff/rules/complex-structure"
+    }
+  ],
+  "lint_passed": true,
+  "lint_findings": [],
+  "static_metrics": {
+    "functions": 8,
+    "documented_functions": 6,
+    "max_function_lines": 69
+  }
+}

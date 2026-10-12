@@ -1,0 +1,73 @@
+1/54 round=1 q8 lru_cache pass=True wall=8.96s rate=28.46137910494
+2/54 round=1 q8 deep_merge pass=True wall=10.99s rate=28.990810815799414
+3/54 round=1 q8 topological_sort pass=True wall=14.48s rate=28.67684585164781
+4/54 round=1 q8 merge_intervals pass=True wall=11.04s rate=28.947552143906794
+5/54 round=1 q8 csv_totals pass=True wall=11.34s rate=28.953128005288377
+6/54 round=1 q8 unique_ordered pass=True wall=6.25s rate=28.76046425524873
+CONTEXT round=1 q8 tokens=4957 ttft=13.703640774998348 wall=14.53s pass=True
+7/54 round=1 bf16 lru_cache pass=True wall=12.23s rate=20.45817732070394
+8/54 round=1 bf16 deep_merge pass=True wall=18.34s rate=20.515560117166643
+9/54 round=1 bf16 topological_sort pass=True wall=19.95s rate=20.630154222995248
+10/54 round=1 bf16 merge_intervals pass=True wall=15.42s rate=20.40649310602995
+11/54 round=1 bf16 csv_totals pass=True wall=15.40s rate=20.626969451740806
+12/54 round=1 bf16 unique_ordered pass=True wall=8.59s rate=20.54353878674185
+CONTEXT round=1 bf16 tokens=4957 ttft=16.88617254901328 wall=17.98s pass=True
+Traceback (most recent call last):
+  File "/home/tom/.local/state/minis-llamacpp-ab-20261009/runtime_compare.py", line 297, in <module>
+    main()
+  File "/home/tom/.local/state/minis-llamacpp-ab-20261009/runtime_compare.py", line 242, in main
+    version=ready(profile)
+            ^^^^^^^^^^^^^^
+  File "/home/tom/.local/state/minis-llamacpp-ab-20261009/runtime_compare.py", line 85, in ready
+    raise RuntimeError('Runtime did not become ready: ' + profile)
+RuntimeError: Runtime did not become ready: ollama
+13/54 round=1 ollama lru_cache pass=True wall=11.91s rate=20.452085626428747
+14/54 round=1 ollama deep_merge pass=True wall=12.96s rate=20.762010636295003
+15/54 round=1 ollama topological_sort pass=True wall=19.69s rate=20.536038614153437
+16/54 round=1 ollama merge_intervals pass=True wall=14.91s rate=20.738566131246948
+17/54 round=1 ollama csv_totals pass=True wall=15.23s rate=20.509941546666592
+18/54 round=1 ollama unique_ordered pass=True wall=8.39s rate=20.80675803500977
+CONTEXT round=1 ollama tokens=4957 ttft=12.36362428299617 wall=13.32s pass=True
+19/54 round=2 ollama csv_totals pass=True wall=14.44s rate=20.75097559124034
+20/54 round=2 ollama merge_intervals pass=True wall=16.39s rate=20.530346118320335
+21/54 round=2 ollama lru_cache pass=True wall=11.77s rate=20.774923098159665
+22/54 round=2 ollama unique_ordered pass=True wall=9.48s rate=20.454106886617275
+23/54 round=2 ollama deep_merge pass=True wall=14.46s rate=20.74414182850973
+24/54 round=2 ollama topological_sort pass=True wall=16.11s rate=20.512593215225646
+CONTEXT round=2 ollama tokens=4957 ttft=12.15803169598803 wall=13.11s pass=True
+25/54 round=2 q8 csv_totals pass=True wall=11.34s rate=28.838445667979965
+26/54 round=2 q8 merge_intervals pass=True wall=12.14s rate=28.96745114314496
+27/54 round=2 q8 lru_cache pass=True wall=9.07s rate=28.397817646478945
+28/54 round=2 q8 unique_ordered pass=True wall=6.92s rate=29.006942271968757
+29/54 round=2 q8 deep_merge pass=True wall=13.10s rate=28.964278768769887
+30/54 round=2 q8 topological_sort pass=True wall=14.52s rate=28.64242085741087
+CONTEXT round=2 q8 tokens=4957 ttft=13.749099362990819 wall=14.53s pass=True
+31/54 round=2 bf16 csv_totals pass=True wall=15.37s rate=20.614387826102675
+32/54 round=2 bf16 merge_intervals pass=True wall=15.31s rate=20.418665164270294
+33/54 round=2 bf16 lru_cache pass=True wall=12.11s rate=20.622216461095082
+34/54 round=2 bf16 unique_ordered pass=True wall=8.49s rate=20.630604279900293
+35/54 round=2 bf16 deep_merge pass=True wall=17.82s rate=20.556544251437977
+36/54 round=2 bf16 topological_sort pass=True wall=16.49s rate=20.43556494976279
+CONTEXT round=2 bf16 tokens=4957 ttft=16.95949156000279 wall=18.00s pass=True
+37/54 round=3 bf16 lru_cache pass=True wall=12.19s rate=20.512523719894897
+38/54 round=3 bf16 unique_ordered pass=True wall=8.29s rate=20.63998743749954
+39/54 round=3 bf16 merge_intervals pass=True wall=15.47s rate=20.434358625521842
+40/54 round=3 bf16 deep_merge pass=True wall=16.07s rate=20.62150937992267
+41/54 round=3 bf16 topological_sort pass=True wall=20.09s rate=20.459127260394787
+42/54 round=3 bf16 csv_totals pass=True wall=15.27s rate=20.485053227234555
+CONTEXT round=3 bf16 tokens=4957 ttft=17.003213310003048 wall=18.05s pass=True
+43/54 round=3 ollama lru_cache pass=True wall=11.84s rate=20.661308806676267
+44/54 round=3 ollama unique_ordered pass=True wall=8.23s rate=20.83387800988261
+45/54 round=3 ollama merge_intervals pass=True wall=15.04s rate=20.515267108070326
+46/54 round=3 ollama deep_merge pass=True wall=14.48s rate=20.74052379491652
+47/54 round=3 ollama topological_sort pass=True wall=19.80s rate=20.53640451813635
+48/54 round=3 ollama csv_totals pass=True wall=14.67s rate=20.675684274147343
+CONTEXT round=3 ollama tokens=4957 ttft=12.199462613993092 wall=13.15s pass=True
+49/54 round=3 q8 lru_cache pass=True wall=8.80s rate=28.802658073873676
+50/54 round=3 q8 unique_ordered pass=True wall=6.34s rate=28.853924011879574
+51/54 round=3 q8 merge_intervals pass=True wall=10.35s rate=28.959821144144613
+52/54 round=3 q8 deep_merge pass=True wall=13.59s rate=28.605532102737687
+53/54 round=3 q8 topological_sort pass=True wall=13.39s rate=28.90843456360647
+54/54 round=3 q8 csv_totals pass=True wall=11.71s rate=28.591028491475466
+CONTEXT round=3 q8 tokens=4957 ttft=13.744946860999335 wall=14.53s pass=True
+BENCHMARK COMPLETE; LLAMA.CPP RESTORED

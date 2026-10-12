@@ -1,0 +1,27 @@
+{
+  "id": "chatcmpl-518",
+  "object": "chat.completion",
+  "created": 1791554832,
+  "model": "gpt-oss-minis-code:20b",
+  "system_fingerprint": "fp_ollama",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "MINIS_OLLAMA_Q8_OK",
+        "reasoning": "User wants exactly that string."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 82,
+    "prompt_tokens_details": {
+      "cached_tokens": 77
+    },
+    "completion_tokens": 24,
+    "total_tokens": 106
+  },
+  "wall_seconds": 0.973
+}

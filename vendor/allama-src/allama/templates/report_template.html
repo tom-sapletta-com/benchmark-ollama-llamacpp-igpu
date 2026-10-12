@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }}</title>
+<!-- Dodanie bibliotek diff2html -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
+<script src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html.min.js"></script>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Allama wspólne komponenty -->
+<link rel="stylesheet" href="../static/css/allama-charts.css">
+<script src="../static/js/radar-chart.js"></script>
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: {{ colors.light }}; }
+    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+    h1, h2 { color: {{ colors.dark }}; }
+    .summary { background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    .model-results { margin: 20px 0; border: 1px solid #ddd; border-radius: 5px; }
+    .model-header { background: #f8f9fa; padding: 10px; border-bottom: 1px solid #ddd; }
+    .prompt-result { padding: 15px; border-bottom: 1px solid #eee; }
+    .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 10px 0; }
+    .metric { background: #f8f9fa; padding: 8px; border-radius: 3px; text-align: center; }
+    .code-block { background: #f4f4f4; padding: 10px; border-radius: 3px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    .success { color: {{ colors.success }}; }
+    .error { color: {{ colors.error }}; }
+    .warning { color: {{ colors.warning }}; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .score { font-weight: bold; font-size: 1.2em; }
+    .diff-container { margin: 15px 0; }
+    .diff-header { background: #f0f0f0; padding: 8px; border-radius: 3px 3px 0 0; font-weight: bold; }
+    .compare-btn { background: {{ colors.primary }}; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin: 5px; }
+    .tab-container { display: flex; margin-bottom: 10px; }
+    .tab { padding: 8px 15px; cursor: pointer; background: #f0f0f0; margin-right: 5px; border-radius: 3px 3px 0 0; }
+    .tab.active { background: {{ colors.primary }}; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>🧪 {{ title }}</h1>
+    <p><strong>Data generowania:</strong> {{ timestamp }}</p>
+
+    <div class="summary">
+        <h2>📊 Podsumowanie</h2>
+        <div class="metrics">
+            <div class="metric">
+                <strong>Testowane modele:</strong><br>
+                {{ models_count }}
+            </div>
+            <div class="metric">
+                <strong>Liczba testów:</strong><br>
+                {{ tests_count }}
+            </div>
+            <div class="metric">
+                <strong>Testy zakończone sukcesem:</strong><br>
+                {{ successful_tests }} ({{ success_rate }}%)
+            </div>
+            <div class="metric">
+                <strong>Średni czas odpowiedzi:</strong><br>
+                {{ avg_response_time }}s
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-container">
+        <div class="tab active" onclick="switchTab('ranking')">Ranking</div>
+        <div class="tab" onclick="switchTab('details')">Szczegóły</div>
+        <div class="tab" onclick="switchTab('compare')">Porównanie kodu</div>
+        <div class="tab" onclick="switchTab('prompts')">Prompty</div>
+        <div class="tab" onclick="switchTab('charts')">Wykresy</div>
+    </div>
+
+    <div id="ranking" class="tab-content active">
+        <h2>🏆 Ranking Modeli</h2>
+        {{ ranking_table|safe }}
+    </div>
+
+    <div id="details" class="tab-content">
+        <h2>📋 Szczegółowe Wyniki</h2>
+        {{ model_sections|safe }}
+    </div>
+
+    <div id="compare" class="tab-content">
+        <h2>🔍 Porównanie kodu</h2>
+        <p>Wybierz dwa modele, aby porównać wygenerowany kod:</p>
+        <div>
+            <select id="model1" onchange="updatePromptSelect()"></select>
+            <select id="prompt1" onchange="updateCompareButton()"></select>
+        </div>
+        <div>
+            <select id="model2" onchange="updatePromptSelect()"></select>
+            <select id="prompt2" onchange="updateCompareButton()"></select>
+        </div>
+        <button id="compareBtn" class="compare-btn" onclick="compareCode()">Porównaj kod</button>
+        <div id="diffOutput" class="diff-container"></div>
+    </div>
+    
+    <div id="prompts" class="tab-content">
+        <h2>📝 Informacje o Promptach</h2>
+        <p>Poniżej znajdują się szczegółowe informacje o promptach użytych w tym benchmarku:</p>
+        <div id="promptsInfo">
+            {% for prompt_name, info in prompts_info.items() %}
+            <div class="prompt-info-card" style="margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; border-radius: 5px;">
+                <h3>{{ prompt_name }}</h3>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <strong>Treść promptu:</strong>
+                    <pre style="white-space: pre-wrap; margin: 10px 0;">{{ info.prompt_text }}</pre>
+                </div>
+                {% if info.description %}
+                <div style="margin: 10px 0;">
+                    <strong>Opis:</strong>
+                    <p>{{ info.description }}</p>
+                </div>
+                {% endif %}
+                {% if info.expected_keywords %}
+                <div style="margin: 10px 0;">
+                    <strong>Oczekiwane słowa kluczowe:</strong>
+                    <ul>
+                        {% for keyword in info.expected_keywords %}
+                        <li>{{ keyword }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div id="charts" class="tab-content">
+        <h2>📈 Wykresy Porównawcze</h2>
+        <p>Porównanie wydajności modeli na podstawie kluczowych metryk:</p>
+        
+        <div class="chart-container">
+            <canvas id="modelComparisonRadarChart" width="600" height="400"></canvas>
+        </div>
+        
+        <div class="stats-badges-container d-flex flex-wrap mt-3 mb-3">
+            <div class="stats-badge badge-primary">
+                <i class="bi bi-robot"></i> Modele: {{ models_count }}
+            </div>
+            <div class="stats-badge badge-info">
+                <i class="bi bi-list-check"></i> Testy: {{ tests_count }}
+            </div>
+            <div class="stats-badge badge-success">
+                <i class="bi bi-check-circle"></i> Udane: {{ successful_tests }}
+            </div>
+            <div class="stats-badge badge-warning">
+                <i class="bi bi-graph-up"></i> Sukces: {{ success_rate }}%
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dane testowe osadzone bezpośrednio w HTML
+    const testResults = {{ test_results_json|safe }};
+    const modelsData = {};
+    
+    // Funkcja do ładowania danych
+    function loadResults() {
+        try {
+            // Dane są już załadowane z osadzonego JSON
+            
+            // Przygotuj dane modeli
+            const models = [];
+            const prompts = {};
+            
+            testResults.results.forEach(result => {
+                const modelName = result.model_name;
+                const promptName = result.prompt_name;
+                
+                if (!models.includes(modelName)) {
+                    models.push(modelName);
+                }
+                
+                if (!prompts[promptName]) {
+                    prompts[promptName] = [];
+                }
+                
+                if (!prompts[promptName].includes(modelName)) {
+                    prompts[promptName].push(modelName);
+                }
+                
+                // Zapisz dane modelu
+                if (!modelsData[modelName]) {
+                    modelsData[modelName] = {};
+                }
+                
+                modelsData[modelName][promptName] = result;
+            });
+            
+            // Wypełnij listy rozwijane
+            fillModelSelects(models);
+            updatePromptSelect();
+            
+            // Inicjalizuj wykres radarowy
+            initRadarChart();
+        } catch (error) {
+            console.error('Błąd podczas ładowania danych:', error);
+        }
+    }
+    
+    // Funkcja do wypełniania list rozwijanych modeli
+    function fillModelSelects(models) {
+        const model1Select = document.getElementById('model1');
+        const model2Select = document.getElementById('model2');
+        
+        model1Select.innerHTML = '';
+        model2Select.innerHTML = '';
+        
+        models.forEach(model => {
+            const option1 = document.createElement('option');
+            option1.value = model;
+            option1.textContent = model;
+            model1Select.appendChild(option1);
+            
+            const option2 = document.createElement('option');
+            option2.value = model;
+            option2.textContent = model;
+            model2Select.appendChild(option2);
+        });
+        
+        // Ustaw domyślnie różne modele, jeśli są dostępne
+        if (models.length > 1) {
+            model2Select.selectedIndex = 1;
+        }
+    }
+    
+    // Funkcja do aktualizacji list rozwijanych promptów
+    function updatePromptSelect() {
+        const model1 = document.getElementById('model1').value;
+        const model2 = document.getElementById('model2').value;
+        const prompt1Select = document.getElementById('prompt1');
+        const prompt2Select = document.getElementById('prompt2');
+        
+        prompt1Select.innerHTML = '';
+        prompt2Select.innerHTML = '';
+        
+        // Znajdź prompty dostępne dla obu modeli
+        const model1Prompts = Object.keys(modelsData[model1] || {});
+        const model2Prompts = Object.keys(modelsData[model2] || {});
+        const commonPrompts = model1Prompts.filter(p => model2Prompts.includes(p));
+        
+        commonPrompts.forEach(prompt => {
+            const option1 = document.createElement('option');
+            option1.value = prompt;
+            option1.textContent = prompt;
+            prompt1Select.appendChild(option1);
+            
+            const option2 = document.createElement('option');
+            option2.value = prompt;
+            option2.textContent = prompt;
+            prompt2Select.appendChild(option2);
+        });
+        
+        updateCompareButton();
+    }
+    
+    // Funkcja do aktualizacji przycisku porównania
+    function updateCompareButton() {
+        const model1 = document.getElementById('model1').value;
+        const model2 = document.getElementById('model2').value;
+        const prompt1 = document.getElementById('prompt1').value;
+        const prompt2 = document.getElementById('prompt2').value;
+        const compareBtn = document.getElementById('compareBtn');
+        
+        compareBtn.disabled = !(model1 && model2 && prompt1 && prompt2);
+    }
+    
+    // Funkcja do porównywania kodu
+    function compareCode() {
+        const model1 = document.getElementById('model1').value;
+        const model2 = document.getElementById('model2').value;
+        const prompt1 = document.getElementById('prompt1').value;
+        const prompt2 = document.getElementById('prompt2').value;
+        
+        if (!model1 || !model2 || !prompt1 || !prompt2) {
+            return;
+        }
+        
+        const code1 = modelsData[model1][prompt1].extracted_code || '';
+        const code2 = modelsData[model2][prompt2].extracted_code || '';
+        
+        const diffOutput = document.getElementById('diffOutput');
+        diffOutput.innerHTML = '';
+        
+        const diffHeader = document.createElement('div');
+        diffHeader.className = 'diff-header';
+        diffHeader.textContent = `Porównanie: ${model1} vs ${model2} (${prompt1})`;
+        diffOutput.appendChild(diffHeader);
+        
+        const diffContainer = document.createElement('div');
+        diffContainer.id = 'diffContainer';
+        diffOutput.appendChild(diffContainer);
+        
+        const diff = Diff.createTwoFilesPatch(
+            `${model1}.py`,
+            `${model2}.py`,
+            code1,
+            code2
+        );
+        
+        const diffHtml = Diff2Html.html(diff, {
+            drawFileList: false,
+            matching: 'lines',
+            outputFormat: 'side-by-side'
+        });
+        
+        diffContainer.innerHTML = diffHtml;
+    }
+    
+    // Funkcja do przełączania zakładek
+    function switchTab(tabId) {
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.textContent.toLowerCase().includes(tabId)) {
+                tab.classList.add('active');
+            }
+        });
+        
+        tabContents.forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        document.getElementById(tabId).classList.add('active');
+    }
+    
+    // Inicjalizacja wykresu radarowego
+    function initRadarChart() {
+        // Oblicz dane do wykresu radarowego
+        const { chartLabels, chartData } = calculateRadarChartData(testResults);
+        
+        // Utwórz wykres
+        const radarChart = new AllamaRadarChart(
+            'modelComparisonRadarChart',
+            chartLabels,
+            chartData
+        );
+        
+        radarChart.render();
+    }
+    
+    // Załaduj dane po załadowaniu strony
+    window.addEventListener('DOMContentLoaded', loadResults);
+</script>
+</body>
+</html>

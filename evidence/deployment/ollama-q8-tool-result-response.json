@@ -1,0 +1,26 @@
+{
+  "id": "chatcmpl-823",
+  "object": "chat.completion",
+  "created": 1791554834,
+  "model": "gpt-oss-minis-code:20b",
+  "system_fingerprint": "fp_ollama",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "The sum of 19 and 23 is **42**."
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 188,
+    "prompt_tokens_details": {
+      "cached_tokens": 176
+    },
+    "completion_tokens": 17,
+    "total_tokens": 205
+  },
+  "wall_seconds": 1.062
+}

@@ -1,0 +1,87 @@
+{
+  "ticket": "PLF-17296",
+  "alias": "gpt-oss-minis-code:20b",
+  "q8_model_digest": "sha256:214b01ff392ec0d991c766ceccba11948c1208c3aa8272b63a5170d802c1866e",
+  "legacy_alias": "gpt-oss-minis-bf16-backup-20261009:20b",
+  "legacy_manifest_preserved": true,
+  "production_manifest": {
+    "schemaVersion": 2,
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "config": {
+      "mediaType": "application/vnd.docker.container.image.v1+json",
+      "digest": "sha256:ba9a7525f758bc8e3b2477b95dfc1b7a93691b070950460d6b356d6d3d0b50aa",
+      "size": 119
+    },
+    "layers": [
+      {
+        "mediaType": "application/vnd.ollama.image.model",
+        "digest": "sha256:214b01ff392ec0d991c766ceccba11948c1208c3aa8272b63a5170d802c1866e",
+        "size": 12110350144,
+        "from": "gpt-oss-minis-ab-q8:20b"
+      },
+      {
+        "mediaType": "application/vnd.ollama.image.template",
+        "digest": "sha256:fa6710a93d78da62641e192361344be7a8c0a1c3737f139cf89f20ce1626b99c",
+        "size": 7240
+      },
+      {
+        "mediaType": "application/vnd.ollama.image.license",
+        "digest": "sha256:f60356777647e927149cbd4c0ec1314a90caba9400ad205ddc4ce47ed001c2d6",
+        "size": 11353
+      },
+      {
+        "mediaType": "application/vnd.ollama.image.params",
+        "digest": "sha256:a7790a626ad5453e32073dcba98301e2665d3beebaef9888000c15b10009e1fa",
+        "size": 117
+      }
+    ]
+  },
+  "template_sha256": "fa6710a93d78da62641e192361344be7a8c0a1c3737f139cf89f20ce1626b99c",
+  "model_create": {
+    "status": "success"
+  },
+  "chat_smoke": {
+    "model": "gpt-oss-minis-code:20b",
+    "created_at": "2026-10-09T14:05:30.604276248Z",
+    "message": {
+      "role": "assistant",
+      "content": "MINIS_OLLAMA_Q8_OK",
+      "thinking": "User wants exactly that string."
+    },
+    "done": true,
+    "done_reason": "stop",
+    "total_duration": 5309082620,
+    "load_duration": 3934430151,
+    "prompt_eval_count": 82,
+    "prompt_eval_cached_count": 0,
+    "prompt_eval_duration": 549827000,
+    "eval_count": 24,
+    "eval_duration": 819183000
+  },
+  "full_gpu": [
+    {
+      "name": "gpt-oss-minis-code:20b",
+      "model": "gpt-oss-minis-code:20b",
+      "size": 11608648580,
+      "digest": "f58cd34ac04f0d7a866afe9f2570b628d902590814149bd428fddea1fcf8b8c1",
+      "details": {
+        "parent_model": "",
+        "format": "gguf",
+        "family": "gptoss",
+        "families": [
+          "gptoss"
+        ],
+        "parameter_size": "20.9B",
+        "quantization_level": "unknown"
+      },
+      "expires_at": "2319-01-19T14:52:47.459248523+01:00",
+      "size_vram": 11608648580,
+      "context_length": 16384
+    }
+  ],
+  "ollama_active": "active",
+  "ollama_enabled": "enabled",
+  "llamacpp_disabled": "disabled",
+  "users": 1,
+  "chats": 4
+}

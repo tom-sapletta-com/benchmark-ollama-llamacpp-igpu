@@ -1,0 +1,205 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>GPT-OSS benchmark replay</title><style>body{max-width:1100px;margin:40px auto;padding:20px;font:16px system-ui;background:#10151b;color:#eaf1f8}table{border-collapse:collapse}td,th{padding:14px;border:1px solid #334152}pre{white-space:pre-wrap;background:#1b232d;padding:20px}a{color:#8ebaff}details{margin:20px 0}</style>
+<h1>GPT-OSS benchmark replay</h1><p>Status: complete · 6/6 coding trials</p>
+<p>One manually prepared runtime. Archived prompts and sandboxed tests reused. Model variant declared by caller; weights, GPU allocation, reload order and other GPU workloads are not verified by this replay. No service control.</p>
+<table><tr><th>Declared profile</th><th>Code tests</th><th>Median response</th><th>Native API tokens/s</th></tr>
+<tr><td>ollama / MXFP4 + Q8</td><td>6/6</td><td>10.89 s</td><td>29.09</td></tr></table>
+<h2>Long input</h2><p>Round 1: PASS · first token 9.57 s · response 10.27 s</p>
+<h2>Coding answers</h2><details><summary>lru_cache · round 1 · PASS</summary><pre>import collections
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        if capacity &lt; 0:
+            raise ValueError(&#34;capacity must be non‑negative&#34;)
+        self.capacity = capacity
+        self.cache = collections.OrderedDict()
+
+    def get(self, key):
+        if key not in self.cache:
+            return -1
+        value = self.cache.pop(key)
+        self.cache[key] = value  # re‑insert to mark as most recently used
+        return value
+
+    def put(self, key, value):
+        if key in self.cache:
+            self.cache.pop(key)
+        elif len(self.cache) &gt;= self.capacity and self.capacity &gt; 0:
+            self.cache.popitem(last=False)  # remove least recently used
+        if self.capacity &gt; 0:
+            self.cache[key] = value</pre><p></p></details><details><summary>deep_merge · round 1 · PASS</summary><pre>import copy
+from collections.abc import Mapping
+
+def deep_merge(a: Mapping, b: Mapping) -&gt; dict:
+    &#34;&#34;&#34;
+    Return a deep copy of the merge of two dictionaries `a` and `b`.
+    Nested dictionaries are merged recursively; in case of a conflict
+    between non-dict values, the value from `b` wins. Lists and other
+    non-dict objects are replaced entirely by the value from `b`.
+    The result is a new dictionary; modifying it will not affect the
+    original inputs.
+    &#34;&#34;&#34;
+    result = copy.deepcopy(a)
+
+    for key, b_val in b.items():
+        if key in result:
+            a_val = result[key]
+            if isinstance(a_val, Mapping) and isinstance(b_val, Mapping):
+                # Recursively merge nested dictionaries
+                result[key] = deep_merge(a_val, b_val)
+            else:
+                # Replace non-dict values (including lists) with b&#39;s value
+                result[key] = copy.deepcopy(b_val)
+        else:
+            # Key only in b
+            result[key] = copy.deepcopy(b_val)
+
+    return result</pre><p></p></details><details><summary>topological_sort · round 1 · PASS</summary><pre>import heapq
+from collections import defaultdict
+
+def topo_sort(graph: dict[str, list[str]]) -&gt; list[str]:
+    &#34;&#34;&#34;
+    Return a topological ordering of the directed graph `graph`.
+    The graph is represented as a dictionary mapping each vertex to a list of
+    its outgoing neighbors. Vertices that appear only as neighbors are also
+    considered part of the graph.
+
+    The algorithm chooses the lexicographically smallest vertex among all
+    currently available vertices (those with zero in‑degree). If the graph
+    contains a cycle, a ValueError is raised.
+
+    The input graph is not modified.
+    &#34;&#34;&#34;
+    # Build set of all vertices
+    vertices = set(graph.keys())
+    for neighs in graph.values():
+        vertices.update(neighs)
+
+    # Compute in‑degrees
+    indegree = defaultdict(int)
+    for u in vertices:
+        indegree[u] = 0
+    for u, neighs in graph.items():
+        for v in neighs:
+            indegree[v] += 1
+
+    # Min‑heap of vertices with zero in‑degree
+    zero_heap = [v for v in vertices if indegree[v] == 0]
+    heapq.heapify(zero_heap)
+
+    result = []
+    while zero_heap:
+        u = heapq.heappop(zero_heap)
+        result.append(u)
+        for v in graph.get(u, []):
+            indegree[v] -= 1
+            if indegree[v] == 0:
+                heapq.heappush(zero_heap, v)
+
+    if len(result) != len(vertices):
+        raise ValueError(&#34;Graph contains a cycle&#34;)
+
+    return result</pre><p></p></details><details><summary>merge_intervals · round 1 · PASS</summary><pre>def merge_intervals(intervals):
+    &#34;&#34;&#34;
+    Merge a list of closed intervals.
+
+    Parameters
+    ----------
+    intervals : Iterable[Iterable[int]]
+        Each element is an iterable of two integers [start, end].
+        The input may be unsorted and must not be modified.
+
+    Returns
+    -------
+    List[List[int]]
+        Sorted list of merged closed intervals.  Intervals that touch
+        (end == start of next) are merged.
+
+    Raises
+    ------
+    ValueError
+        If any interval has start &gt; end.
+    &#34;&#34;&#34;
+    # Convert to list of tuples to avoid modifying the input
+    intervals_list = [tuple(interval) for interval in intervals]
+
+    if not intervals_list:
+        return []
+
+    # Validate intervals
+    for start, end in intervals_list:
+        if start &gt; end:
+            raise ValueError(f&#34;Invalid interval [{start}, {end}]: start &gt; end&#34;)
+
+    # Sort by start, then by end
+    sorted_intervals = sorted(intervals_list, key=lambda x: (x[0], x[1]))
+
+    merged = []
+    current_start, current_end = sorted_intervals[0]
+
+    for start, end in sorted_intervals[1:]:
+        if start &lt;= current_end:  # Overlap or touch
+            current_end = max(current_end, end)
+        else:
+            merged.append([current_start, current_end])
+            current_start, current_end = start, end
+
+    merged.append([current_start, current_end])
+    return merged</pre><p></p></details><details><summary>csv_totals · round 1 · PASS</summary><pre>import csv
+from decimal import Decimal, InvalidOperation
+from typing import Dict
+
+def csv_totals(text: str) -&gt; Dict[str, Decimal]:
+    &#34;&#34;&#34;
+    Sum amounts per category from a CSV string.
+
+    Parameters
+    ----------
+    text : str
+        CSV data with header `category,amount`. The `category` field may be
+        quoted and contain commas. Empty lines are ignored.
+
+    Returns
+    -------
+    Dict[str, Decimal]
+        Mapping from category to the total amount.
+
+    Raises
+    ------
+    ValueError
+        If any amount cannot be parsed as a Decimal.
+    &#34;&#34;&#34;
+    totals: Dict[str, Decimal] = {}
+    reader = csv.DictReader(text.splitlines(), skipinitialspace=True)
+
+    for row in reader:
+        # Skip completely empty rows
+        if not any(row.values()):
+            continue
+
+        category = row.get(&#34;category&#34;)
+        amount_str = row.get(&#34;amount&#34;)
+
+        if category is None or amount_str is None:
+            continue  # ignore malformed rows
+
+        try:
+            amount = Decimal(amount_str)
+        except (InvalidOperation, TypeError):
+            raise ValueError(f&#34;Invalid amount: {amount_str!r}&#34;)
+
+        totals[category] = totals.get(category, Decimal(&#34;0&#34;)) + amount
+
+    return totals</pre><p></p></details><details><summary>unique_ordered · round 1 · PASS</summary><pre>def unique_ordered(items):
+    &#34;&#34;&#34;
+    Return a new list containing the elements of `items` with duplicates removed,
+    preserving the order of the first occurrence of each element.
+    Elements may be unhashable (e.g., lists, dictionaries), so a linear
+    search is used to detect duplicates.
+    &#34;&#34;&#34;
+    result = []
+    for item in items:
+        if item not in result:
+            result.append(item)
+    return result</pre><p></p></details>
+<p><a href="results.json">Full JSON</a> · 2026-10-09T14:15:56Z</p></html>

@@ -1,0 +1,7 @@
+{
+  "five_independent_assertions": "PASS",
+  "tests_unchanged": true,
+  "model": "gpt-oss-minis-code:20b",
+  "runtime": "llama.cpp b11429 Vulkan",
+  "source_sha256": "f795a68cec9d48660b0566fa84bedd7b101156ee2c625ea3dd1b847a31cf0217"
+}

@@ -1,0 +1,30 @@
+{
+  "ollama_active": "active",
+  "ollama_enabled": "enabled",
+  "llamacpp_active": "inactive",
+  "llamacpp_enabled": "disabled",
+  "models": {
+    "models": [
+      {
+        "name": "gpt-oss-minis-code:20b",
+        "model": "gpt-oss-minis-code:20b",
+        "size": 11608648580,
+        "digest": "f58cd34ac04f0d7a866afe9f2570b628d902590814149bd428fddea1fcf8b8c1",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "gptoss",
+          "families": [
+            "gptoss"
+          ],
+          "parameter_size": "20.9B",
+          "quantization_level": "unknown"
+        },
+        "expires_at": "2319-01-19T16:42:51.723446442+01:00",
+        "size_vram": 11608648580,
+        "context_length": 16384
+      }
+    ]
+  },
+  "timestamp": "2026-10-09T15:58:19.775496+00:00"
+}

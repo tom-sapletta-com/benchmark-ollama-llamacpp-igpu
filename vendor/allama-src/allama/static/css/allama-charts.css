@@ -1,0 +1,86 @@
+/**
+ * Allama Benchmark - Style dla wykresów i statystyk
+ * Wspólny plik CSS do użycia zarówno w lokalnym raporcie HTML jak i na serwerze
+ */
+
+/* Kontener wykresu */
+.chart-container {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* Style dla badge'y statystyk */
+.stats-badge {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Kolory badge'y */
+.badge-primary {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.badge-success {
+    background-color: #198754;
+    color: white;
+}
+
+.badge-info {
+    background-color: #0dcaf0;
+    color: black;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: black;
+}
+
+/* Karty benchmarków */
+.benchmark-card {
+    height: 100%;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+.benchmark-card .card-header {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.benchmark-card .card-body {
+    padding: 1.25rem;
+}
+
+/* Responsywny układ */
+.benchmark-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .benchmark-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 992px) {
+    .benchmark-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

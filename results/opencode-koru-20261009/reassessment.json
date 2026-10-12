@@ -1,0 +1,1017 @@
+{
+  "baseline": {
+    "syntax_passed": true,
+    "test_exit": 0,
+    "test_summary": {
+      "passed": 24,
+      "total": 24,
+      "collected": 24
+    },
+    "tests": [
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_valid_nfo_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00012078601866960526,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_invalid_json",
+        "outcome": "passed",
+        "call": {
+          "duration": 6.5983971580863e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_empty_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 5.733798025175929e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_error_level",
+        "outcome": "passed",
+        "call": {
+          "duration": 7.685500895604491e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_missing_message_falls_back_to_function_name",
+        "outcome": "passed",
+        "call": {
+          "duration": 6.875896360725164e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_error_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 5.0664995796978474e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_warning_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 6.477104034274817e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_info_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 5.494296783581376e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_empty_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.74490225315094e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_cross_mark_error",
+        "outcome": "passed",
+        "call": {
+          "duration": 5.557399708777666e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_no_log_files",
+        "outcome": "passed",
+        "call": {
+          "duration": 9.905500337481499e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_nfo_log",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00020825100364163518,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_autonomous_log",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0001661420101299882,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_limit",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00047937798080965877,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_yields_sse_format",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00029851996805518866,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_level_filter",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00023505999706685543,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_empty_levels_is_not_default",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0002256130101159215,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_existing_history_order_and_limit_semantics",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00021204800577834249,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_already_set_stop_event",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00011222099419683218,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_stop_after_keepalive",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00010916497558355331,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_tail_both_sources_and_unicode",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.000275755999609828,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_rotation_resets_offset",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0002669699606485665,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_new_file_and_level_filter",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00021027395268902183,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_unreadable_logs_are_ignored",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00018365500727668405,
+          "outcome": "passed"
+        }
+      }
+    ],
+    "test_output": "........................                                                 [100%]\n24 passed in 0.04s\n",
+    "complexity_passed": false,
+    "complexity_findings": [
+      {
+        "cell": null,
+        "code": "C901",
+        "end_location": {
+          "column": 19,
+          "row": 118
+        },
+        "filename": "/workspace/src/koruapi/dashboard_logs.py",
+        "fix": null,
+        "location": {
+          "column": 5,
+          "row": 118
+        },
+        "message": "`sse_log_stream` is too complex (19 > 15)",
+        "noqa_row": 118,
+        "url": "https://docs.astral.sh/ruff/rules/complex-structure"
+      }
+    ],
+    "lint_passed": true,
+    "lint_findings": [],
+    "static_metrics": {
+      "functions": 8,
+      "documented_functions": 6,
+      "max_function_lines": 69
+    }
+  },
+  "reference": {
+    "syntax_passed": true,
+    "test_exit": 0,
+    "test_summary": {
+      "passed": 24,
+      "total": 24,
+      "collected": 24
+    },
+    "tests": [
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_valid_nfo_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00011877203360199928,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_invalid_json",
+        "outcome": "passed",
+        "call": {
+          "duration": 6.759702228009701e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_empty_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 5.5935001000761986e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_error_level",
+        "outcome": "passed",
+        "call": {
+          "duration": 7.628300227224827e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_missing_message_falls_back_to_function_name",
+        "outcome": "passed",
+        "call": {
+          "duration": 6.937998114153743e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_error_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 5.130597855895758e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_warning_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 5.045498255640268e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_info_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.734797403216362e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_empty_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.672800423577428e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_cross_mark_error",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.760996671393514e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_no_log_files",
+        "outcome": "passed",
+        "call": {
+          "duration": 9.738298831507564e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_nfo_log",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00019917299505323172,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_autonomous_log",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0001616530353203416,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_limit",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0004756210255436599,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_yields_sse_format",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0002862959518097341,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_level_filter",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00024531903909519315,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_empty_levels_is_not_default",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00021920097060501575,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_existing_history_order_and_limit_semantics",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00021253898739814758,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_already_set_stop_event",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00010348402429372072,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_stop_after_keepalive",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00011357298353686929,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_tail_both_sources_and_unicode",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00028097699396312237,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_rotation_resets_offset",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0002712290151976049,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_new_file_and_level_filter",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00021331000607460737,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_unreadable_logs_are_ignored",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0001882120268419385,
+          "outcome": "passed"
+        }
+      }
+    ],
+    "test_output": "........................                                                 [100%]\n24 passed in 0.04s\n",
+    "complexity_passed": true,
+    "complexity_findings": [],
+    "lint_passed": true,
+    "lint_findings": [],
+    "static_metrics": {
+      "functions": 10,
+      "documented_functions": 7,
+      "max_function_lines": 50
+    }
+  },
+  "gemma4-12b-1": {
+    "syntax_passed": true,
+    "test_exit": 0,
+    "test_summary": {
+      "passed": 24,
+      "total": 24,
+      "collected": 24
+    },
+    "tests": [
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_valid_nfo_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00012567598605528474,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_invalid_json",
+        "outcome": "passed",
+        "call": {
+          "duration": 6.829795893281698e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_empty_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 5.5684009566903114e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_error_level",
+        "outcome": "passed",
+        "call": {
+          "duration": 7.745600305497646e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_missing_message_falls_back_to_function_name",
+        "outcome": "passed",
+        "call": {
+          "duration": 7.118296343833208e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_error_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 5.106598837301135e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_warning_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.9592985305935144e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_info_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.892196739092469e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_empty_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.849099786952138e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_cross_mark_error",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.9342052079737186e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_no_log_files",
+        "outcome": "passed",
+        "call": {
+          "duration": 9.747198782861233e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_nfo_log",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00020514399511739612,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_autonomous_log",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00016661197878420353,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_limit",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00047570199239999056,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_yields_sse_format",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00029297900618985295,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_level_filter",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0002435359638184309,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_empty_levels_is_not_default",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0002087010070681572,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_existing_history_order_and_limit_semantics",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00022027204977348447,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_already_set_stop_event",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00010217196540907025,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_stop_after_keepalive",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00012193899601697922,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_tail_both_sources_and_unicode",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00028039602329954505,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_rotation_resets_offset",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0002703869831748307,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_new_file_and_level_filter",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00021866901079192758,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_unreadable_logs_are_ignored",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00018217199249193072,
+          "outcome": "passed"
+        }
+      }
+    ],
+    "test_output": "........................                                                 [100%]\n24 passed in 0.04s\n",
+    "complexity_passed": false,
+    "complexity_findings": [
+      {
+        "cell": null,
+        "code": "C901",
+        "end_location": {
+          "column": 19,
+          "row": 118
+        },
+        "filename": "/workspace/src/koruapi/dashboard_logs.py",
+        "fix": null,
+        "location": {
+          "column": 5,
+          "row": 118
+        },
+        "message": "`sse_log_stream` is too complex (19 > 15)",
+        "noqa_row": 118,
+        "url": "https://docs.astral.sh/ruff/rules/complex-structure"
+      }
+    ],
+    "lint_passed": true,
+    "lint_findings": [],
+    "static_metrics": {
+      "functions": 8,
+      "documented_functions": 6,
+      "max_function_lines": 69
+    }
+  },
+  "gpt-oss-20b-1": {
+    "syntax_passed": true,
+    "test_exit": 1,
+    "test_summary": {
+      "passed": 18,
+      "failed": 6,
+      "total": 24,
+      "collected": 24
+    },
+    "tests": [
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_valid_nfo_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00011725997319445014,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_invalid_json",
+        "outcome": "passed",
+        "call": {
+          "duration": 6.590300472453237e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_empty_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 6.0914026107639074e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_error_level",
+        "outcome": "passed",
+        "call": {
+          "duration": 7.897801697254181e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseNfoLine::test_missing_message_falls_back_to_function_name",
+        "outcome": "passed",
+        "call": {
+          "duration": 6.960099563002586e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_error_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 5.132600199431181e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_warning_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.841096233576536e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_info_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.94130072183907e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_empty_line",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.711799556389451e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestParseAutonomousLogLine::test_cross_mark_error",
+        "outcome": "passed",
+        "call": {
+          "duration": 4.8111018259078264e-05,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_no_log_files",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00010265305172652006,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_nfo_log",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00020501401741057634,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_reads_autonomous_log",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00016492902068421245,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestReadRecentLogs::test_limit",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00048341602087020874,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_yields_sse_format",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0002879300154745579,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "workspace/tests/test_dashboard_logs.py::TestSseLogStream::test_level_filter",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.000230172008741647,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_empty_levels_is_not_default",
+        "outcome": "failed",
+        "call": {
+          "duration": 0.0002183190081268549,
+          "outcome": "failed",
+          "crash": {
+            "path": "/workspace/src/koruapi/dashboard_logs.py",
+            "lineno": 179,
+            "message": "ValueError: not enough values to unpack (expected 2, got 0)"
+          },
+          "traceback": [
+            {
+              "path": "/checks/test_stream_regression.py",
+              "lineno": 27,
+              "message": ""
+            },
+            {
+              "path": "src/koruapi/dashboard_logs.py",
+              "lineno": 179,
+              "message": "ValueError"
+            }
+          ],
+          "longrepr": "tmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_empty_levels_is_not_defau0')\n\n    def test_empty_levels_is_not_default(tmp_path):\n        nfo, _ = paths(tmp_path); nfo.write_text(event('not visible'))\n        stream = logs.sse_log_stream(tmp_path, levels=set())\n>       assert next(stream) == ': keepalive\\n\\n'\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:27: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_empty_levels_is_not_defau0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n>               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_existing_history_order_and_limit_semantics",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.0002356710028834641,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_already_set_stop_event",
+        "outcome": "passed",
+        "call": {
+          "duration": 0.00010713102528825402,
+          "outcome": "passed"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_stop_after_keepalive",
+        "outcome": "failed",
+        "call": {
+          "duration": 0.00012345198774710298,
+          "outcome": "failed",
+          "crash": {
+            "path": "/workspace/src/koruapi/dashboard_logs.py",
+            "lineno": 188,
+            "message": "NameError: name 'time' is not defined. Did you forget to import 'time'"
+          },
+          "traceback": [
+            {
+              "path": "/checks/test_stream_regression.py",
+              "lineno": 45,
+              "message": ""
+            },
+            {
+              "path": "src/koruapi/dashboard_logs.py",
+              "lineno": 188,
+              "message": "NameError"
+            }
+          ],
+          "longrepr": "tmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_stop_after_keepalive0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d493a090>\n\n    def test_stop_after_keepalive(tmp_path, monkeypatch):\n        stopped = [False]; monkeypatch.setattr(time, 'sleep', lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, stop_event=SimpleNamespace(is_set=lambda: stopped[0]))\n        assert next(stream) == ': keepalive\\n\\n'; stopped[0] = True\n>       assert list(stream) == []\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:45: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_stop_after_keepalive0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n>           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name 'time' is not defined. Did you forget to import 'time'\n\nsrc/koruapi/dashboard_logs.py:188: NameError"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_tail_both_sources_and_unicode",
+        "outcome": "failed",
+        "call": {
+          "duration": 0.00022149499272927642,
+          "outcome": "failed",
+          "crash": {
+            "path": "/workspace/src/koruapi/dashboard_logs.py",
+            "lineno": 188,
+            "message": "NameError: name 'time' is not defined. Did you forget to import 'time'"
+          },
+          "traceback": [
+            {
+              "path": "/checks/test_stream_regression.py",
+              "lineno": 53,
+              "message": ""
+            },
+            {
+              "path": "src/koruapi/dashboard_logs.py",
+              "lineno": 188,
+              "message": "NameError"
+            }
+          ],
+          "longrepr": "tmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_tail_both_sources_and_uni0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d49833e0>\n\n    def test_tail_both_sources_and_unicode(tmp_path, monkeypatch):\n        nfo, auto = paths(tmp_path); monkeypatch.setattr(time, 'sleep', lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, max_events=2)\n        assert next(stream) == ': keepalive\\n\\n'\n        nfo.write_text(event('Za\u017c\u00f3\u0142\u0107 \ud83c\udf0d')); auto.write_text('[ERROR] awaria\\n')\n>       assert data(next(stream))['message'] == 'Za\u017c\u00f3\u0142\u0107 \ud83c\udf0d'\n                    ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:53: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_tail_both_sources_and_uni0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n>           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name 'time' is not defined. Did you forget to import 'time'\n\nsrc/koruapi/dashboard_logs.py:188: NameError"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_rotation_resets_offset",
+        "outcome": "failed",
+        "call": {
+          "duration": 0.0002671399852260947,
+          "outcome": "failed",
+          "crash": {
+            "path": "/workspace/src/koruapi/dashboard_logs.py",
+            "lineno": 179,
+            "message": "ValueError: not enough values to unpack (expected 2, got 0)"
+          },
+          "traceback": [
+            {
+              "path": "/checks/test_stream_regression.py",
+              "lineno": 63,
+              "message": ""
+            },
+            {
+              "path": "src/koruapi/dashboard_logs.py",
+              "lineno": 179,
+              "message": "ValueError"
+            }
+          ],
+          "longrepr": "tmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_rotation_resets_offset0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d4983f80>\n\n    def test_rotation_resets_offset(tmp_path, monkeypatch):\n        nfo, _ = paths(tmp_path); nfo.write_text('not JSON ' * 200 + '\\n')\n        monkeypatch.setattr(time, 'sleep', lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, max_events=1)\n>       assert next(stream) == ': keepalive\\n\\n'\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:63: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_rotation_resets_offset0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n>               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_new_file_and_level_filter",
+        "outcome": "failed",
+        "call": {
+          "duration": 0.000201547984033823,
+          "outcome": "failed",
+          "crash": {
+            "path": "/workspace/src/koruapi/dashboard_logs.py",
+            "lineno": 188,
+            "message": "NameError: name 'time' is not defined. Did you forget to import 'time'"
+          },
+          "traceback": [
+            {
+              "path": "/checks/test_stream_regression.py",
+              "lineno": 74,
+              "message": ""
+            },
+            {
+              "path": "src/koruapi/dashboard_logs.py",
+              "lineno": 188,
+              "message": "NameError"
+            }
+          ],
+          "longrepr": "tmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_new_file_and_level_filter0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d4986b10>\n\n    def test_new_file_and_level_filter(tmp_path, monkeypatch):\n        monkeypatch.setattr(time, 'sleep', lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, levels={'ERROR'}, max_events=1)\n        assert next(stream) == ': keepalive\\n\\n'\n        nfo, _ = paths(tmp_path); nfo.write_text(event('ignored') + event('visible', 'ERROR'))\n>       assert data(next(stream))['message'] == 'visible'; stream.close()\n                    ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:74: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_new_file_and_level_filter0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n>           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name 'time' is not defined. Did you forget to import 'time'\n\nsrc/koruapi/dashboard_logs.py:188: NameError"
+        }
+      },
+      {
+        "nodeid": "checks/test_stream_regression.py::test_unreadable_logs_are_ignored",
+        "outcome": "failed",
+        "call": {
+          "duration": 0.00019775104010477662,
+          "outcome": "failed",
+          "crash": {
+            "path": "/workspace/src/koruapi/dashboard_logs.py",
+            "lineno": 179,
+            "message": "ValueError: not enough values to unpack (expected 2, got 0)"
+          },
+          "traceback": [
+            {
+              "path": "/checks/test_stream_regression.py",
+              "lineno": 80,
+              "message": ""
+            },
+            {
+              "path": "src/koruapi/dashboard_logs.py",
+              "lineno": 179,
+              "message": "ValueError"
+            }
+          ],
+          "longrepr": "tmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_unreadable_logs_are_ignor0')\n\n    def test_unreadable_logs_are_ignored(tmp_path):\n        nfo, auto = paths(tmp_path); nfo.mkdir(); auto.mkdir()\n        stream = logs.sse_log_stream(tmp_path)\n>       assert next(stream) == ': keepalive\\n\\n'; stream.close()\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:80: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_unreadable_logs_are_ignor0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n>               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError"
+        }
+      }
+    ],
+    "test_output": "................F..FFFFF                                                 [100%]\n=================================== FAILURES ===================================\n_______________________ test_empty_levels_is_not_default _______________________\n\ntmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_empty_levels_is_not_defau0')\n\n    def test_empty_levels_is_not_default(tmp_path):\n        nfo, _ = paths(tmp_path); nfo.write_text(event('not visible'))\n        stream = logs.sse_log_stream(tmp_path, levels=set())\n>       assert next(stream) == ': keepalive\\n\\n'\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:27: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_empty_levels_is_not_defau0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n>               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError\n__________________________ test_stop_after_keepalive ___________________________\n\ntmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_stop_after_keepalive0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d493a090>\n\n    def test_stop_after_keepalive(tmp_path, monkeypatch):\n        stopped = [False]; monkeypatch.setattr(time, 'sleep', lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, stop_event=SimpleNamespace(is_set=lambda: stopped[0]))\n        assert next(stream) == ': keepalive\\n\\n'; stopped[0] = True\n>       assert list(stream) == []\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:45: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_stop_after_keepalive0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n>           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name 'time' is not defined. Did you forget to import 'time'\n\nsrc/koruapi/dashboard_logs.py:188: NameError\n______________________ test_tail_both_sources_and_unicode ______________________\n\ntmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_tail_both_sources_and_uni0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d49833e0>\n\n    def test_tail_both_sources_and_unicode(tmp_path, monkeypatch):\n        nfo, auto = paths(tmp_path); monkeypatch.setattr(time, 'sleep', lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, max_events=2)\n        assert next(stream) == ': keepalive\\n\\n'\n        nfo.write_text(event('Za\u017c\u00f3\u0142\u0107 \ud83c\udf0d')); auto.write_text('[ERROR] awaria\\n')\n>       assert data(next(stream))['message'] == 'Za\u017c\u00f3\u0142\u0107 \ud83c\udf0d'\n                    ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:53: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_tail_both_sources_and_uni0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n>           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name 'time' is not defined. Did you forget to import 'time'\n\nsrc/koruapi/dashboard_logs.py:188: NameError\n_________________________ test_rotation_resets_offset __________________________\n\ntmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_rotation_resets_offset0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d4983f80>\n\n    def test_rotation_resets_offset(tmp_path, monkeypatch):\n        nfo, _ = paths(tmp_path); nfo.write_text('not JSON ' * 200 + '\\n')\n        monkeypatch.setattr(time, 'sleep', lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, max_events=1)\n>       assert next(stream) == ': keepalive\\n\\n'\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:63: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_rotation_resets_offset0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n>               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError\n________________________ test_new_file_and_level_filter ________________________\n\ntmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_new_file_and_level_filter0')\nmonkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7ff0d4986b10>\n\n    def test_new_file_and_level_filter(tmp_path, monkeypatch):\n        monkeypatch.setattr(time, 'sleep', lambda _: None)\n        stream = logs.sse_log_stream(tmp_path, levels={'ERROR'}, max_events=1)\n        assert next(stream) == ': keepalive\\n\\n'\n        nfo, _ = paths(tmp_path); nfo.write_text(event('ignored') + event('visible', 'ERROR'))\n>       assert data(next(stream))['message'] == 'visible'; stream.close()\n                    ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:74: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_new_file_and_level_filter0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n                events_sent, nfo_offset = _stream_new_lines(\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\n            # Check autonomous log for new lines\n            if auto_path.exists():\n                events_sent, auto_offset = _stream_new_lines(\n                    auto_path, auto_offset, _parse_autonomous_log_line, levels, events_sent, json\n                )\n            yield \": keepalive\\n\\n\"\n>           time.sleep(poll_interval)\n            ^^^^\nE           NameError: name 'time' is not defined. Did you forget to import 'time'\n\nsrc/koruapi/dashboard_logs.py:188: NameError\n_______________________ test_unreadable_logs_are_ignored _______________________\n\ntmp_path = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_unreadable_logs_are_ignor0')\n\n    def test_unreadable_logs_are_ignored(tmp_path):\n        nfo, auto = paths(tmp_path); nfo.mkdir(); auto.mkdir()\n        stream = logs.sse_log_stream(tmp_path)\n>       assert next(stream) == ': keepalive\\n\\n'; stream.close()\n               ^^^^^^^^^^^^\n\n/checks/test_stream_regression.py:80: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nproject = PosixPath('/tmp/pytest-of-nobody/pytest-0/test_unreadable_logs_are_ignor0')\n\n    def sse_log_stream(\n        project: Path,\n        *,\n        levels: set[str] | None = None,\n        poll_interval: float = 0.5,\n        max_events: int = 0,\n        stop_event: Any = None,\n    ) -> str:\n        \"\"\"Yield SSE-formatted log events by tailing log files.\n    \n        This is a generator that yields ``data: <json>\\\\n\\\\n`` strings.\n        The caller should write them to the HTTP response.\n        \"\"\"\n        if levels is None:\n            levels = {\"ERROR\", \"WARNING\", \"INFO\", \"DEBUG\"}\n    \n        nfo_path = _nfo_log_path(project)\n        auto_path = _autonomous_log_path(project)\n        nfo_offset = nfo_path.stat().st_size if nfo_path.exists() else 0\n        auto_offset = auto_path.stat().st_size if auto_path.exists() else 0\n        events_sent = 0\n    \n        # Send recent history first\n        for entry in read_recent_logs(project, limit=50):\n            if entry[\"level\"] in levels:\n                yield f\"data: {json.dumps(entry)}\\n\\n\"\n                events_sent += 1\n    \n        while True:\n            if max_events and events_sent >= max_events:\n                break\n            if stop_event is not None and stop_event.is_set():\n                break\n            # Check nfo log for new lines\n            if nfo_path.exists():\n>               events_sent, nfo_offset = _stream_new_lines(\n                ^^^^^^^^^^^^^^^^^^^^^^^\n                    nfo_path, nfo_offset, _parse_nfo_line, levels, events_sent, json\n                )\nE               ValueError: not enough values to unpack (expected 2, got 0)\n\nsrc/koruapi/dashboard_logs.py:179: ValueError\n=========================== short test summary info ============================\nFAILED ../checks/test_stream_regression.py::test_empty_levels_is_not_default\nFAILED ../checks/test_stream_regression.py::test_stop_after_keepalive - NameE...\nFAILED ../checks/test_stream_regression.py::test_tail_both_sources_and_unicode\nFAILED ../checks/test_stream_regression.py::test_rotation_resets_offset - Val...\nFAILED ../checks/test_stream_regression.py::test_new_file_and_level_filter - ...\nFAILED ../checks/test_stream_regression.py::test_unreadable_logs_are_ignored\n6 failed, 18 passed in 0.07s\n",
+    "complexity_passed": true,
+    "complexity_findings": [],
+    "lint_passed": false,
+    "lint_findings": [
+      {
+        "cell": null,
+        "code": "F821",
+        "end_location": {
+          "column": 13,
+          "row": 188
+        },
+        "filename": "/workspace/src/koruapi/dashboard_logs.py",
+        "fix": null,
+        "location": {
+          "column": 9,
+          "row": 188
+        },
+        "message": "Undefined name `time`",
+        "noqa_row": 188,
+        "url": "https://docs.astral.sh/ruff/rules/undefined-name"
+      }
+    ],
+    "static_metrics": {
+      "functions": 10,
+      "documented_functions": 7,
+      "max_function_lines": 45
+    }
+  }
+}
